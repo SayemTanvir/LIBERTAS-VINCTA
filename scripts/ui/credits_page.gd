@@ -4,7 +4,7 @@ func _ready() -> void:
 	build_page("CREDITS")
 	content.add_child(make_label("LIBERTAS VINCTA", "MenuText"))
 	content.add_child(make_label("TEAM 4'S COMPLIMENT", "Small"))
-	var roles := {"Sajib": "Design / Direction", "Ifat": "Assets", "Ramim": "Godot Implementation", "Tanvir": "Testing / Debugging"}
+	var roles := {"Sajib": "Design / Direction", "Ifat": "Assets", "Ramim": "Godot Implementation / Story Designer", "Tanvir": "Testing / Debugging"}
 	for person in roles:
 		content.add_child(make_label(person + "  /  " + roles[person]))
 	content.add_child(make_label("ENGINE", "Small"))

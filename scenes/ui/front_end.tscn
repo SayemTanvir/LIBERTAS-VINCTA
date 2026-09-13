@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://di3mrcs7dkeyt"]
 
 [ext_resource type="Script" uid="uid://bnkhab6djftq3" path="res://scripts/ui/front_end.gd" id="1"]
-[ext_resource type="Theme" path="res://themes/libertas_ui_theme.tres" id="2"]
+[ext_resource type="Theme" uid="uid://cautxytwlol2n" path="res://themes/libertas_ui_theme.tres" id="2"]
 [ext_resource type="Script" uid="uid://dl8jm34njtevq" path="res://scripts/ui/ui_audio.gd" id="audio"]
 [ext_resource type="PackedScene" path="res://scenes/ui/components/menu_background.tscn" id="background"]
 
