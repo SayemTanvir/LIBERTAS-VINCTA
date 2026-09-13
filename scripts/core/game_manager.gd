@@ -12,6 +12,14 @@ var return_state: State = State.PLAYING
 var arrival_pending: bool = false
 var respawn_pending: bool = false
 var save_path: String = SAVE_PATH
+var ui_input_until_frame: int = -1
+
+func block_ui_input() -> void:
+	# GUI consumption does not clear Input.is_action_just_pressed in player physics.
+	ui_input_until_frame = Engine.get_physics_frames() + 2
+
+func ui_blocks_input() -> bool:
+	return Engine.get_physics_frames() <= ui_input_until_frame
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -110,7 +118,14 @@ func caught() -> void:
 	state = State.CAUGHT
 	EventBus.audio_requested.emit("monster_breathing")
 	await get_tree().create_timer(1.2, false).timeout
-	restart_checkpoint()
+	if state != State.CAUGHT:
+		return
+	var hud := get_tree().get_first_node_in_group("hud")
+	if hud != null:
+		get_tree().paused = true
+		hud.show_game_over()
+	else:
+		restart_checkpoint()
 
 func finish(kind: String) -> void:
 	if state != State.PLAYING or not FreedomLedger.eligible(kind):
@@ -125,6 +140,7 @@ func finish(kind: String) -> void:
 func continue_to_part_two() -> void:
 	if ending not in ["untouched", "vantree", "partial_mercy"]:
 		return
+	get_tree().paused = false
 	FreedomLedger.begin_part_two(ending)
 	EventBus.part_two_started.emit(FreedomLedger.part2_seed)
 	ending = ""

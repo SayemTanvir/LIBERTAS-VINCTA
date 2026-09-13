@@ -8,13 +8,18 @@ var senses: Label
 var vitals: Label
 var room_name: Label
 var prompt: Label
-var subtitle: Label
+var subtitle: RichTextLabel
+var bubble: Control
+var reader: Control
+var game_over: Control
+var chapter_complete: Control
+var result_busy: bool = false
+var acknowledged_message: bool = false
 var anchor_status: Label
 var fade: ColorRect
 var pulse: ColorRect
 var peripheral: Array[ColorRect] = []
-var modal: PanelContainer
-var modal_box: VBoxContainer
+
 var subtitle_queue: Array[Dictionary] = []
 var subtitle_time: float = 0.0
 var modal_mode: String = ""
@@ -46,15 +51,9 @@ func _ready() -> void:
 	root.add_child(room_name)
 	prompt = make_label("[E]", 19)
 	root.add_child(prompt)
-	subtitle = make_label("", 22)
-	subtitle.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
-	subtitle.offset_left = 100
-	subtitle.offset_right = -100
-	subtitle.offset_top = -118
-	subtitle.offset_bottom = -36
-	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	root.add_child(subtitle)
+	bubble = preload("res://scenes/ui/message_bubble.tscn").instantiate()
+	root.add_child(bubble)
+	subtitle = bubble.text_label
 	anchor_status = make_label("", 17)
 	anchor_status.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	anchor_status.offset_left = -160
@@ -74,17 +73,19 @@ func _ready() -> void:
 	fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(fade)
-	modal = PanelContainer.new()
-	modal.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	modal.offset_left = -270
-	modal.offset_right = 270
-	modal.offset_top = -250
-	modal.offset_bottom = 250
-	root.add_child(modal)
-	modal_box = VBoxContainer.new()
-	modal_box.add_theme_constant_override("separation", 14)
-	modal.add_child(modal_box)
-	modal.hide()
+	reader = preload("res://scenes/ui/letter_reader.tscn").instantiate()
+	root.add_child(reader)
+	reader.close_requested.connect(close_modal)
+	game_over = preload("res://scenes/ui/game_over.tscn").instantiate()
+	game_over.hide()
+	game_over.process_mode = Node.PROCESS_MODE_DISABLED
+	root.add_child(game_over)
+	game_over.selected.connect(_result_action)
+	chapter_complete = preload("res://scenes/ui/chapter_complete.tscn").instantiate()
+	chapter_complete.hide()
+	chapter_complete.process_mode = Node.PROCESS_MODE_DISABLED
+	root.add_child(chapter_complete)
+	chapter_complete.selected.connect(_result_action)
 	pause_menu = preload("res://scenes/ui/pause_menu.tscn").instantiate()
 	root.add_child(pause_menu)
 	EventBus.subtitle_requested.connect(enqueue_subtitle)
@@ -129,7 +130,7 @@ func make_label(text: String, size: int = 18) -> Label:
 func _process(delta: float) -> void:
 	threat_clock += delta
 	_layout_for_viewport()
-	subtitle.visible = SessionSettings.subtitles_enabled
+	bubble.visible = not subtitle.text.is_empty() and (SessionSettings.subtitles_enabled or acknowledged_message) and not reader.visible and not pause_menu.visible and not game_over.visible and not chapter_complete.visible
 	var playing_hud := GameManager.zone != "intro" and GameManager.state != GameManager.State.ENDING
 	senses.visible = playing_hud
 	vitals.visible = playing_hud
@@ -164,9 +165,11 @@ func _process(delta: float) -> void:
 	if not get_tree().paused:
 		subtitle_time -= delta
 		if subtitle_time <= 0.0:
-			if not subtitle_queue.is_empty():
+			if bubble.visible and bubble.advance_page():
+				subtitle_time = 4.0
+			elif not subtitle_queue.is_empty():
 				var item: Dictionary = subtitle_queue.pop_front()
-				subtitle.text = (item.speaker + "\n" if not item.speaker.is_empty() else "") + item.text
+				bubble.show_text(item.speaker, item.text)
 				subtitle_time = item.duration
 			else:
 				subtitle.text = ""
@@ -178,12 +181,6 @@ func _layout_for_viewport() -> void:
 	var narrow := root.size.x < 900.0
 	room_name.offset_top = 78.0 if narrow else 22.0
 	room_name.offset_bottom = room_name.offset_top + 24.0
-	var half_width := minf(270.0, root.size.x * 0.46)
-	var half_height := minf(250.0, maxf(150.0, root.size.y * 0.46))
-	modal.offset_left = -half_width
-	modal.offset_right = half_width
-	modal.offset_top = -half_height
-	modal.offset_bottom = half_height
 
 func status(sense: String) -> String:
 	return "restored" if sense in FreedomLedger.keys_collected else "sealed"
@@ -206,53 +203,86 @@ func _detection_impact(_source: Node) -> void:
 func _anchor_progress(id: String, seconds: float, required: float) -> void:
 	anchor_status.text = "%s  %02d / %02d" % [id, floori(seconds), floori(required)] if seconds > 0.0 else ""
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("pause"):
-		if GameManager.state == GameManager.State.READING:
-			close_modal()
-		elif GameManager.state == GameManager.State.PAUSED:
-			pause_menu.back()
+func _input(event: InputEvent) -> void:
+	if reader.visible or pause_menu.visible or game_over.visible or chapter_complete.visible:
+		return
+	if event.is_echo():
+		return
+	if event.is_action_pressed("inventory") and GameManager.state == GameManager.State.PLAYING:
+		get_viewport().set_input_as_handled()
+		var lines: PackedStringArray = []
+		for item in FreedomLedger.inventory:
+			lines.append("%s: %d" % [str(item).capitalize(), int(FreedomLedger.inventory[item])])
+		lines.append("\nLetters collected: %d" % FreedomLedger.letter_ids.size())
+		lines.append("\nRestored senses: " + (", ".join(FreedomLedger.keys_collected) if not FreedomLedger.keys_collected.is_empty() else "None"))
+		show_letter("Inventory", "\n".join(lines))
+	elif event.is_action_pressed("pause") or event.is_action_pressed("ui_cancel"):
+		if acknowledged_message:
+			close_message()
 		elif GameManager.state in [GameManager.State.PLAYING, GameManager.State.INTRO]:
 			GameManager.pause_game()
 			show_pause()
 		get_viewport().set_input_as_handled()
-	elif event.is_action_pressed("interact") and GameManager.state == GameManager.State.READING:
-		close_modal()
+	elif bubble.visible and (event.is_action_pressed("interact") or event.is_action_pressed("ui_accept")):
 		get_viewport().set_input_as_handled()
-
-func clear_modal(title: String) -> void:
-	for child in modal_box.get_children():
-		modal_box.remove_child(child)
-		child.queue_free()
-	var heading := make_label(title, 25)
-	heading.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	modal_box.add_child(heading)
-	modal.show()
-
-func button(text: String, callback: Callable) -> Button:
-	var control = preload("res://scenes/ui/components/menu_button.tscn").instantiate()
-	control.caption = text
-	control.custom_minimum_size.y = 38
-	control.pressed.connect(callback)
-	modal_box.add_child(control)
-	return control
+		GameManager.block_ui_input()
+		if not bubble.advance_page():
+			if acknowledged_message:
+				close_message()
+			else:
+				subtitle.text = ""
+				subtitle_time = 0.0
 
 func show_pause() -> void:
 	pause_menu.open()
 
 func show_letter(title: String, text: String) -> void:
 	GameManager.read_letter()
-	clear_modal(title)
 	modal_mode = "letter"
-	var content := make_label(text.replace("\\n", "\n"), 20)
-	content.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	content.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	modal_box.add_child(content)
-	button("Close [E / Esc]", close_modal).grab_focus()
+	reader.open(title, text)
+
+func show_message(speaker: String, text: String) -> void:
+	GameManager.read_letter()
+	acknowledged_message = true
+	bubble.show_text(speaker, text)
+
+func close_message() -> void:
+	acknowledged_message = false
+	subtitle.text = ""
+	GameManager.block_ui_input()
+	GameManager.resume()
 
 func close_modal() -> void:
-	modal.hide()
-	GameManager.resume()
+	reader.hide()
+	GameManager.block_ui_input()
+	if modal_mode == "ending":
+		modal_mode = ""
+		chapter_complete.process_mode = Node.PROCESS_MODE_INHERIT
+		chapter_complete.show()
+		chapter_complete.focus_default()
+	else:
+		modal_mode = ""
+		GameManager.resume()
+
+func show_game_over() -> void:
+	subtitle.text = ""
+	game_over.process_mode = Node.PROCESS_MODE_INHERIT
+	game_over.show()
+	game_over.set_selection(0, false)
+
+func _result_action(id: String) -> void:
+	if result_busy:
+		return
+	result_busy = true
+	GameManager.block_ui_input()
+	match id:
+		"home": GameManager.go_home.call_deferred()
+		"retry": GameManager.restart_checkpoint.call_deferred()
+		"continue":
+			if GameManager.ending in ["untouched", "partial_mercy", "vantree"]:
+				GameManager.continue_to_part_two.call_deferred()
+			else:
+				GameManager.new_game.call_deferred()
 
 func show_ending() -> void:
 	fade.color.a = 0.88
@@ -268,16 +298,9 @@ func show_ending() -> void:
 		"custodian_rest": "Els takes the empty place and becomes the living ward.",
 		"vessel": "The prison closes around a new key. An unseen hand carries it away."
 	}
-	clear_modal(titles.get(GameManager.ending, "LIBERTAS VINCTA"))
+	get_tree().paused = true
+	modal_mode = "ending"
 	var closing := ""
 	if GameManager.ending in ["severance", "custodian_rest", "vessel"]:
 		closing = "\n\nFreedom was never lost in this house.\nIt was only ever moved from one hand to another.\n\nThe only question was ever whose hand was empty\nwhen the counting stopped."
-	var content := make_label(texts.get(GameManager.ending, "") + closing, 20)
-	content.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	content.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	modal_box.add_child(content)
-	if GameManager.ending in ["untouched", "partial_mercy", "vantree"]:
-		button("Descend", GameManager.continue_to_part_two).grab_focus()
-	else:
-		button("New game", GameManager.new_game).grab_focus()
-		button("Main menu", GameManager.go_home)
+	reader.open(titles.get(GameManager.ending, "LIBERTAS VINCTA"), texts.get(GameManager.ending, "") + closing)

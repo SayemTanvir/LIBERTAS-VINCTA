@@ -2,18 +2,13 @@ extends "res://scripts/ui/menu_navigation.gd"
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	setup_navigation($BackgroundRoot/PageContent)
+	setup_navigation($PageContent)
 	var menu = add_page("menu", preload("res://scenes/ui/main_menu.tscn"))
 	menu.selected.connect(select)
-	var scenes := {
-		"story": preload("res://scenes/ui/story_page.tscn"),
-		"controls": preload("res://scenes/ui/controls_page.tscn"),
-		"settings": preload("res://scenes/ui/settings_page.tscn"),
-		"credits": preload("res://scenes/ui/credits_page.tscn")
-	}
-	for id in scenes:
-		var page = add_page(id, scenes[id])
-		page.back_requested.connect(func(): navigate("menu"))
+	for id in ["settings", "rules", "controls", "credits"]:
+		var page = add_page(id, load("res://scenes/ui/" + id + "_page.tscn"))
+		page.back_requested.connect(back)
+	pages.rules.controls_requested.connect(func(): navigate("controls"))
 	show_initial()
 
 func select(destination: String) -> void:
@@ -24,10 +19,3 @@ func select(destination: String) -> void:
 			if not OS.has_feature("web"):
 				leave_to(get_tree().quit)
 		_: navigate(destination)
-
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("pause") and not event.is_echo():
-		if current_id != "menu":
-			EventBus.audio_requested.emit("ui_back")
-			navigate("menu")
-		get_viewport().set_input_as_handled()

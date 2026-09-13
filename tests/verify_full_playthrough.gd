@@ -26,6 +26,11 @@ func _wait_zone(zone: String) -> bool:
 	while Time.get_ticks_msec() < deadline:
 		await get_tree().process_frame
 		var current := get_tree().current_scene
+		if current != null and GameManager.state == GameManager.State.CAUGHT:
+			var hud: Node = current.get_node_or_null("UI")
+			if hud != null and hud.game_over.visible:
+				_check(get_tree().paused, "Game Over must pause until Retry is selected")
+				hud.game_over.activate_selection()
 		if current != null and current.scene_file_path == "res://scenes/main/main.tscn" and current.room.zone_id == zone and GameManager.state == GameManager.State.PLAYING:
 			main = current
 			for enemy in get_tree().get_nodes_in_group("enemy"):

@@ -32,6 +32,9 @@ Use F5 rather than running an individual floor scene. `Main` supplies Els, the D
 | Blood or partial sigil | R |
 | Stun Rite | T |
 | Pause | Esc |
+| Inventory / collected-letter count | Tab |
+
+Menu navigation uses arrows, Enter/Space, mouse hover/click, and standard Godot gamepad UI actions. To open Controls, select Rules and press Right, or press Right/right-click on the Rules page. Back and Escape preserve the originating menu. See the [UI integration report](docs/UI_IMPLEMENTATION_REPORT.md) for artwork mappings and validation.
 
 ## Full Walkthrough
 
@@ -75,12 +78,13 @@ At the Nexus, all three anchors are visible together. Holding E for 20 uninterru
 The maintained Godot tests cover layout/art, systems, the canonical route, and complete alternate-route recovery playthroughs:
 
 ```powershell
+godot --headless --path . tests/verify_image_ui.tscn
 godot --headless --path . tests/verify_estate_assets.tscn
 godot --headless --path . tests/verify_game_systems.tscn
 godot --headless --path . tests/verify_game_route.tscn
 godot --headless --path . tests/verify_full_playthrough.tscn
 ```
 
-Current results: 686 asset/layout checks, 66 systems checks, 96 canonical-route checks, and 148 full-playthrough checks, all with zero failures. Together they cover Awakening, all four Part I outcomes, all three Nexus endings, one-time story triggers, branch mechanics, doorway arrivals, capture, checkpoint restoration, door-free respawn, restored movement control, target-facing puzzle poses, and the false-exit Loop reset.
+Current results: 592 UI checks, 686 asset/layout checks, 66 systems checks, 96 canonical-route checks, and 150 full-playthrough checks, all with zero failures. Together they cover Awakening, all four Part I outcomes, all three Nexus endings, one-time story triggers, branch mechanics, doorway arrivals, capture, checkpoint restoration, door-free respawn, restored movement control, target-facing puzzle poses, and the false-exit Loop reset.
 
 See the [professional playtest report](docs/PRO_PLAYTEST_REPORT.md), [asset credits](ASSET_CREDITS.md), and [AI disclosure](AI_DISCLOSURE.md).

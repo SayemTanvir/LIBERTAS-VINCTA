@@ -48,7 +48,7 @@ func _process(delta: float) -> void:
 		target = focus
 	global_position.x = lerpf(global_position.x, target.x, 1.0 - exp(-horizontal_response * delta))
 	global_position.y = lerpf(global_position.y, target.y, 1.0 - exp(-vertical_response * delta))
-	var strength := trauma * trauma
+	var strength := trauma * trauma if SessionSettings.screen_shake else 0.0
 	offset = Vector2(sin(shake_clock * 43.0), cos(shake_clock * 37.0)) * strength * 8.0
 
 func add_trauma(amount: float) -> void:

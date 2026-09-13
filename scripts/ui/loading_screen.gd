@@ -5,14 +5,11 @@ extends Control
 @export var ambience: AudioStream
 var failed: bool = false
 @onready var curtain: ColorRect = $Curtain
-@onready var status_label: Label = $Status
-@onready var back_button: Button = $Back
-@onready var loading_button: Button = $LoadingButton
+@onready var message: Control = $MessageBubble
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	back_button.hide()
-	back_button.pressed.connect(GameManager.go_home)
+	message.show_text("", "Entering Hollowmere...")
 	if DisplayServer.get_name() == "headless":
 		_enter_game.call_deferred()
 		return
@@ -44,12 +41,9 @@ func _fail(reason: String) -> void:
 	push_error("LoadingScreen: " + reason)
 	failed = true
 	curtain.color.a = 0.0
-	loading_button.hide()
-	status_label.text = "HOLLOWMERE COULD NOT BE OPENED.\nRETURN HOME AND TRY AGAIN."
-	back_button.show()
-	back_button.grab_focus()
+	message.show_text("", "Hollowmere could not be opened.\nPress Enter or Escape to return home.")
 
 func _unhandled_input(event: InputEvent) -> void:
 	get_viewport().set_input_as_handled()
-	if failed and event.is_action_pressed("pause"):
+	if failed and (event.is_action_pressed("ui_cancel") or event.is_action_pressed("ui_accept") or event.is_action_pressed("pause")):
 		GameManager.go_home()

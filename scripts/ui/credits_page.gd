@@ -1,15 +1,8 @@
-extends "res://scripts/ui/menu_page.gd"
+extends "res://scripts/ui/image_state_menu.gd"
 
 func _ready() -> void:
-	build_page("CREDITS")
-	content.add_child(make_label("LIBERTAS VINCTA", "MenuText"))
-	content.add_child(make_label("TEAM 4'S COMPLIMENT", "Small"))
-	var roles := {"Sajib": "Design / Direction", "Ifat": "Assets", "Ramim": "Godot Implementation / Story Designer", "Tanvir": "Testing / Debugging"}
-	for person in roles:
-		content.add_child(make_label(person + "  /  " + roles[person]))
-	content.add_child(make_label("ENGINE", "Small"))
-	content.add_child(make_label("Godot 4.7 stable"))
-	content.add_child(make_label("EXTERNAL ASSETS", "Small"))
-	content.add_child(make_label("Player art: AI-generated, supplied by the project owner; provenance accompanies the player assets.\n\nZombie sprites and Antons_Footsteps wood recordings: supplied by the project owner. Creator and license details have not been supplied.\n\nRepository icon: provenance remains unconfirmed. See ASSET_CREDITS.md for the source record."))
-	content.add_child(make_label("AI-ASSISTED DEVELOPMENT", "Small"))
-	content.add_child(make_label("AI tools assisted code implementation and player art creation. The team directs development and reviews the final game.", "Small"))
+	preload("res://scripts/ui/menu_art.gd").single(self, "10_Credits", "credits_final_corrected_back_active", Rect2(670, 802, 333, 93))
+	# Only Ifat's contribution region changes; the original page stays intact.
+	var contribution := Rect2(714, 350, 250, 30)
+	texture_layer(region(preload("res://assets/BG/10_Credits/credits_contributions.png"), contribution), contribution)
+	selected.connect(func(_id: String): back_requested.emit())

@@ -136,7 +136,6 @@ func _take_tools() -> void:
 func _take_item() -> void:
 	FreedomLedger.flags[interaction_id] = true
 	FreedomLedger.collect_item(item_id, item_amount)
-	say(display_name + " collected.", 1.4)
 
 func _read_letter() -> void:
 	if FreedomLedger.collect_letter(interaction_id):

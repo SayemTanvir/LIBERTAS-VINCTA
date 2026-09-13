@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" format=3 uid="uid://brcc8yw0lr14l"]
+[gd_resource type="SpriteFrames" format=3 uid="uid://bnx0kb4b2is80"]
 
 [ext_resource type="Texture2D" uid="uid://cdt876dkcj3n2" path="res://assets/sprites/zombie/Skin2_x256_Spritesheets/x256_Spritesheets/Idle/Idle Body 0.png" id="1"]
 [ext_resource type="Texture2D" uid="uid://da5o2nfaswhb6" path="res://assets/sprites/zombie/Skin2_x256_Spritesheets/x256_Spritesheets/Idle/Idle Body 315.png" id="2"]

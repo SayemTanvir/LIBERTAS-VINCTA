@@ -55,7 +55,7 @@ func _physics_process(delta: float) -> void:
 	_update_flashlight_charge(delta)
 	_update_breath(delta)
 	target_interactable = null
-	if not control_enabled or GameManager.state != GameManager.State.PLAYING:
+	if not control_enabled or GameManager.state != GameManager.State.PLAYING or GameManager.ui_blocks_input():
 		velocity = Vector2.ZERO
 		return
 	if Input.is_action_just_pressed("flashlight") and FreedomLedger.flags.get("flashlight", false) and hidden_spot == null:
