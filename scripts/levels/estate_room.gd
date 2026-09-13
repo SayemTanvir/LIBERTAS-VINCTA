@@ -225,19 +225,29 @@ func patrol_target(stage: int, index: int) -> Vector2:
 		candidates = candidates.slice(0, 5)
 	elif zone_id == "upper" and stage == 1:
 		candidates = candidates.filter(func(spec): return str(spec.id) in ["UF-01", "UF-02", "UF-04", "UF-06"])
-	elif zone_id == "roots" and int(FreedomLedger.part2_seed.get("monster_stage", 0)) == 0 and not FreedomLedger.part2_seed.get("touch_mutation", false):
-		candidates = candidates.filter(func(spec): return str(spec.id) == "CR-03")
+	elif zone_id == "roots":
+		if FreedomLedger.part2_seed.get("part1_ending", "") == "untouched" or not FreedomLedger.flags.get("visited_CR-03", false):
+			candidates = candidates.filter(func(spec): return str(spec.id) == "CR-03")
+		else:
+			candidates = candidates.filter(func(spec): return str(spec.id) != "CR-01")
 	if candidates.is_empty():
 		return Vector2(float(layout.enemy), 500.0)
 	var spec: Dictionary = candidates[index % candidates.size()]
 	return clamp_point(Vector2((float(spec.start) + float(spec.end)) * 0.5, 430.0 if index % 2 == 0 else 575.0))
 
 func vibration_transmission_at(point: Vector2) -> float:
-	if surface_at(point) == "RUBBLE":
-		return 160.0
 	if zone_id == "echoes" and point.x >= 3300.0 and point.x < 4400.0 and point.y < 470.0:
 		return 96.0
+	if surface_at(point) == "RUBBLE":
+		return 160.0
 	return 480.0
+
+func threat_active_at(point: Vector2) -> bool:
+	if zone_id != "roots":
+		return true
+	if point.x < 1000.0:
+		return false
+	return point.x >= 3000.0 or FreedomLedger.flags.get("visited_CR-03", false)
 
 func surface_at(point: Vector2) -> String:
 	for region in layout.get("surface_regions", []):
@@ -297,28 +307,16 @@ func _enter_room(id: String) -> void:
 	match id:
 		"GF-03":
 			EventBus.tension_changed.emit("SEARCHING")
-			if FreedomLedger.current_stage == 0:
-				_story_once("piano_warning", "ELS", "The piano is locked... but something inside it is breathing in time.", "monster_breathing")
 		"GF-04":
 			var player = get_tree().get_first_node_in_group("player")
 			if player != null and not player.is_crouching:
 				EventBus.noise_created.emit(Vector2(2520.0, 410.0), 420.0, "GENERIC")
 		"UF-02":
 			FreedomLedger.flags["vision_vfx_primed"] = true
-			_story_once("vanity_warning", "ELS", "These scratches all end at the vanity. Something waited here.")
-		"UF-03":
-			if FreedomLedger.sight_restored:
-				_story_once("nursery_watches", "ELS", "Every painted face is watching the same empty corner.", "monster_search")
-		"BS-01":
-			if FreedomLedger.current_stage >= 2:
-				_story_once("basement_followed", "ELS", "It followed me downstairs. It does not need the light anymore.", "monster_breathing")
-		"BS-03":
-			_story_once("custodian_bones", "ELS", "Vantree rings. Every body down here belonged to my family.")
 		"BS-05":
 			FreedomLedger.flags["ritual_chamber_seen"] = true
-			_story_once("fourth_ward", "ELS", "Three wards broken. The fourth is still breathing... and my name is beneath it.", "monster_search")
 		"CR-04":
-			_story_once("name_carving", "ELS", "My name... carved here centuries before I was born.")
+			_story_once("name_carving", "", "Custodian. Jailer. Vantree. Els Vantree - the final carving bears a date centuries old.")
 		"CE-01":
 			if not FreedomLedger.flags.get("mechanic_intro_seen", false):
 				FreedomLedger.flags["mechanic_intro_seen"] = true
@@ -331,10 +329,8 @@ func _enter_room(id: String) -> void:
 				FreedomLedger.flags["entity_spoke"] = true
 				EventBus.audio_requested.emit("monster_breathing")
 				EventBus.subtitle_requested.emit("THE DEPRIVED", "Els. You have brought your name home.", 4.0)
-				EventBus.subtitle_requested.emit("ELS", "No. I brought back the choice you buried.", 3.5)
 		"LN-CENTER":
 			FreedomLedger.flags["finale_started"] = true
-			_story_once("nexus_choice", "ELS", "Three chains. Destroy it, replace it... or become the lock.", "monster_search")
 
 func _story_once(beat: String, speaker: String, line: String, cue: String = "") -> void:
 	var flag := "story_" + beat

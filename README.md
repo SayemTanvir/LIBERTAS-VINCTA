@@ -8,7 +8,7 @@
 
 LIBERTAS VINCTA is a 2D psychological survival-horror game set in Hollowmere Estate and the Sunken Cathedral beneath it. Els Vantree restores senses to the Deprived One by taking sealed keys. Every restored sense makes it faster and more perceptive: it renews hunts from fresh sounds, outruns a straight sprint once it can see, and predicts familiar hides and exits once it remembers. Taking all three keys creates a false escape that loops the house instead of winning.
 
-The game contains the complete Part I estate route, the Part II Cathedral Roots, Chamber of Echoes, and Ley-Nexus, six successful endings across both parts, and the three-key Loop failure state. One-time environmental story reactions, sensory escalation cues, threat music, camera impact, and peripheral danger feedback carry the tension between major reveals.
+The game contains the complete Part I estate route, the Part II Cathedral Roots, Chamber of Echoes, and Ley-Nexus, six successful endings across both parts, and the three-key Loop failure state. Source-defined story triggers, sensory escalation cues, threat music, camera impact, and peripheral danger feedback carry the tension between the original reveals.
 
 ## Run
 
@@ -32,6 +32,10 @@ Use F5 rather than running an individual floor scene. `Main` supplies Els, the D
 | Blood or partial sigil | R |
 | Stun Rite | T |
 | Pause | Esc |
+
+## Full Walkthrough
+
+See [Rules and Steps to Solve the Game Story](<RULE AND STEPS TO SOLVE THE GAME STORY.md>) for the complete spoiler walkthrough, every ending route, all room and pickup locations, monster rules, Part II branch solutions, and the full story explanation.
 
 The flashlight has 90 seconds of charge and drains three times faster while sprinting. Recharge stations take 12 stationary seconds. Breath can be held for 6 seconds and has a 15-second cooldown. Batteries, bottles, clocks, and lockpicks are persistent checkpoint inventory.
 
@@ -76,6 +80,6 @@ godot --headless --path . tests/verify_game_systems.tscn
 godot --headless --path . tests/verify_game_route.tscn
 ```
 
-Current results: 679 asset/layout checks, 57 systems checks, and 92 route checks, all with zero failures. The route test covers Awakening, Vantree Part I, Part II, the Echo skill gate, Severance, and the false-exit Loop reset.
+Current results: 679 asset/layout checks, 62 systems checks, and 92 route checks, all with zero failures. The route test covers Awakening, Vantree Part I, Part II, the Echo skill gate, Severance, and the false-exit Loop reset.
 
 See [QA](docs/QA.md), [asset credits](ASSET_CREDITS.md), and [AI disclosure](AI_DISCLOSURE.md).

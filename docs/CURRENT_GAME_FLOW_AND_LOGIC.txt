@@ -82,10 +82,10 @@ ambush remains active for ten seconds.
 
 STORY PRESSURE
 
-- One-time in-world reactions now build across the piano, vanity, nursery, basement,
-  ritual chamber, carved-name reveal, Vault of Whispers, and Ley-Nexus.
-- Restoring each sense gives Els a distinct realization of what she has returned to
-  the entity. The first key also forces the search score and monster cue.
+- Story triggers remain limited to the source-defined Music Room tension, vision
+  priming, Ritual Chamber staging, CR-04 name reveal, CE-03 first voice, and Nexus.
+- Restoring each sense retains the original short reaction. The first key also
+  forces the search score and monster cue.
 - Search and chase states drive separate music levels, red peripheral pressure, and
   brief camera impact on detection, damage, and sense restoration.
 
@@ -127,7 +127,9 @@ Finale:
   LN-CENTER Convergence, containing LN-A, LN-B, and LN-C in one visible arena.
 
 Touch transmits 480 px over bare stone, 160 px over rubble, and 96 px on the elevated
-Choir lane. Blood Sigil blocks senses in a three-tile radius for 12 seconds, costs
+Choir lane. Crouching and stillness do not suppress Touch. CR-01 remains threat-free,
+and the first live Roots encounter begins at CR-03. Blood Sigil blocks senses in a
+three-tile radius for 12 seconds, costs
 eight percent max HP, and has a 20-second cooldown. Stun Rite lasts six seconds, costs
 20 percent, and has a 60-second cooldown. CE-05 opens after three successful branch
 mechanic uses.
@@ -143,8 +145,8 @@ detection or damage resets progress.
 
 AUTOMATED STATUS
 
-- Asset/layout: 679 checks, zero failures.
-- Systems: 57 checks, zero failures.
+- Asset/layout: 686 checks, zero failures.
+- Systems: 62 checks, zero failures.
 - Canonical route: 92 checks, zero failures.
 
 See tests/verify_estate_assets.tscn, tests/verify_game_systems.tscn, and

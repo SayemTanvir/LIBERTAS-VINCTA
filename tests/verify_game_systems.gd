@@ -89,13 +89,6 @@ func _run() -> void:
 	_check(is_equal_approx(enemy._move_speed(), enemy.true_form_speed), "Stage 3 prediction dropped back to patrol speed")
 	player.facing = Vector2.RIGHT
 	_check(enemy._predict_exit() and enemy.state == enemy.State.AMBUSH, "Stage 3 did not intercept a known exit ahead of the player")
-	var story_lines: Array[String] = []
-	var story_listener := func(_speaker: String, line: String, _duration: float): story_lines.append(line)
-	EventBus.subtitle_requested.connect(story_listener)
-	room._story_once("test_once", "ELS", "test line")
-	room._story_once("test_once", "ELS", "test line")
-	_check(story_lines == ["test line"], "One-time story beat repeated")
-	EventBus.subtitle_requested.disconnect(story_listener)
 	var hide: BaseInteractable = room.props.get_node("DiningTableHide")
 	for _i in 5:
 		FreedomLedger.record_hiding_use(hide.interaction_id)
@@ -105,7 +98,12 @@ func _run() -> void:
 	enemy.queue_free()
 	player.queue_free()
 	room.queue_free()
-	audio.queue_free()
+	if audio.fade_tween != null:
+		audio.fade_tween.kill()
+	for audio_player in audio.players.values():
+		audio_player.stop()
+	remove_child(audio)
+	audio.free()
 	await get_tree().process_frame
 	print("SYSTEM CHECK: %s checks, %s failures. Tunables, state machine, resources, abilities, and channel resets verified." % [checks, failures.size()])
 	get_tree().quit(0 if failures.is_empty() else 1)
@@ -132,10 +130,22 @@ func _check_inputs_and_seeds() -> void:
 
 func _check_branch_abilities(player: CharacterBody2D, enemy: CharacterBody2D) -> void:
 	FreedomLedger.reset()
+	FreedomLedger.begin_part_two("untouched")
+	GameManager.zone = "echoes"
+	for _use in 3:
+		_check(player.use_gadget(), "Untouched resonance gadget could not be used")
+	_check(FreedomLedger.mechanic_uses == 3, "Untouched gadgets did not open the Echo mechanic gate")
+	FreedomLedger.reset()
 	FreedomLedger.restore_sense("hearing")
 	FreedomLedger.begin_part_two("vantree")
 	FreedomLedger.flags["part2_ability_unlocked"] = true
 	GameManager.zone = "echoes"
+	enemy.position = player.position + Vector2(100, 0)
+	enemy.change_state(enemy.State.WANDER_BLIND)
+	player.velocity = Vector2.ZERO
+	enemy._detect_touch()
+	_check(enemy.state == enemy.State.HUNT_AUDIO, "Standing still incorrectly defeated the Touch mutation")
+	_check(is_equal_approx(enemy._move_speed(), enemy.true_form_speed), "Touch mutation hunt did not use true-form speed")
 	var hp_before := FreedomLedger.hp
 	_check(player.use_sigil(), "Blood Sigil could not cast")
 	_check(is_equal_approx(FreedomLedger.hp, hp_before - FreedomLedger.max_hp * 0.08), "Blood Sigil HP cost is not 8 percent")

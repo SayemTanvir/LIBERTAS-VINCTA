@@ -136,12 +136,7 @@ func _take_key(player: Node2D) -> void:
 			FreedomLedger.flags["piano_screech"] = true
 		elif sense == "memory":
 			FreedomLedger.flags["true_form_revealed"] = true
-		var reactions := {
-			"hearing": "That was not an echo. I gave it hearing.",
-			"sight": "The dark is looking back. I gave it sight.",
-			"memory": "It remembers every room I ran through. It remembers me."
-		}
-		say(reactions[sense], 3.2)
+		say({"hearing": "Something heard that.", "sight": "It turned toward the light.", "memory": "It knows this place now."}[sense], 2.8)
 		GameManager.save_checkpoint(player.global_position)
 	else:
 		say("Another seal holds this one.")

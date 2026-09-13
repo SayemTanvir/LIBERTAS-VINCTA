@@ -144,6 +144,8 @@ func use_gadget() -> bool:
 		return false
 	var point := global_position + facing * (260.0 if gadget == "bottle" else 180.0)
 	EventBus.noise_created.emit(point, 576.0 if gadget == "bottle" else 384.0, "GLASS" if gadget == "bottle" else "GENERIC")
+	if GameManager.zone == "echoes" and FreedomLedger.current_part == 2 and FreedomLedger.part2_seed.get("full_gadgets", false):
+		FreedomLedger.mechanic_uses += 1
 	EventBus.ability_used.emit(gadget)
 	return true
 

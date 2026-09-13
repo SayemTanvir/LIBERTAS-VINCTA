@@ -144,6 +144,13 @@ func _physics_process(delta: float) -> void:
 	if not is_instance_valid(player) or not is_instance_valid(room) or GameManager.state != GameManager.State.PLAYING:
 		velocity = Vector2.ZERO
 		return
+	if room.has_method("threat_active_at") and not room.threat_active_at(player.global_position):
+		detection_active = false
+		if state != _patrol_state():
+			change_state(_patrol_state())
+		target = Vector2(room.patrol_anchor(), 500.0)
+		_move(delta)
+		return
 	hit_cooldown = maxf(0.0, hit_cooldown - delta)
 	if stun_seconds > 0.0:
 		stun_seconds -= delta
@@ -181,8 +188,6 @@ func _update_vision(delta: float) -> void:
 
 func _detect_touch() -> void:
 	if FreedomLedger.current_part != 2 or not FreedomLedger.part2_seed.get("touch_mutation", false) or _sense_blocked("touch"):
-		return
-	if player.get_real_velocity().length() < 10.0:
 		return
 	var transmission: float = room.vibration_transmission_at(player.global_position)
 	if global_position.distance_to(player.global_position) <= transmission and state not in [State.CHASE, State.HUNT_AUDIO]:
@@ -284,6 +289,8 @@ func _move(delta: float) -> void:
 	_play_visual(animation)
 
 func _move_speed() -> float:
+	if FreedomLedger.current_part == 2 and FreedomLedger.part2_seed.get("touch_mutation", false) and state == State.HUNT_AUDIO:
+		return true_form_speed
 	if _stage() == 0:
 		return blind_speed
 	if state == State.CHASE:

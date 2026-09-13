@@ -110,6 +110,22 @@ func _verify_zone(zone: String, art: RefCounted, seen_rooms: Array[String]) -> D
 		var anchors := [room.props.get_node("LnA"), room.props.get_node("LnB"), room.props.get_node("LnC")]
 		_check(anchors[2].position.x - anchors[0].position.x <= 1280.0, "Nexus anchors are not simultaneously visible")
 		_check(passage_count == 0, "Nexus must lock with no retreat door")
+	if zone == "roots":
+		_check(not room.threat_active_at(Vector2(500, 500)), "CR-01 must remain a threat-free narrative descent")
+		_check(not room.threat_active_at(Vector2(1500, 500)), "Threat became active before the player reached CR-03")
+		room._enter_room("CR-03")
+		_check(room.threat_active_at(Vector2(1500, 500)), "Roots threat did not activate after reaching CR-03")
+		_check(not room.threat_active_at(Vector2(500, 500)), "CR-01 lost its permanent threat-free rule")
+		var reveals: Array[String] = []
+		var reveal_listener := func(_speaker: String, line: String, _duration: float): reveals.append(line)
+		EventBus.subtitle_requested.connect(reveal_listener)
+		room._enter_room("CR-04")
+		room._enter_room("CR-04")
+		EventBus.subtitle_requested.disconnect(reveal_listener)
+		_check(reveals == ["Custodian. Jailer. Vantree. Els Vantree - the final carving bears a date centuries old."], "CR-04 name reveal changed or repeated")
+	if zone == "echoes":
+		_check(is_equal_approx(room.vibration_transmission_at(Vector2(3500, 430)), 96.0), "Elevated Choir Touch transmission must be 96 pixels")
+		_check(is_equal_approx(room.vibration_transmission_at(Vector2(3500, 520)), 160.0), "Lower Choir rubble transmission must be 160 pixels")
 	_check(not room.find_path(Vector2(240, 600), Vector2(room.room_width - 240, 600)).is_empty(), zone + ": end-to-end path blocked")
 	room.queue_free()
 	await get_tree().process_frame
