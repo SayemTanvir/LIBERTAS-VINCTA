@@ -6,6 +6,9 @@ var motion: Tween
 var highlighted: bool = false
 @onready var visual: Control = $Visual
 @onready var label: Label = $Visual/Caption
+@onready var marker: Label = $Visual/Marker
+@onready var selection: ColorRect = $Selection
+@onready var divider: ColorRect = $Divider
 @onready var accent: ColorRect = $Accent
 
 func _ready() -> void:
@@ -29,13 +32,16 @@ func update_highlight() -> void:
 	if motion:
 		motion.kill()
 	motion = create_tween().set_parallel(true).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	motion.tween_property(visual, "position:x", 8.0 if active else 0.0, 0.15)
-	motion.tween_property(visual, "scale", Vector2.ONE * (1.02 if active else 1.0), 0.15)
+	motion.tween_property(visual, "position:x", 7.0 if active else 0.0, 0.15)
 	motion.tween_property(accent, "modulate:a", 1.0 if active else 0.0, 0.15)
+	motion.tween_property(marker, "modulate:a", 1.0 if active else 0.0, 0.15)
+	motion.tween_property(selection, "modulate:a", 0.72 if active else 0.0, 0.15)
+	motion.tween_property(divider, "modulate:a", 0.5 if active else 1.0, 0.15)
 	motion.tween_property(label, "modulate", get_theme_color("font_hover_color" if active else "font_color", "Button"), 0.15)
 
 func press_feedback() -> void:
 	if motion:
 		motion.kill()
 	motion = create_tween()
-	motion.tween_property(visual, "scale", Vector2.ONE * 0.985, 0.06)
+	motion.tween_property(visual, "position:x", 3.0, 0.06)
+	motion.tween_property(selection, "modulate:a", 1.0, 0.06)
