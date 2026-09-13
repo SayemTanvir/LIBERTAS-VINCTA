@@ -12,6 +12,8 @@ BOOT AND SAVE
   restore that ledger snapshot, then reverse the collapse animation behind a fade
   before the entity and player controls resume. Respawn takes priority over any
   passage state, initializes doors closed, and never replays arrival or closing.
+  Recovery does not wait on a fade signal that may already have completed, so the
+  state always returns to PLAYING and movement input is restored.
 
 PART I ROOM REGIONS
 
@@ -159,7 +161,7 @@ AUTOMATED STATUS
 - Asset/layout: 686 checks, zero failures.
 - Systems: 66 checks, zero failures.
 - Canonical route: 96 checks, zero failures.
-- Full alternate playthrough: 147 checks, zero failures.
+- Full alternate playthrough: 148 checks, zero failures.
 
 See tests/verify_estate_assets.tscn, tests/verify_game_systems.tscn, and
 tests/verify_game_route.tscn, and tests/verify_full_playthrough.tscn.

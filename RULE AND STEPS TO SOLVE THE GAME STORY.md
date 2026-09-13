@@ -504,7 +504,7 @@ Press `E` at a hiding place to enter it and `E` again to leave. The flashlight t
 - A recovered sense creates a checkpoint at the key location.
 - Capture or death restarts from the latest checkpoint and restores the saved ledger state.
 - Capture plays the collapse animation; checkpoint recovery fades in while that animation reverses back to the standing pose. The entity remains inactive until control returns.
-- Checkpoint recovery does not replay the doorway arrival or door-closing animation. The saved door is already closed when Els fades back in.
+- Checkpoint recovery does not replay the doorway arrival or door-closing animation. The saved door is already closed when Els fades back in, and movement control resumes as soon as the recovery animation completes.
 - Continue from the main menu loads the saved zone, position, inventory, keys, letters, monster stage, health, and Part II state.
 - Recharge use and ordinary pickups are safest after a recent transition/key checkpoint.
 

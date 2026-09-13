@@ -81,6 +81,6 @@ godot --headless --path . tests/verify_game_route.tscn
 godot --headless --path . tests/verify_full_playthrough.tscn
 ```
 
-Current results: 686 asset/layout checks, 66 systems checks, 96 canonical-route checks, and 147 full-playthrough checks, all with zero failures. Together they cover Awakening, all four Part I outcomes, all three Nexus endings, one-time story triggers, branch mechanics, doorway arrivals, capture, checkpoint restoration, door-free respawn, target-facing puzzle poses, and the false-exit Loop reset.
+Current results: 686 asset/layout checks, 66 systems checks, 96 canonical-route checks, and 148 full-playthrough checks, all with zero failures. Together they cover Awakening, all four Part I outcomes, all three Nexus endings, one-time story triggers, branch mechanics, doorway arrivals, capture, checkpoint restoration, door-free respawn, restored movement control, target-facing puzzle poses, and the false-exit Loop reset.
 
 See the [professional playtest report](docs/PRO_PLAYTEST_REPORT.md), [asset credits](ASSET_CREDITS.md), and [AI disclosure](AI_DISCLOSURE.md).

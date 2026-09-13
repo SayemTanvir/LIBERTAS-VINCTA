@@ -176,9 +176,9 @@ func _run_loop_and_recovery() -> bool:
 	EventBus.player_caught.emit()
 	await get_tree().process_frame
 	_check(GameManager.state == GameManager.State.CAUGHT and player.animation_state == "death", "First-room capture did not begin correctly")
-	Engine.time_scale = 20.0
 	if not await _wait_zone("ground"):
 		return false
+	Engine.time_scale = 20.0
 	EventBus.audio_requested.disconnect(door_listener)
 	player = main.get_node("Entities/Player")
 	var entry_presentation: Node = main.room.props.get_node("FrontDoor/Visual/DoorPresentation")
@@ -186,6 +186,12 @@ func _run_loop_and_recovery() -> bool:
 	_check(not bool(entry_presentation.get("arrival_completed")), "Respawn replayed the first door arrival/closing animation")
 	_check(door_cues.is_empty(), "Respawn emitted an irrelevant door-closing sound")
 	_check(entry_presentation.door_sprite.position.is_equal_approx(entry_presentation.closed_position) and entry_presentation.door_sprite.scale.is_equal_approx(entry_presentation.closed_scale), "Respawn did not initialize the first door directly in its closed state")
+	var position_before_input := player.global_position
+	Input.action_press("move_right")
+	for _frame in 3:
+		await get_tree().physics_frame
+	Input.action_release("move_right")
+	_check(player.global_position.x > position_before_input.x, "Movement control did not resume after checkpoint recovery")
 	var hearing_key: BaseInteractable = main.room.props.get_node("HearingKey")
 	player.play_animation("idle")
 	await hearing_key.interact(player)

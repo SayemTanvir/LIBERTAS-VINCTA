@@ -96,6 +96,6 @@ func _finish_checkpoint_respawn(player: CharacterBody2D) -> void:
 	var reveal := create_tween()
 	reveal.tween_property(hud.fade, "color:a", 0.0, 0.55)
 	await player.play_respawn()
-	await reveal.finished
 	GameManager.respawn_pending = false
 	GameManager.state = GameManager.State.PLAYING
+	player.control_enabled = true

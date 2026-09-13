@@ -16,6 +16,7 @@ The playthrough was performed through the actual scenes and interaction nodes wi
 | Critical | An anchor could begin while the monster had already detected Els, allowing a channel to continue without a fresh detection signal. | Anchors now reject an already-detected start and continuously inspect live detection as well as damage/detection events. |
 | High | Capture cut to a standing checkpoint with no recovery animation. | Capture now holds the death pose, restores the exact checkpoint, fades in, and reverses the collapse animation before control and enemy processing resume. |
 | High | A first-room checkpoint recovery could be presented like another doorway arrival, producing an irrelevant door-close beat. | Respawn now overrides passage arrival state, starts with all doors closed, and emits no door cue. |
+| High | A completed respawn could leave movement locked because the recovery coroutine awaited a fade signal that had already fired. | Recovery now returns to `PLAYING` immediately after the reverse-collapse animation and explicitly restores player control. |
 | High | The three-key Loop played the collapse forward, making Els appear to fall again before snapping upright. | The Loop now begins prone and uses the same reverse recovery sequence while gameplay remains locked. |
 | High | Stun Rite consumed 20% health and its cooldown when the monster was outside the 192-pixel radius. | Range is validated first; failed attempts spend no health and start no cooldown. |
 | Medium | The cracked ritual seal silently consumed a lockpick even though only the piano and vanity are lockpick puzzles. | The ritual seal is now a one-step, no-lockpick interaction with a dedicated reach pose. |
@@ -46,7 +47,7 @@ The playthrough was performed through the actual scenes and interaction nodes wi
 | Estate assets/layout | 686 checks, 0 failures |
 | AI, abilities, interaction systems | 66 checks, 0 failures |
 | Canon Vantree route and Severance | 96 checks, 0 failures |
-| Untouched, Partial Mercy, Loop, recovery, remaining Nexus endings | 147 checks, 0 failures |
+| Untouched, Partial Mercy, Loop, recovery, remaining Nexus endings | 148 checks, 0 failures |
 | Rendered room sweep | 7 zones, 38 viewpoints for 37 room regions |
 | Rendered animation sweep | 9 critical states captured |
 

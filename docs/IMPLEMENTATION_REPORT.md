@@ -55,6 +55,8 @@ Door transitions show the opened leaf and dark threshold, move Els through it, l
 
 Interaction facing is derived from the live player-to-target vector. Authored piano, vanity, and ritual offsets retain exact staging while using that target angle. Checkpoint recovery has priority over passage arrival state, initializes every passage directly closed, and cannot replay an arrival or door-closing cue.
 
+The fade and reverse-collapse animation run together, but returning to `PLAYING` no longer awaits a tween signal that may already have fired. Recovery explicitly restores player control after the animation completes.
+
 ## Interaction safeguards
 
 - Completed puzzles remain visible but cannot be solved repeatedly.
@@ -89,7 +91,7 @@ Gameplay and art remain separated: collision, interaction IDs, and route logic d
 | Estate assets/layout | 686 checks, 0 failures |
 | Systems and AI | 66 checks, 0 failures |
 | Canon Vantree-to-Severance route | 96 checks, 0 failures |
-| Alternate outcomes, recovery, and remaining Nexus endings | 147 checks, 0 failures |
+| Alternate outcomes, recovery, and remaining Nexus endings | 148 checks, 0 failures |
 | Rendered room sweep | 7 zones, 38 viewpoints for 37 room regions |
 | Rendered animation sweep | 9 critical states |
 

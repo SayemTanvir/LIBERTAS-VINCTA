@@ -9,7 +9,7 @@ Validated with Godot 4.7 stable on 2026-09-13.
 | `tests/verify_estate_assets.tscn` | 7 zones, 37 room regions, 60 textures, progression props, doors, pickup visibility, paths, hiding priorities, recharge coverage, and Nexus framing | 686 checks, 0 failures |
 | `tests/verify_game_systems.tscn` | Inputs, all Part II seeds, movement, target-facing interactions, battery/noise values, enemy states, Hearing/Sight/Memory/Touch behavior, sigils, stun, anchor interruption, and cleanup | 66 checks, 0 failures |
 | `tests/verify_game_route.tscn` | Awakening, canonical Vantree route, transitions, Part II, story-once triggers, branch gate, Nexus, Severance, and two Loop resets | 96 checks, 0 failures |
-| `tests/verify_full_playthrough.tscn` | Actual interactions for Untouched, Partial Mercy, Loop, Custodian's Rest, Vessel, first-room capture, checkpoint restore, door-free respawn, puzzle angles, and gated animations | 147 checks, 0 failures |
+| `tests/verify_full_playthrough.tscn` | Actual interactions for Untouched, Partial Mercy, Loop, Custodian's Rest, Vessel, first-room capture, checkpoint restore, door-free respawn, post-recovery movement input, puzzle angles, and gated animations | 148 checks, 0 failures |
 
 Run from the project directory:
 
@@ -43,6 +43,7 @@ The resulting frames were inspected for nonblank rendering, asset bounds, floor/
 - [x] Verify capture restores the exact checkpoint inventory, health, zone, and position.
 - [x] Verify collapse and reverse respawn presentation while control and enemy logic are locked.
 - [x] Verify first-room respawn emits no door cue, never invokes arrival, and initializes the entry door closed.
+- [x] Verify recovery at normal time scale returns to `PLAYING` and accepts movement input.
 - [x] Verify Continuing restores the serialized progression state.
 - [x] Inspect all 37 room regions and all nine critical interaction animations with rendered frames.
 
