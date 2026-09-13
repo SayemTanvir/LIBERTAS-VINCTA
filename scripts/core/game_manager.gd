@@ -10,6 +10,8 @@ var checkpoint: Dictionary = {}
 var ending: String = ""
 var return_state: State = State.PLAYING
 var arrival_pending: bool = false
+var respawn_pending: bool = false
+var save_path: String = SAVE_PATH
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -18,12 +20,15 @@ func _ready() -> void:
 
 func new_game() -> void:
 	get_tree().paused = false
+	if FileAccess.file_exists(save_path):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
 	FreedomLedger.reset()
 	zone = "intro"
 	entry = "start"
 	checkpoint.clear()
 	ending = ""
 	arrival_pending = false
+	respawn_pending = false
 	state = State.INTRO
 	return_state = State.PLAYING
 	_load_game_scene()
@@ -35,6 +40,7 @@ func go_home() -> void:
 	entry = "start"
 	ending = ""
 	arrival_pending = false
+	respawn_pending = false
 	return_state = State.PLAYING
 	state = State.MENU
 	get_tree().change_scene_to_file("res://scenes/ui/front_end.tscn")
@@ -43,27 +49,34 @@ func save_checkpoint(position: Vector2) -> void:
 	checkpoint = {"zone": zone, "position": position, "ledger": FreedomLedger.snapshot()}
 	var serializable := checkpoint.duplicate(true)
 	serializable.position = [position.x, position.y]
-	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	var file := FileAccess.open(save_path, FileAccess.WRITE)
 	if file != null:
 		file.store_string(JSON.stringify(serializable, "  "))
+	else:
+		push_warning("Checkpoint could not be written.")
 
 func has_save() -> bool:
-	return FileAccess.file_exists(SAVE_PATH)
+	return FileAccess.file_exists(save_path)
 
 func continue_game() -> void:
 	if not has_save():
 		new_game()
 		return
-	var data = JSON.parse_string(FileAccess.get_file_as_string(SAVE_PATH))
+	var data = JSON.parse_string(FileAccess.get_file_as_string(save_path))
 	if not data is Dictionary or not data.has("ledger"):
+		new_game()
+		return
+	var saved_position = data.get("position", [])
+	if not saved_position is Array or saved_position.size() < 2:
 		new_game()
 		return
 	FreedomLedger.restore_snapshot(data.ledger)
 	zone = str(data.get("zone", "ground"))
-	var p: Array = data.get("position", [240.0, 490.0])
+	var p: Array = saved_position
 	checkpoint = {"zone": zone, "position": Vector2(float(p[0]), float(p[1])), "ledger": FreedomLedger.snapshot()}
 	entry = "checkpoint"
 	arrival_pending = false
+	respawn_pending = false
 	ending = ""
 	state = State.PLAYING
 	_load_game_scene()
@@ -73,6 +86,7 @@ func travel(destination: String, entrance: String = "start") -> void:
 	zone = destination
 	entry = entrance
 	arrival_pending = true
+	respawn_pending = false
 	state = State.PLAYING
 	get_tree().change_scene_to_file("res://scenes/main/main.tscn")
 
@@ -86,6 +100,7 @@ func restart_checkpoint() -> void:
 	entry = "checkpoint"
 	arrival_pending = false
 	ending = ""
+	respawn_pending = true
 	state = State.PLAYING
 	get_tree().change_scene_to_file("res://scenes/main/main.tscn")
 
@@ -117,6 +132,7 @@ func continue_to_part_two() -> void:
 	zone = "roots"
 	entry = "start"
 	arrival_pending = false
+	respawn_pending = false
 	checkpoint.clear()
 	get_tree().change_scene_to_file("res://scenes/main/main.tscn")
 
@@ -129,6 +145,7 @@ func _trigger_loop() -> void:
 	ending = ""
 	checkpoint.clear()
 	arrival_pending = false
+	respawn_pending = false
 	await get_tree().create_timer(0.35, false).timeout
 	state = State.PLAYING
 	get_tree().change_scene_to_file("res://scenes/main/main.tscn")

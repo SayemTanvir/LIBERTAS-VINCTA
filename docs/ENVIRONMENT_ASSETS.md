@@ -1,6 +1,6 @@
 # Environment assets
 
-The imported furniture is enabled by default on all four floors. Run the project
+The imported and generated environment dressing is enabled by default in all seven zones. Run the project
 with F5, then start a new game from the menu. No manual texture assignments are
 needed. Room contents are generated at runtime, so use the Remote scene tree to
 inspect them while playing.
@@ -16,10 +16,13 @@ inspect them while playing.
 | Portrait Gallery / Master Bedroom | Paneling, carpet treatment, reading furniture, folding screens and a framed tabletop vanity seal |
 | Nursery / Linen Passage | High chair, wooden chair, bookshelves, bench and screen at `linen_hide` |
 | Flooded Cellar / Wine Cellar | Brick walls, dark floorboards, water overlay, bottle crates, wine racks and bottle cabinets |
-| Ritual Chamber | Candle tables, screens and a book-bearing lectern; the original ritual interaction remains at x=4090 |
+| Ritual Chamber | Candle tables, screens and a book-bearing lectern; the ritual interaction remains at x=4720 |
+| Cathedral Roots | Floodwater, rubble, crypts, altar stonework, roots and Vantree story markers |
+| Chamber of Echoes | Forge, broken choir floor, clocks, letter props and the sealed Nexus descent |
+| Ley-Nexus | Cathedral shell, center seal, closed return threshold and three simultaneously visible anchors |
 
-40 source PNGs supply 45 catalog textures, including a generated atlas for keys,
-letters, flashlight, tool pouch, doors and stairs. Modern cafe equipment, neon signs, takeaway packaging,
+The asset catalog exposes 60 verified textures, including generated atlases for keys,
+letters, flashlight, tool pouch, doors, stairs and cathedral props. Modern cafe equipment, neon signs, takeaway packaging,
 fresh desserts and unrelated bar equipment remain unused. Existing character,
 footstep and ambience integrations are preserved. The warm piano music is not
 assigned as horror ambience.
@@ -89,18 +92,22 @@ Run with the installed Godot executable, substituting its path for `godot`:
 
 ```powershell
 godot --headless --path . res://tests/verify_estate_assets.tscn --quit-after 1800
-godot --path . res://tests/verify_estate_assets.tscn --resolution 1280x720 --windowed --audio-driver Dummy --quit-after 1800 -- --capture
-godot --path . res://tests/verify_game_route.tscn --resolution 1280x720 --windowed --audio-driver Dummy --quit-after 9000
+godot --headless --path . res://tests/verify_game_systems.tscn
+godot --headless --path . res://tests/verify_game_route.tscn
+godot --headless --path . res://tests/verify_full_playthrough.tscn
+godot --rendering-method gl_compatibility --path . res://tests/capture_asset_sweep.tscn
+godot --rendering-method gl_compatibility --path . res://tests/capture_animation_sweep.tscn
 ```
 
 The check loads Main for every floor and verifies atlas bounds, replacement
 visuals, foot anchors, navigation and unobstructed E access to every interaction.
 It exercises hiding, three-step puzzles, locked/unlocked keys, checkpoint ledger
-restoration, room reloads and the greybox override. Render mode also checks for
-nonblank frames and writes twenty-one room, open-door and flashlight views under
-`build/asset-verification/`.
+restoration, room reloads and the greybox override. The rendered room sweep writes
+38 viewpoints for 37 room regions under `build/asset-sweep/`; the animation sweep writes nine critical
+interaction and recovery states under `build/animation-sweep/`.
 
-The route test requires rendering because the loading screen waits for a drawn
-frame. It checks actual door transitions and the Full Awakening route, with
-accelerated time and frozen enemies. These are focused integration checks, not
-a full playthrough of all endings or a Windows/Web export test.
+The route test checks actual door transitions and the canonical
+Vantree-to-Severance route with accelerated time and deterministic enemy handling.
+The separate full-playthrough suite covers Untouched, Partial Mercy, the three-key
+Loop, checkpoint recovery, and the other two Nexus endings. These are focused
+integration checks, not a Windows/Web export test.

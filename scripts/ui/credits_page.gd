@@ -8,7 +8,7 @@ func _ready() -> void:
 	for person in roles:
 		content.add_child(make_label(person + "  /  " + roles[person]))
 	content.add_child(make_label("ENGINE", "Small"))
-	content.add_child(make_label("Godot 4.7.2"))
+	content.add_child(make_label("Godot 4.7 stable"))
 	content.add_child(make_label("EXTERNAL ASSETS", "Small"))
 	content.add_child(make_label("Player art: AI-generated, supplied by the project owner; provenance accompanies the player assets.\n\nZombie sprites and Antons_Footsteps wood recordings: supplied by the project owner. Creator and license details have not been supplied.\n\nRepository icon: provenance remains unconfirmed. See ASSET_CREDITS.md for the source record."))
 	content.add_child(make_label("AI-ASSISTED DEVELOPMENT", "Small"))

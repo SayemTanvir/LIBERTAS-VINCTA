@@ -23,8 +23,10 @@ extends Node
 var players: Dictionary = {}
 var tension: String = ""
 var fade_tween: Tween
+var shutting_down: bool = false
 
 func _ready() -> void:
+	add_to_group("audio_director")
 	_setup_footstep_randomizer()
 	
 	for cue in ["rain", "drip", "breathing", "building_creak", "house_ambience", "wood_footsteps", "stone_footsteps", "water_footsteps", "key_sting", "monster_breathing", "monster_search", "monster_screech", "door", "lockpick", "flashlight", "ui"]:
@@ -61,10 +63,38 @@ func _ready() -> void:
 		
 	EventBus.audio_requested.connect(play_cue)
 	EventBus.tension_changed.connect(set_tension)
-	EventBus.sense_restored.connect(func(_sense): play_cue("key_sting"))
+	EventBus.sense_restored.connect(_play_key_sting)
 	
 	play_cue("house_ambience")
 	set_tension("CALM")
+
+func _exit_tree() -> void:
+	shutdown()
+
+func shutdown() -> void:
+	if shutting_down:
+		return
+	shutting_down = true
+	if fade_tween != null:
+		fade_tween.kill()
+		fade_tween = null
+	if EventBus.audio_requested.is_connected(play_cue):
+		EventBus.audio_requested.disconnect(play_cue)
+	if EventBus.tension_changed.is_connected(set_tension):
+		EventBus.tension_changed.disconnect(set_tension)
+	if EventBus.sense_restored.is_connected(_play_key_sting):
+		EventBus.sense_restored.disconnect(_play_key_sting)
+	for audio in players.values():
+		if is_instance_valid(audio):
+			if audio.finished.is_connected(audio.play):
+				audio.finished.disconnect(audio.play)
+			audio.stop()
+			audio.stream = null
+	players.clear()
+	tension = ""
+
+func _play_key_sting(_sense: String) -> void:
+	play_cue("key_sting")
 
 func play_cue(cue: String) -> void:
 	if players.has(cue) and players[cue].stream != null:

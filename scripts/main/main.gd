@@ -9,14 +9,18 @@ func _ready() -> void:
 	room = packed.instantiate()
 	$World.add_child(room)
 	var player := $Entities/Player
-	var arriving := GameManager.arrival_pending and GameManager.zone != "intro"
+	# Recovery always wins over arrival so a stale passage flag cannot replay a door.
+	var recovering := GameManager.respawn_pending
+	var arriving := not recovering and GameManager.arrival_pending and GameManager.zone != "intro"
+	var loop_waking := bool(FreedomLedger.flags.get("loop_wake", false))
 	GameManager.arrival_pending = false
 	var arrival_door: BaseInteractable = _passage_for_entry() if arriving else null
 	var spawn: Vector2 = room.get_node("Markers/ReturnSpawn" if GameManager.entry == "end" else "Markers/PlayerSpawn").global_position
 	if arrival_door != null:
 		spawn = arrival_door.global_position + Vector2(0, 8)
-	if GameManager.entry == "checkpoint" and not GameManager.checkpoint.is_empty():
+	if recovering and not GameManager.checkpoint.is_empty():
 		spawn = GameManager.checkpoint.position
+		_close_passages_immediately()
 	player.global_position = spawn
 	var camera := player.get_node("Camera2D")
 	camera.limit_left = 0
@@ -27,12 +31,12 @@ func _ready() -> void:
 	if GameManager.zone == "intro":
 		$Awakening.begin(player, $UI)
 	else:
-		GameManager.state = GameManager.State.INTRO if arrival_door != null else GameManager.State.PLAYING
-		player.control_enabled = arrival_door == null
-		if arrival_door == null:
+		GameManager.state = GameManager.State.INTRO if arrival_door != null or recovering or loop_waking else GameManager.State.PLAYING
+		player.control_enabled = arrival_door == null and not recovering and not loop_waking
+		if arrival_door == null and not recovering and not loop_waking:
 			GameManager.save_checkpoint(spawn)
 		if FreedomLedger.flags.get("flashlight", false):
-			player.set_flashlight(false)
+			player.set_flashlight(false, false)
 		var enemy := ENEMY.instantiate()
 		var enemy_spawn: Vector2 = room.get_node("Markers/EnemySpawn").global_position
 		if enemy_spawn.distance_to(spawn) < 650.0:
@@ -42,8 +46,17 @@ func _ready() -> void:
 		$Entities.add_child(enemy)
 		if arrival_door != null:
 			_finish_arrival.call_deferred(player, arrival_door)
-		elif FreedomLedger.flags.get("loop_wake", false):
+		elif recovering:
+			_finish_checkpoint_respawn.call_deferred(player)
+		elif loop_waking:
 			_finish_loop_wake.call_deferred(player)
+
+func _close_passages_immediately() -> void:
+	for child in room.props.get_children():
+		if child is BaseInteractable:
+			var presentation: Node = child.get_node_or_null("Visual/DoorPresentation")
+			if presentation != null:
+				presentation.set_open_immediate(false)
 
 func _passage_for_entry() -> BaseInteractable:
 	if GameManager.entry not in ["start", "end", "checkpoint"]:
@@ -73,10 +86,16 @@ func _finish_arrival(player: CharacterBody2D, door: BaseInteractable) -> void:
 
 func _finish_loop_wake(player: CharacterBody2D) -> void:
 	FreedomLedger.flags["loop_wake"] = false
-	player.control_enabled = false
-	player.play_animation("death")
-	await get_tree().create_timer(0.75, false).timeout
-	player.play_animation("idle")
-	player.control_enabled = true
+	await player.play_respawn()
 	GameManager.state = GameManager.State.PLAYING
 	GameManager.save_checkpoint(player.global_position)
+
+func _finish_checkpoint_respawn(player: CharacterBody2D) -> void:
+	var hud := $UI
+	hud.fade.color = Color.BLACK
+	var reveal := create_tween()
+	reveal.tween_property(hud.fade, "color:a", 0.0, 0.55)
+	await player.play_respawn()
+	await reveal.finished
+	GameManager.respawn_pending = false
+	GameManager.state = GameManager.State.PLAYING

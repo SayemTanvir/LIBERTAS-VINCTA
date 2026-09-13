@@ -72,14 +72,15 @@ At the Nexus, all three anchors are visible together. Holding E for 20 uninterru
 
 ## Verification
 
-The maintained Godot tests cover layout/art, systems, and the canonical route:
+The maintained Godot tests cover layout/art, systems, the canonical route, and complete alternate-route recovery playthroughs:
 
 ```powershell
 godot --headless --path . tests/verify_estate_assets.tscn
 godot --headless --path . tests/verify_game_systems.tscn
 godot --headless --path . tests/verify_game_route.tscn
+godot --headless --path . tests/verify_full_playthrough.tscn
 ```
 
-Current results: 679 asset/layout checks, 62 systems checks, and 92 route checks, all with zero failures. The route test covers Awakening, Vantree Part I, Part II, the Echo skill gate, Severance, and the false-exit Loop reset.
+Current results: 686 asset/layout checks, 66 systems checks, 96 canonical-route checks, and 147 full-playthrough checks, all with zero failures. Together they cover Awakening, all four Part I outcomes, all three Nexus endings, one-time story triggers, branch mechanics, doorway arrivals, capture, checkpoint restoration, door-free respawn, target-facing puzzle poses, and the false-exit Loop reset.
 
-See [QA](docs/QA.md), [asset credits](ASSET_CREDITS.md), and [AI disclosure](AI_DISCLOSURE.md).
+See the [professional playtest report](docs/PRO_PLAYTEST_REPORT.md), [asset credits](ASSET_CREDITS.md), and [AI disclosure](AI_DISCLOSURE.md).

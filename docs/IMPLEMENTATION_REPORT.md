@@ -1,196 +1,100 @@
-# Implementation report — LIBERTAS VINCTA
+# LIBERTAS VINCTA: Implementation Report
 
-Implemented and validated in **Godot 4.7.2 stable (ed1daf0bf)** for **4's Compliment**. The current brief supersedes the former side-view milestone limit: the active game is now a 2D elevated room-plane greybox with intro, progression, stealth, three endings and replaceable asset hooks.
+Validated with Godot 4.7 stable on 2026-09-13. The current build implements the complete estate and cathedral game described by the rulebook, not the earlier greybox milestone.
 
-## 1. Created files
+## Playable scope
 
-- `AI_DISCLOSURE.md`
-- `ASSET_CREDITS.md`
-- `KNOWN_ISSUES.md`
-- `README.md`
-- `data/estate_layout.json`
-- `default_bus_layout.tres`
-- `docs/ASSET_INTEGRATION.md`
-- `docs/IMPLEMENTATION_REPORT.md`
-- `docs/QA.md`
-- `export_presets.cfg`
-- `scenes/enemy/deprived_one.tscn`
-- `scenes/interactables/base_interactable.tscn`
-- `scenes/interactables/door.tscn`
-- `scenes/interactables/exit_trigger.tscn`
-- `scenes/interactables/flashlight.tscn`
-- `scenes/interactables/hiding_spot.tscn`
-- `scenes/interactables/key_pickup.tscn`
-- `scenes/interactables/letter_pickup.tscn`
-- `scenes/interactables/locked_door.tscn`
-- `scenes/interactables/lockpick_tool.tscn`
-- `scenes/interactables/puzzle_interactable.tscn`
-- `scenes/intro/awakening.tscn`
-- `scenes/levels/basement_floor.tscn`
-- `scenes/levels/ground_floor.tscn`
-- `scenes/levels/intro_floor.tscn`
-- `scenes/levels/upper_floor.tscn`
-- `scenes/systems/audio_director.tscn`
-- `scripts/core/event_bus.gd`
-- `scripts/core/event_bus.gd.uid`
-- `scripts/core/freedom_ledger.gd`
-- `scripts/core/freedom_ledger.gd.uid`
-- `scripts/core/game_manager.gd`
-- `scripts/core/game_manager.gd.uid`
-- `scripts/enemy/deprived_one.gd`
-- `scripts/enemy/deprived_one.gd.uid`
-- `scripts/interactables/base_interactable.gd`
-- `scripts/interactables/base_interactable.gd.uid`
-- `scripts/intro/awakening.gd`
-- `scripts/intro/awakening.gd.uid`
-- `scripts/levels/estate_room.gd`
-- `scripts/levels/estate_room.gd.uid`
-- `scripts/main/main.gd`
-- `scripts/main/main.gd.uid`
-- `scripts/player/room_camera.gd`
-- `scripts/player/room_camera.gd.uid`
-- `scripts/systems/audio_director.gd`
-- `scripts/systems/audio_director.gd.uid`
-- `scripts/systems/noise_model.gd`
-- `scripts/systems/noise_model.gd.uid`
-- `scripts/systems/session_settings.gd`
-- `scripts/systems/session_settings.gd.uid`
-- `scripts/ui/game_hud.gd`
-- `scripts/ui/game_hud.gd.uid`
+- Cold Foyer awakening and door transition
+- Ground Floor, Upper Floor, and Basement across 24 Part I room regions
+- Cathedral Roots, Chamber of Echoes, and Ley-Nexus across 13 Part II room regions
+- Hearing, Sight, Memory, and branch-specific Touch progression
+- Untouched, Vantree, Partial Mercy, and the deliberate three-key Loop
+- Severance, Custodian's Rest, and Vessel at the Nexus
+- Checkpoint saves, Continue, capture recovery, Loop recovery, and New Game reset
+- Imported room dressing, furniture, piano, doors, pickups, and generated cathedral assets
 
-The .gd.uid files are engine-generated stable script metadata, not cache. The pre-existing, untracked `scenes/levels/hearing_test_level.tscn` was inspected and retained unchanged; it is not counted as newly created by this implementation. Temporary test scripts, validation logs, screenshots and the validation-user cache were subsequently removed at the user's request. The results below record checks performed before that cleanup.
+The seven runtime zones contain 37 named room regions. Layout is data-driven through `data/estate_layout.json`; art placement and atlas slices are defined by `data/estate_art.json`.
 
-## 2. Modified files
+## Route contract
 
-- `project.godot`: five autoloads and room-depth input actions; existing Main entry point and Godot 4 configuration retained.
-- `scenes/main/main.tscn`: preserved World, Entities and UI; added scene coordination, audio and Awakening.
-- `scenes/player/player.tscn`: retained CharacterBody2D; replaced gravity-body collider with independent foot collision; added replaceable animated visual, flashlight and bounded camera.
-- `scripts/player/player.gd`: adapted movement to normalized horizontal/depth locomotion; added interactions, hiding, flashlight, noise and animation hooks.
-
-The initial implementation made no commits or pushes. A subsequent user-authorized cleanup removes temporary testing artifacts and publishes the game framework; caches remain excluded.
-
-## 3. Scene hierarchy
-
-```text
-Main (Node2D; Y sorted)
-├── World (Node2D; Y sorted)
-│   └── IntroFloor / GroundFloor / UpperFloor / BasementFloor (runtime instance)
-│       ├── Backdrop (placeholder walls, floor, seams, parallax)
-│       ├── Geometry (StaticBody2D boundaries)
-│       ├── Props (Y-sorted furniture and reusable interactables)
-│       ├── Markers (player, return, enemy and prop locations)
-│       └── EnvironmentArt (optional PackedScene assignment)
-├── Entities (Node2D; Y sorted)
-│   ├── Player (CharacterBody2D)
-│   │   ├── CollisionShape2D (foot footprint)
-│   │   ├── Visual
-│   │   │   ├── Shadow / PlaceholderVisual / AnimatedSprite2D
-│   │   │   └── Flashlight (beam placeholder + PointLight2D)
-│   │   └── Camera2D (independent smoothed room-plane tracking)
-│   └── DeprivedOne (outside intro)
-│       ├── CollisionShape2D
-│       ├── Visual (placeholder + AnimatedSprite2D)
-│       └── DebugState (off by default)
-├── UI (CanvasLayer; HUD/subtitles/letters/pause/settings/endings)
-├── Audio (silent-safe AudioStreamPlayer hooks and tension)
-└── Awakening (intro sequencer)
-```
-
-Room geometry and props are built from the layout JSON at runtime. Inspect them through Godot's Remote scene tree while playing.
-
-## 4. Autoloads
-
-| Autoload | Responsibility |
-| --- | --- |
-| EventBus | Cross-system signals; noise, senses, detection, hiding, interactions, subtitles, audio and endings |
-| FreedomLedger | Canonical keys, derived sense flags/stage, unique letters, persistent flags and eligibility |
-| GameManager | Intro/play/pause/reading/caught/ending states, scene transitions and runtime checkpoints |
-| NoiseModel | Surface multipliers and gameplay footstep events, separate from audible SFX |
-| SessionSettings | Audio bus levels and fullscreen settings for the current session |
-
-## 5. Inputs
-
-`move_left` A/Left; `move_right` D/Right; `move_up` W/Up; `move_down` S/Down; `sprint` Shift; `crouch` Ctrl; `interact` E; `flashlight` F; `pause` Esc.
-
-## 6. Implemented gameplay
-
-Normalized accelerated movement with reduced depth speed; speed exports; sprint/crouch; foot collision; Y sorting; camera limits and cinematic focus; line-of-sight-filtered nearby E interactions; one-shot pickups; flashlight light/signal; footsteps and surface noise; hiding; three puzzle seals; five unique letters; subtitle queue; ledger screen pulse; minimal sense HUD; pausing/reading; volume/fullscreen controls; enemy states; death fade; snapshots and restart; three playable text endings.
-
-BaseInteractable and its scene presets cover Door, LockedDoor, KeyPickup, LetterPickup, FlashlightPickup, LockpickToolPickup, HidingSpot, PuzzleInteractable and ExitTrigger. Runtime behavior is shared rather than duplicated across ten scripts.
-
-## 7. Awakening flow
-
-Black screen → rain/drip/breathing/creak hooks → slow fade → Els lying down → “...Where am I?” → get-up placeholder and agency restored → flashlight with “Mine...” / “How did it get over there?” → tools with “At least I came prepared.” → locked-door reaction → short locksmith beat → door fades open toward a dark corridor → creak and “Hello?” → ground-floor gameplay.
-
-There is no objective popup or theme counter. Every missing audio stream is safe.
-
-## 8–9. Freedom progression and enemy stages
-
-| Stage | New enemy capability | Player consequence |
+| Keys | Exit and gate | Result |
 | --- | --- | --- |
-| Deprived | Dormant, no hearing/sight response | Movement and light are safe |
-| Hearing | WANDER → INVESTIGATE noise → SEARCH | Sprint, glass and water become detectable |
-| Sight | Range/FOV/occlusion detection → CHASE | Exposed/lighted movement and flashlight use carry risk |
-| Memory | Observed hiding history, visible route samples → PREDICT_HUNT | Repeated observed hiding/routes can be rechecked |
+| 0 | Front Door after one test, with zero detections | Untouched |
+| Hearing only | `BS-09`, with at least 4 of 7 Part I letters | Vantree |
+| Hearing and Sight | Flood Tunnel in `BS-04` | Partial Mercy |
+| Hearing, Sight, Memory | Front Door | Loop reset; no Part II seed |
 
-The enemy uses AStarGrid2D with inflated obstacle cells, periodic repathing and a reachable-lane fallback. Physical CharacterBody2D movement still enforces collision. It never teleports through walls. Memory is bounded to three observed hiding spots and four visible route samples; unseen remote hiding is not recorded. Debug radius/state/path/noise drawing defaults off.
+Part II inherits a distinct seed from each successful Part I route:
 
-## 10. Greybox progression
+- Untouched supplies gadgets and leaves the entity's senses dormant.
+- Vantree mutates Touch, unlocks Blood Magic, and limits Els to 80 maximum HP.
+- Partial Mercy preserves Hearing and Sight and unlocks partial sigils.
 
-Cold Foyer (1,800 pixels) → Ground (7,200: Music Room, Dining Hall, Servant's Pantry) → Upper (7,200: Portrait Gallery, Master Bedroom, Nursery/Linen) → Basement (7,200: Flooded Cellar, Wine Cellar, Ritual Chamber).
+Each branch must complete three successful mechanic uses before the Nexus descent opens. All three Nexus anchors require a continuous 20-second interaction; releasing `E`, detection, or damage resets progress.
 
-Stairs connect room groups. Floor depth spans roughly y=354–634. Furniture offers occlusion and alternative walking lanes. Glass/carpet choices follow Hearing; light/shadow choices follow Sight; water, hiding and a ritual-pressure interaction lead into Memory. The basement service return unlocks after Memory.
+## Architecture
 
-These are compact room groups with named areas, not separate full-size rooms for each name. The 8–15 minute target remains subject to measured human playtesting.
+| Module | Responsibility |
+| --- | --- |
+| `scripts/core/freedom_ledger.gd` | Inventory, keys, senses, endings, Part II seed, persistent flags, health, charge, and save data |
+| `scripts/core/game_manager.gd` | Runtime state, transitions, checkpoints, Continue, restart, respawn, and Loop reset |
+| `scripts/levels/estate_room.gd` | Builds rooms, geometry, props, markers, surfaces, and automatic story triggers from JSON |
+| `scripts/interactables/base_interactable.gd` | Doors, puzzles, pickups, exits, hiding, vents, recharge, forge, lore, and Nexus anchors |
+| `scripts/player/player.gd` | Movement, flashlight, gadgets, sigils, stun, interaction, damage, and animation presentation |
+| `scripts/enemy/deprived_one.gd` | Nine-state sensory AI, navigation, chase, Memory prediction, Touch, damage, and stun feedback |
+| `scripts/systems/audio_director.gd` | Ambience, cues, threat layers, and deterministic playback cleanup |
+| `scripts/ui/game_hud.gd` | HUD, subtitles, letters, pause, ending flow, and status feedback |
 
-## 11. Ending conditions
+Cross-system communication uses `EventBus`; player progress uses `FreedomLedger`; transient world construction remains owned by the active room scene.
 
-- **Full Awakening:** exactly three keys; interact with the ground-floor front door.
-- **Partial Mercy:** exactly two keys; interact with the basement maintenance escape.
-- **Vantree:** zero or one key plus at least three letters; interact with the ground-floor custodian seal.
+## Player and presentation
 
-All three execute. The third branch is intentionally a short isolated text ending, not a second campaign.
+Movement is normalized across the elevated room plane and uses a foot collider, Y sorting, camera limits, surface-aware noise, sprint, crouch, and hold-breath states. The flashlight is held at hand scale and casts onto the floor. Puzzle poses are target-specific for the piano, vanity, and ritual seal.
 
-## 12–14. Audio and asset integration
+Door transitions show the opened leaf and dark threshold, move Els through it, load the destination at its paired doorway, and close the arrival door. Capture plays collapse, restores the exact saved state and position, then fades in while the supplied collapse animation reverses into a standing recovery. Enemies and controls stay inactive until recovery completes. The false-exit Loop uses the same prone-to-standing presentation.
 
-Master/Music/Ambience/SFX buses are defined. Rain, drips, house ambience, breathing/creak, three footstep families, key sting, creature sounds, door/lockpick/flashlight/UI and CALM/SEARCHING/CHASE music slots exist. Named players are built from exported AudioStream fields; empty slots remain silent. Music crossfades over 1.2 seconds.
+Interaction facing is derived from the live player-to-target vector. Authored piano, vanity, and ritual offsets retain exact staging while using that target angle. Checkpoint recovery has priority over passage arrival state, initializes every passage directly closed, and cannot replay an arrival or door-closing cue.
 
-Exact asset types, node paths, animation names and integration steps are in [ASSET_INTEGRATION.md](ASSET_INTEGRATION.md). Assign SpriteFrames to character AnimatedSprite2D nodes, Texture2D to prop Sprite2D nodes, PackedScene room art to each floor's environment_art export, AudioStream assets to Audio, and a Theme to Main/UI. Collision and gameplay IDs remain independent.
+## Interaction safeguards
 
-No final art/audio is installed. The team still needs final assets, approved letter/ending text, mix/pacing/balance passes and credits.
+- Completed puzzles remain visible but cannot be solved repeatedly.
+- Sealed or gated objects do not play success-like pickup or unlock animations.
+- The piano and vanity consume one lockpick on their first successful attempt.
+- The cracked ritual seal is a one-step Sight-gated interaction and consumes no lockpick.
+- CR-04 and CE-03 source-defined reveals share persistent one-time flags with nearby lore interactions.
+- CE-01 presents a hint for the active branch only.
+- Stun Rite validates its 192-pixel range before spending health or starting cooldown.
+- An anchor cannot begin while Els is detected and continuously validates live detection while channeling.
 
-## 15. Known limitations / work not verified
+## Enemy progression
 
-See [KNOWN_ISSUES.md](../KNOWN_ISSUES.md). No technical implementation blocker remains for the supplied greybox framework. Human balance/release QA, the requested 8–15 minute duration and actual Windows/Web builds could not be verified as complete. Matching export templates were absent from the standard local directory; none were installed automatically. Presets include the JSON but binaries were not generated.
+| Stage | Capability |
+| --- | --- |
+| Deprived | Dormant navigation pressure; no Hearing or Sight response |
+| Hearing | Investigates surface noise and escalates repeated noise into a hunt |
+| Sight | Uses FOV, range, occlusion, and exposure confirmation; outruns a straight sprint |
+| Memory | Records confirmed routes and used hiding places, predicts exits, and ambushes repeats |
+| Vantree Part II | Touch reads floor transmission and uses the true-form presentation |
 
-Settings/checkpoints are session-only. Navigation geometry is static. Room transitions are immediate. Puzzle interactions are deliberately simple. The old corridor is a retained reference, not the active level. All current letter/ending text beyond supplied dialogue is provisional.
+The enemy uses `AStarGrid2D` around inflated obstacles and still relies on `CharacterBody2D` collision for physical movement. It does not teleport through geometry. Stun uses distinct sway and desaturation because the supplied monster sheet contains no dedicated stagger frames.
 
-## 16–17. Validation and exact testing procedure
+## Assets
 
-Run Main with F5 in Godot 4.7.2. Full step-by-step route and manual release checklist are in [QA.md](QA.md).
+Gameplay and art remain separated: collision, interaction IDs, and route logic do not depend on image filenames. The current asset sweep verifies all 60 catalog textures, object transparency, room coverage, interaction access, and navigation. See `ASSET_CREDITS.md` and `docs/ENVIRONMENT_ASSETS.md` for source and integration details.
 
-Validation performed:
+## Verification
 
-- Godot headless editor import: no parser errors.
-- Framework suite: **54 checks, 0 failures** on the final gameplay scripts.
-- Movement suite: **9 checks, 0 failures**, including actual traversal around all six blockers.
-- Rendered smoke suite: **3 checks, 0 failures** plus native OpenGL captures of both floor styles, pause/settings, letters and an ending.
-- Rendered screenshots were inspected for framing, readability and layout.
-- `git diff --check`: clean.
+| Suite | Result |
+| --- | --- |
+| Estate assets/layout | 686 checks, 0 failures |
+| Systems and AI | 66 checks, 0 failures |
+| Canon Vantree-to-Severance route | 96 checks, 0 failures |
+| Alternate outcomes, recovery, and remaining Nexus endings | 147 checks, 0 failures |
+| Rendered room sweep | 7 zones, 38 viewpoints for 37 room regions |
+| Rendered animation sweep | 9 critical states |
 
-A misplaced Hearing Key was found during visual review, moved out of furniture collision, then verified by the real E-input path and new all-room placement checks.
+The integration routes use actual scenes and interaction nodes. Enemies are frozen only where deterministic path coverage is required; sensing, chase, damage, interruption, and recovery receive separate live-system checks.
 
-Some progression tests freeze the enemy and call interactions directly to isolate state transitions. This is not a claim of an uninterrupted human stealth run. The separate movement suite runs live enemy navigation. The restricted Windows environment reports a certificate-store error unrelated to the offline game. Final validation redirected editor cache/settings to the ignored workspace cache to avoid protected user-profile writes.
+## Remaining release work
 
-## 18. Suggested commit sequence
-
-1. `refactor: adapt player and camera to elevated room-plane movement`
-2. `feat: add freedom ledger events and runtime game lifecycle`
-3. `feat: add awakening reusable interactions and subtitle UI`
-4. `feat: add hearing sight memory and stealth enemy behavior`
-5. `feat: connect estate greybox puzzles letters and ending branches`
-6. `feat: add pause settings and silent-safe audio hooks`
-7. `test: cover progression checkpoints sensing and live navigation`
-8. `docs: document asset integration QA and jam export setup`
-
-These are suggestions for coherent review/staging; the human developer decides when to commit and push.
+No known story-route or runtime blocker remains in the verified build. Public distribution still requires asset-license confirmation, matching Godot 4.7 export templates, exported Windows/Web smoke tests, and normal-speed human balance/accessibility testing. These release items are tracked in `KNOWN_ISSUES.md` and do not change the story.

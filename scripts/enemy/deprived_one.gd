@@ -134,8 +134,7 @@ func _restored(sense: String) -> void:
 		while recent_hides.size() > 5:
 			recent_hides.pop_front()
 		target = room.clamp_point(Vector2(180.0, player.global_position.y))
-		sprite.scale = Vector2.ONE * 0.62
-		sprite.modulate = Color(0.88, 0.76, 0.76)
+		_apply_base_appearance()
 		change_state(State.PREDICT_HUNT)
 	else:
 		change_state(_patrol_state())
@@ -429,9 +428,20 @@ func stun(seconds: float) -> void:
 	velocity = Vector2.ZERO
 
 func _play_visual(animation: String) -> void:
-	var has_art := CharacterAnimation.play(sprite, animation, facing)
+	_apply_base_appearance()
+	sprite.rotation = 0.0
+	var requested := "idle" if animation == "stagger" else animation
+	var has_art := CharacterAnimation.play(sprite, requested, facing)
+	if animation == "stagger":
+		sprite.rotation = sin(float(Time.get_ticks_msec()) * 0.018) * 0.07
+		sprite.modulate = sprite.modulate.lerp(Color(0.55, 0.72, 0.72), 0.45)
 	sprite.visible = has_art
 	$Visual/PlaceholderVisual.visible = not has_art
+
+func _apply_base_appearance() -> void:
+	var true_form: bool = _stage() >= 3 or (FreedomLedger.current_part == 2 and bool(FreedomLedger.part2_seed.get("touch_mutation", false)))
+	sprite.scale = Vector2.ONE * (0.62 if true_form else 0.55)
+	sprite.modulate = Color(0.88, 0.76, 0.76) if true_form else Color.WHITE
 
 func _attack() -> void:
 	velocity = Vector2.ZERO

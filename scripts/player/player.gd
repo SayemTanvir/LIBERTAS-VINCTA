@@ -127,12 +127,13 @@ func _find_interactable() -> void:
 				nearest = distance
 				target_interactable = candidate
 
-func set_flashlight(enabled: bool) -> void:
+func set_flashlight(enabled: bool, present_action: bool = true) -> void:
 	flashlight_enabled = enabled and FreedomLedger.flashlight_seconds > 0.0
 	$FlashlightFloor.visible = flashlight_enabled
 	EventBus.flashlight_changed.emit(flashlight_enabled)
-	EventBus.audio_requested.emit("flashlight")
-	play_action("flashlight")
+	if present_action:
+		EventBus.audio_requested.emit("flashlight")
+		play_action("flashlight")
 
 func use_gadget() -> bool:
 	if FreedomLedger.flashlight_seconds < 50.0 and FreedomLedger.consume_item("battery"):
@@ -180,20 +181,27 @@ func use_sigil() -> bool:
 func use_stun() -> bool:
 	if not FreedomLedger.part2_seed.get("blood_magic", false) or not FreedomLedger.flags.get("part2_ability_unlocked", false) or stun_cooldown > 0.0:
 		return false
+	var targets: Array[Node] = []
+	for enemy in get_tree().get_nodes_in_group("enemy"):
+		if global_position.distance_to(enemy.global_position) <= 192.0 and enemy.has_method("stun"):
+			targets.append(enemy)
+	if targets.is_empty():
+		return false
 	var cost := FreedomLedger.max_hp * 0.20
 	if FreedomLedger.hp <= cost:
 		return false
 	FreedomLedger.damage(cost)
 	stun_cooldown = 60.0
-	for enemy in get_tree().get_nodes_in_group("enemy"):
-		if global_position.distance_to(enemy.global_position) <= 192.0 and enemy.has_method("stun"):
-			enemy.stun(6.0)
+	for enemy in targets:
+		enemy.stun(6.0)
 	_spawn_sigil(192.0, 0.8, Color(0.72, 0.16, 0.18, 0.8))
 	EventBus.ability_used.emit("blood_stun")
 	return true
 
 func _spawn_sigil(radius: float, lifetime: float, color: Color) -> void:
 	var effect := Node2D.new()
+	effect.name = "SigilField"
+	effect.add_to_group("transient_effect")
 	effect.set_script(SigilField)
 	effect.radius = radius
 	effect.lifetime = lifetime
@@ -228,6 +236,32 @@ func _caught() -> void:
 	visual.scale.y = 1.0
 	visual.modulate.a = 1.0
 	play_animation("death")
+
+func play_respawn() -> void:
+	control_enabled = false
+	velocity = Vector2.ZERO
+	visual.scale.y = 1.0
+	visual.modulate.a = 0.0
+	play_animation("death")
+	var reveal: Tween
+	if sprite.visible and sprite.sprite_frames != null:
+		var recovery_animation := sprite.animation
+		var frame_count := sprite.sprite_frames.get_frame_count(recovery_animation)
+		sprite.pause()
+		sprite.set_frame_and_progress(frame_count - 1, 1.0)
+		reveal = create_tween()
+		reveal.tween_property(visual, "modulate:a", 1.0, 0.18)
+		sprite.play(recovery_animation, -1.35, true)
+		var fps := maxf(1.0, sprite.sprite_frames.get_animation_speed(recovery_animation))
+		await get_tree().create_timer(minf(0.9, float(frame_count) / fps / 1.35), false).timeout
+	else:
+		reveal = create_tween()
+		reveal.tween_property(visual, "modulate:a", 1.0, 0.3)
+		await reveal.finished
+	visual.modulate.a = 1.0
+	animation_hold = 0.0
+	play_animation("idle")
+	control_enabled = true
 
 func _update_animation(axis: Vector2, speed: float) -> void:
 	$FlashlightFloor.rotation = facing.angle()

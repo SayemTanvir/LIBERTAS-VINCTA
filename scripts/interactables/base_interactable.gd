@@ -18,6 +18,7 @@ extends Node2D
 @export var ending_type: String = "untouched"
 @export var puzzle_steps: int = 3
 @export var action_seconds: float = 0.9
+@export var consumes_lockpick: bool = true
 @export var action_animation_override: String = ""
 @export var action_position_offset: Vector2 = Vector2.ZERO
 @export var action_facing: Vector2 = Vector2.ZERO
@@ -31,15 +32,29 @@ var interrupt_serial: int = 0
 func _ready() -> void:
 	add_to_group("interactable")
 	$Visual/PlaceholderVisual.visible = $Visual/Sprite2D.texture == null
-	EventBus.player_detected.connect(func(_source): interrupt_serial += 1)
-	EventBus.player_hurt.connect(func(_amount): interrupt_serial += 1)
+	EventBus.player_detected.connect(_interrupt_for_detection)
+	EventBus.player_hurt.connect(_interrupt_for_damage)
 	refresh()
+
+func _interrupt_for_detection(_source: Node) -> void:
+	interrupt_serial += 1
+
+func _interrupt_for_damage(_amount: float) -> void:
+	interrupt_serial += 1
 
 func available() -> bool:
 	if busy:
 		return false
+	if kind == "puzzle":
+		return not FreedomLedger.flags.get(interaction_id, false)
 	if kind in ["forge", "lore"] and not required_flag.is_empty() and not FreedomLedger.has_requirement(required_flag):
 		return false
+	if kind == "lore" and interaction_id == "vantree_altar":
+		return not FreedomLedger.flags.get("story_name_carving", false) and not FreedomLedger.flags.get(interaction_id, false)
+	if kind == "lore" and interaction_id == "mechanic_intro":
+		return not FreedomLedger.flags.get("mechanic_intro_seen", false) and not FreedomLedger.flags.get(interaction_id, false)
+	if kind == "lore" and interaction_id == "first_voice":
+		return not FreedomLedger.flags.get("entity_spoke", false) and not FreedomLedger.flags.get(interaction_id, false)
 	if kind == "key":
 		return sense not in FreedomLedger.keys_collected
 	if kind == "letter":
@@ -51,7 +66,7 @@ func available() -> bool:
 	return true
 
 func refresh() -> void:
-	visible = available() or kind in ["puzzle", "door", "locked_door", "hiding", "exit", "recharge", "vent", "anchor"]
+	visible = available() or kind in ["puzzle", "door", "locked_door", "hiding", "exit", "recharge", "vent", "anchor", "lore"]
 
 func say(line: String, seconds: float = 2.0, speaker: String = "ELS") -> void:
 	EventBus.subtitle_requested.emit(speaker, line, seconds)
@@ -61,8 +76,9 @@ func interact(player: Node2D) -> void:
 		return
 	busy = true
 	EventBus.interaction_started.emit(self)
-	_prepare_action_pose(player)
-	player.play_action(_action_animation(), action_seconds if kind in ["puzzle", "recharge", "anchor"] else 1.0)
+	if _can_play_action():
+		_prepare_action_pose(player)
+		player.play_action(_action_animation(), action_seconds if kind in ["puzzle", "recharge", "anchor"] else 1.0)
 	match kind:
 		"flashlight": _take_flashlight(player)
 		"tool": _take_tools()
@@ -82,6 +98,11 @@ func interact(player: Node2D) -> void:
 	EventBus.interaction_finished.emit(self)
 	refresh()
 
+func _can_play_action() -> bool:
+	if kind in ["key", "puzzle", "door", "vent", "anchor"] and not required_flag.is_empty():
+		return FreedomLedger.has_requirement(required_flag)
+	return true
+
 func _action_animation() -> String:
 	if not action_animation_override.is_empty():
 		return action_animation_override
@@ -96,8 +117,9 @@ func _prepare_action_pose(player: Node2D) -> void:
 		player.global_position = global_position + action_position_offset
 		if player is CharacterBody2D:
 			player.velocity = Vector2.ZERO
-	if action_facing != Vector2.ZERO:
-		player.facing = action_facing.normalized()
+	var target_direction := action_facing if action_facing != Vector2.ZERO else global_position - player.global_position
+	if target_direction.length_squared() > 0.001:
+		player.facing = target_direction.normalized()
 
 func _take_flashlight(player: Node2D) -> void:
 	FreedomLedger.flags[interaction_id] = true
@@ -145,7 +167,7 @@ func _work_puzzle(player: Node2D) -> void:
 	if not FreedomLedger.has_requirement(required_flag):
 		say("Not yet.")
 		return
-	if progress == 0 and not FreedomLedger.consume_item("lockpick"):
+	if progress == 0 and consumes_lockpick and not FreedomLedger.consume_item("lockpick"):
 		say("I need a lockpick.")
 		return
 	player.control_enabled = false
@@ -190,11 +212,22 @@ func _reveal_lore() -> void:
 	FreedomLedger.flags[interaction_id] = true
 	if noise_radius > 0.0:
 		EventBus.noise_created.emit(global_position, noise_radius, "GENERIC")
-	say(text, 4.0, speaker)
+	var line := text
+	if interaction_id == "mechanic_intro":
+		if FreedomLedger.part2_seed.get("full_gadgets", false):
+			line = "Three echoes from glass or clockwork will wake the descent."
+		elif FreedomLedger.part2_seed.get("hybrid_magic", false):
+			line = "A partial sigil can mute the ward Memory left dormant."
+		else:
+			line = "Stay above the broken floor; feel movement through the stone."
+	say(line, 4.0, speaker)
 
 func _channel_anchor(player: Node2D) -> void:
 	if not FreedomLedger.has_requirement(required_flag):
 		say(text if not text.is_empty() else "The anchor refuses the pattern.")
+		return
+	if _player_is_detected():
+		say("The entity's attention breaks the pattern.")
 		return
 	player.control_enabled = false
 	player.velocity = Vector2.ZERO
@@ -202,7 +235,7 @@ func _channel_anchor(player: Node2D) -> void:
 	var elapsed := 0.0
 	while elapsed < channel_seconds:
 		await get_tree().physics_frame
-		if interrupt_serial != started_serial or GameManager.state != GameManager.State.PLAYING:
+		if interrupt_serial != started_serial or _player_is_detected() or GameManager.state != GameManager.State.PLAYING:
 			player.control_enabled = true
 			EventBus.anchor_progress.emit(interaction_id, 0.0, channel_seconds)
 			say("The pattern broke.")
@@ -218,6 +251,12 @@ func _channel_anchor(player: Node2D) -> void:
 	say("Anchor cleansed.")
 	if ending_type in ["severance", "custodian_rest", "vessel"]:
 		EventBus.ending_triggered.emit(ending_type)
+
+func _player_is_detected() -> bool:
+	for enemy in get_tree().get_nodes_in_group("enemy"):
+		if bool(enemy.get("detection_active")):
+			return true
+	return false
 
 func _unlock_intro(player: CharacterBody2D) -> void:
 	if not FreedomLedger.flags.get("intro_door_tried", false):

@@ -8,6 +8,7 @@ func _ready() -> void:
 	get_tree().current_scene = null
 	Engine.time_scale = 12.0
 	AudioServer.set_bus_mute(0, true)
+	GameManager.save_path = "res://build/route_test_save.json"
 	_run.call_deferred()
 
 func _check(value: bool, message: String) -> void:
@@ -116,13 +117,33 @@ func _run() -> void:
 	_check(FreedomLedger.part2_seed.get("blood_magic", false), "Vantree seed missing Blood Magic")
 	_check(FreedomLedger.part2_seed.get("senses", []).is_empty(), "Vantree monster inherited a sealed Part I sense")
 	_check(is_equal_approx(FreedomLedger.max_hp, 80.0), "Vantree HP soft cap missing")
-	await _use("VantreeAltar")
+	var roots_player: CharacterBody2D = main.get_node("Entities/Player")
+	var altar: BaseInteractable = main.room.props.get_node_or_null("VantreeAltar")
+	_check(altar != null, "Missing Vantree altar reveal prop")
+	roots_player.position = Vector2(3550, 500)
+	await get_tree().physics_frame
+	await get_tree().process_frame
+	_check(FreedomLedger.flags.get("story_name_carving", false), "CR-04 did not trigger the one-time name-carving reveal")
 	await _use("Vantree08")
 	await _use("EchoThreshold")
 	if not await _wait_zone("echoes"):
 		return
 	await _use("SigilForge")
 	var player: CharacterBody2D = main.get_node("Entities/Player")
+	var voice_lines: Array[String] = []
+	var voice_listener := func(speaker: String, line: String, _seconds: float):
+		if speaker == "THE DEPRIVED":
+			voice_lines.append(line)
+	EventBus.subtitle_requested.connect(voice_listener)
+	player.position = Vector2(2500, 500)
+	await get_tree().physics_frame
+	player.position = Vector2(3500, 500)
+	await get_tree().physics_frame
+	player.position = Vector2(2500, 500)
+	await get_tree().physics_frame
+	EventBus.subtitle_requested.disconnect(voice_listener)
+	_check(voice_lines == ["Els. You have brought your name home."], "CE-03 first voice was missing, changed, or repeated")
+	_check(not main.room.props.get_node("FirstVoice").available(), "CE-03 first voice can be replayed manually")
 	player.sigil_cooldown = 0.0
 	_check(player.use_sigil(), "First Blood Sigil failed")
 	player.sigil_cooldown = 0.0
@@ -141,7 +162,8 @@ func _run() -> void:
 	FreedomLedger.restore_sense("memory")
 	GameManager.state = GameManager.State.PLAYING
 	GameManager.finish("loop")
-	await get_tree().create_timer(0.5, false).timeout
+	if not await _wait_zone("ground"):
+		return
 	_check(FreedomLedger.current_stage == 0 and FreedomLedger.keys_collected.is_empty(), "Loop did not reset keys and entity")
 	_check(FreedomLedger.loop_counter == 1 and FreedomLedger.part2_seed.is_empty(), "Loop generated an invalid Part II seed")
 	FreedomLedger.reset_for_loop()
@@ -150,6 +172,8 @@ func _run() -> void:
 	var active_scene := get_tree().current_scene
 	if active_scene != null and active_scene != self:
 		active_scene.queue_free()
-	await get_tree().process_frame
-	await get_tree().process_frame
+	for _frame in 8:
+		await get_tree().process_frame
+	if FileAccess.file_exists(GameManager.save_path):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(GameManager.save_path))
 	get_tree().quit(0 if failures.is_empty() else 1)

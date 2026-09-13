@@ -13,10 +13,19 @@ func _ready() -> void:
 	top_level = true
 	position_smoothing_enabled = false
 	player = get_parent()
-	EventBus.player_detected.connect(func(_source): add_trauma(0.55))
-	EventBus.sense_restored.connect(func(_sense): add_trauma(0.8))
-	EventBus.player_hurt.connect(func(_amount): add_trauma(0.7))
+	EventBus.player_detected.connect(_detected_trauma)
+	EventBus.sense_restored.connect(_sense_trauma)
+	EventBus.player_hurt.connect(_hurt_trauma)
 	snap_to_player()
+
+func _detected_trauma(_source: Node) -> void:
+	add_trauma(0.55)
+
+func _sense_trauma(_sense: String) -> void:
+	add_trauma(0.8)
+
+func _hurt_trauma(_amount: float) -> void:
+	add_trauma(0.7)
 
 func snap_to_player() -> void:
 	if player == null:

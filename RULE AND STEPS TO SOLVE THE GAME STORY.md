@@ -60,13 +60,13 @@ A later key can be visible before it is available, but interacting with it early
 
 ### Lockpick rule
 
-The tool pouch in the opening gives 3 lockpicks. A puzzle consumes one lockpick on its first successful attempt, not one per click.
+The tool pouch in the opening gives 3 lockpicks. The piano and vanity each consume one lockpick on their first successful attempt, not one per click. The cracked ritual seal is broken without a lockpick.
 
 | Puzzle | Inputs needed | Lockpicks consumed |
 | --- | --- | --- |
 | Piano seal | Press `E` three times, allowing each action to finish | 1 |
 | Vanity seal | Press `E` three times | 1 |
-| Cracked ritual seal | Press `E` once | 1 |
+| Cracked ritual seal | Press `E` once | 0 |
 
 There is also a spare lockpick in `GF-07`.
 
@@ -169,7 +169,7 @@ CR-01 -> CR-02 -> CR-03 -> CR-04 -> CR-05 -> CR-06
 1. Move through `CR-01`, the threat-free, narration-free entry descent.
 2. In the water of `CR-02`, collect **Vantree Letter VIII** and the battery.
 3. Cross the rubble maze in `CR-03`. Rubble transmits less vibration than bare stone.
-4. In `CR-04`, interact with the **Vantree Altar / Read the Names**.
+4. Enter `CR-04`; the **Vantree Altar** name-carving reveal triggers automatically and only once.
 5. Els finds the names "Custodian," "Jailer," and "Vantree," followed by her own full name carved with a date centuries before her birth.
 6. Continue to `CR-05`. Letters IX, X, and XI are optional here.
 7. Four crypt alcoves provide hiding places. Avoid relying on only one if the monster has Memory on another branch.
@@ -188,14 +188,14 @@ The door to the Nexus opens only after **three successful uses of the current Pa
 
 For the Vantree route, use this exact sequence:
 
-1. Read the Resonance information in `CE-01`.
+1. Enter `CE-01` and read the one-time branch hint. On Vantree it explains that rubble softens Touch and that the forge can buy twelve seconds of silence.
 2. Reach the **Sigil Forge** in `CE-02` and interact once.
 3. The forge unlocks Blood Magic, costs 8% of maximum health, and counts as use 1 of 3.
 4. Press `R` to cast a Blood Sigil. This costs another 8% of maximum health and counts as use 2.
 5. Wait for the 20-second sigil cooldown to end.
 6. Press `R` again. This counts as use 3.
 7. A Blood Sigil suppresses the monster's active senses within a 192-pixel area for 12 seconds.
-8. `T` performs the Stun Rite if the monster is within 192 pixels. It costs 20% of maximum health, stuns for 6 seconds, and has a 60-second cooldown. Stun Rite does not count toward the three-use gate.
+8. `T` performs the Stun Rite only if the monster is within 192 pixels. A successful rite costs 20% of maximum health, stuns for 6 seconds, and has a 60-second cooldown. An out-of-range attempt spends nothing. Stun Rite does not count toward the three-use gate.
 9. In `CE-03`, collect Letters XII and XIII if desired.
 10. The Deprived One speaks for the first time: "Els. You have brought your name home."
 11. In `CE-04`, collect the three clocks if needed.
@@ -503,6 +503,8 @@ Press `E` at a hiding place to enter it and `E` again to leave. The flashlight t
 - The game saves after successful room transitions.
 - A recovered sense creates a checkpoint at the key location.
 - Capture or death restarts from the latest checkpoint and restores the saved ledger state.
+- Capture plays the collapse animation; checkpoint recovery fades in while that animation reverses back to the standing pose. The entity remains inactive until control returns.
+- Checkpoint recovery does not replay the doorway arrival or door-closing animation. The saved door is already closed when Els fades back in.
 - Continue from the main menu loads the saved zone, position, inventory, keys, letters, monster stage, health, and Part II state.
 - Recharge use and ordinary pickups are safest after a recent transition/key checkpoint.
 
@@ -540,7 +542,7 @@ All three Part II endings close with the story's central statement: freedom in H
 - [ ] Return to Ground and enter Basement
 - [ ] Basement: leave Memory sealed, use `BS-09` Ritual Conduit
 - [ ] Choose Descend
-- [ ] Roots: inspect Vantree Altar, reach Echo Threshold
+- [ ] Roots: enter the Vantree Altar room for its automatic reveal, then reach Echo Threshold
 - [ ] Echoes: forge once, cast two Blood Sigils, enter Nexus
 - [ ] Nexus: hold `E` for 20 seconds at `LN-A`
 
@@ -574,6 +576,8 @@ All three Part II endings close with the story's central statement: freedom in H
 ### "The piano/vanity is not opening"
 
 Press `E` for every puzzle step and wait for each action to complete. The piano and vanity each require three completed interactions. Make sure at least one lockpick remains when beginning the puzzle.
+
+The cracked ritual seal in `BS-05` requires Sight and one completed interaction, but it does not consume a lockpick.
 
 ### "The Sight or Memory Key will not collect"
 

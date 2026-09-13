@@ -91,9 +91,15 @@ func _ready() -> void:
 	EventBus.sense_restored.connect(transaction)
 	EventBus.tension_changed.connect(_set_threat_state)
 	EventBus.player_detected.connect(_detection_impact)
-	EventBus.player_caught.connect(func(): create_tween().tween_property(fade, "color:a", 1.0, 1.0))
+	EventBus.player_caught.connect(_caught_fade)
 	EventBus.anchor_progress.connect(_anchor_progress)
-	EventBus.anchor_cleansed.connect(func(_id, _total): anchor_status.text = "")
+	EventBus.anchor_cleansed.connect(_anchor_cleansed)
+
+func _caught_fade() -> void:
+	create_tween().tween_property(fade, "color:a", 1.0, 1.0)
+
+func _anchor_cleansed(_id: String, _total: int) -> void:
+	anchor_status.text = ""
 
 func _build_peripheral() -> void:
 	var specs := [

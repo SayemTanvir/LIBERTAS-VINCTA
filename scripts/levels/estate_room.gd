@@ -322,7 +322,7 @@ func _enter_room(id: String) -> void:
 				FreedomLedger.flags["mechanic_intro_seen"] = true
 				if FreedomLedger.part2_seed.get("hybrid_magic", false):
 					FreedomLedger.flags["part2_ability_unlocked"] = true
-				var line := "Stay above the broken floor; feel movement through the stone." if FreedomLedger.part2_seed.get("touch_mutation", false) else "The forge can turn blood into twelve seconds of silence."
+				var line := _mechanic_intro_line()
 				EventBus.subtitle_requested.emit("ELS", line, 4.0)
 		"CE-03":
 			if FreedomLedger.part2_seed.get("blood_magic", false) and not FreedomLedger.flags.get("entity_spoke", false):
@@ -331,6 +331,13 @@ func _enter_room(id: String) -> void:
 				EventBus.subtitle_requested.emit("THE DEPRIVED", "Els. You have brought your name home.", 4.0)
 		"LN-CENTER":
 			FreedomLedger.flags["finale_started"] = true
+
+func _mechanic_intro_line() -> String:
+	if FreedomLedger.part2_seed.get("full_gadgets", false):
+		return "Three echoes from glass or clockwork will wake the descent."
+	if FreedomLedger.part2_seed.get("hybrid_magic", false):
+		return "A partial sigil can mute the ward Memory left dormant."
+	return "Rubble softens Touch. The forge can buy twelve seconds of silence."
 
 func _story_once(beat: String, speaker: String, line: String, cue: String = "") -> void:
 	var flag := "story_" + beat

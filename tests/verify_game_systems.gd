@@ -31,6 +31,12 @@ func _run() -> void:
 	var player: CharacterBody2D = PLAYER.instantiate()
 	player.position = Vector2(500, 500)
 	add_child(player)
+	var ordinary_interaction: BaseInteractable = room.props.get_node("HearingKey")
+	player.global_position = ordinary_interaction.global_position + Vector2(42, 28)
+	player.facing = Vector2.RIGHT
+	ordinary_interaction._prepare_action_pose(player)
+	_check(player.facing.dot((ordinary_interaction.global_position - player.global_position).normalized()) > 0.999, "An ordinary interaction did not face its target")
+	player.position = Vector2(500, 500)
 	GameManager.zone = "ground"
 	GameManager.state = GameManager.State.PLAYING
 	FreedomLedger.reset()
@@ -94,17 +100,19 @@ func _run() -> void:
 		FreedomLedger.record_hiding_use(hide.interaction_id)
 	_check(enemy._hide_score(hide) == 30, "Repeated hiding priority did not cap at High")
 	await _check_branch_abilities(player, enemy)
-	await _check_anchor_interrupt(player)
+	await _check_anchor_interrupt(player, enemy)
+	for effect in get_tree().get_nodes_in_group("transient_effect"):
+		effect.queue_free()
 	enemy.queue_free()
 	player.queue_free()
 	room.queue_free()
-	if audio.fade_tween != null:
-		audio.fade_tween.kill()
-	for audio_player in audio.players.values():
-		audio_player.stop()
+	audio.shutdown()
+	for _frame in 2:
+		await get_tree().process_frame
 	remove_child(audio)
 	audio.free()
-	await get_tree().process_frame
+	for _frame in 4:
+		await get_tree().process_frame
 	print("SYSTEM CHECK: %s checks, %s failures. Tunables, state machine, resources, abilities, and channel resets verified." % [checks, failures.size()])
 	get_tree().quit(0 if failures.is_empty() else 1)
 
@@ -151,6 +159,10 @@ func _check_branch_abilities(player: CharacterBody2D, enemy: CharacterBody2D) ->
 	_check(is_equal_approx(FreedomLedger.hp, hp_before - FreedomLedger.max_hp * 0.08), "Blood Sigil HP cost is not 8 percent")
 	_check(player.sigil_cooldown == 20.0 and int(FreedomLedger.flags.sigil_until) > Time.get_ticks_msec(), "Blood Sigil timing is incorrect")
 	player.stun_cooldown = 0.0
+	enemy.position = player.position + Vector2(500, 0)
+	hp_before = FreedomLedger.hp
+	_check(not player.use_stun(), "Out-of-range Stun Rite incorrectly activated")
+	_check(is_equal_approx(FreedomLedger.hp, hp_before) and player.stun_cooldown == 0.0, "Failed Stun Rite spent health or cooldown")
 	enemy.position = player.position + Vector2(100, 0)
 	hp_before = FreedomLedger.hp
 	_check(player.use_stun(), "Stun Rite could not cast")
@@ -166,7 +178,7 @@ func _check_branch_abilities(player: CharacterBody2D, enemy: CharacterBody2D) ->
 	_check(player.use_sigil(), "Partial Sigil could not cast")
 	_check(is_equal_approx(FreedomLedger.hp, hp_before - FreedomLedger.max_hp * 0.04), "Partial Sigil HP cost is not 4 percent")
 
-func _check_anchor_interrupt(player: CharacterBody2D) -> void:
+func _check_anchor_interrupt(player: CharacterBody2D, enemy: CharacterBody2D) -> void:
 	FreedomLedger.flags["automation_channel"] = true
 	FreedomLedger.anchors_cleansed.clear()
 	GameManager.state = GameManager.State.PLAYING
@@ -174,6 +186,10 @@ func _check_anchor_interrupt(player: CharacterBody2D) -> void:
 	anchor.interaction_id = "interrupt_test"
 	anchor.channel_seconds = 2.0
 	add_child(anchor)
+	enemy.detection_active = true
+	await anchor.interact(player)
+	_check("interrupt_test" not in FreedomLedger.anchors_cleansed and player.control_enabled, "Anchor started while the player was already detected")
+	enemy.detection_active = false
 	anchor.interact(player)
 	await get_tree().create_timer(0.15, false).timeout
 	EventBus.player_detected.emit(null)

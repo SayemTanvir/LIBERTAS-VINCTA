@@ -8,7 +8,10 @@ BOOT AND SAVE
   seed, inventory, hiding history, detections, flashlight charge, HP, mechanic uses,
   and completed Nexus anchor.
 - Awakening supplies the flashlight and three-lockpick tool pouch before the estate.
-- Room transitions and sense pickups create checkpoints.
+- Room transitions and sense pickups create checkpoints. Capture and manual restart
+  restore that ledger snapshot, then reverse the collapse animation behind a fade
+  before the entity and player controls resume. Respawn takes priority over any
+  passage state, initializes doors closed, and never replays arrival or closing.
 
 PART I ROOM REGIONS
 
@@ -43,7 +46,9 @@ Basement:
   BS-09 Ritual Conduit
 
 Key order is strict: Hearing at the locked GF-03 piano, Sight at the locked UF-02
-vanity, then Memory at the cracked BS-05 ritual seal. GF-10 is gated by Hearing.
+vanity, then Memory at the cracked BS-05 ritual seal. The piano and vanity each
+consume one lockpick; the cracked ritual seal consumes none. Completed puzzles
+remain visible but cannot be worked repeatedly. GF-10 is gated by Hearing.
 The vent graph connects GF-08, UF-04, UF-07, and BS-02.
 
 PART I EXIT RULES
@@ -53,9 +58,10 @@ PART I EXIT RULES
   events.
 - BS-09 produces Vantree with exactly one key and at least four of seven estate letters.
 - BS-04 produces Partial Mercy with exactly two keys.
-- Three keys plus the GF-01 front door produces the Loop. It hard-cuts to GF-01,
-  clears keys, resets the entity to Stage 0, and generates no Part II seed. Loop two
-  unlocks vantree_memory_fragment_A.
+- Three keys plus the GF-01 front door produces the Loop. It returns Els to GF-01,
+  clears keys, resets the entity to Stage 0, and generates no Part II seed. Els wakes
+  from the prone pose before controls resume. Loop two unlocks
+  vantree_memory_fragment_A.
 
 SENSORY AI
 
@@ -98,6 +104,9 @@ PLAYER SYSTEMS
 - Gadgets: batteries add charge; bottles and clocks create remote noise pings.
 - Doors animate open, reveal a black passage, move Els through it, and close behind
   her at the destination. The held flashlight and beam remain at hand/floor scale.
+- Sealed keys and gated puzzles do not play successful pickup/unlock poses.
+- Every interaction faces its actual target. The piano, vanity, and ritual seal also
+  use authored standing offsets so their peak reach frames meet the prop.
 
 PART II SEEDS
 
@@ -131,7 +140,9 @@ Choir lane. Crouching and stillness do not suppress Touch. CR-01 remains threat-
 and the first live Roots encounter begins at CR-03. Blood Sigil blocks senses in a
 three-tile radius for 12 seconds, costs
 eight percent max HP, and has a 20-second cooldown. Stun Rite lasts six seconds, costs
-20 percent, and has a 60-second cooldown. CE-05 opens after three successful branch
+20 percent, and has a 60-second cooldown; an out-of-range attempt spends nothing.
+CE-01 presents a one-time branch-specific mechanic hint. CR-04 and CE-03 story reveals
+also fire exactly once. CE-05 opens after three successful branch
 mechanic uses.
 
 NEXUS AND FINAL ENDINGS
@@ -146,8 +157,9 @@ detection or damage resets progress.
 AUTOMATED STATUS
 
 - Asset/layout: 686 checks, zero failures.
-- Systems: 62 checks, zero failures.
-- Canonical route: 92 checks, zero failures.
+- Systems: 66 checks, zero failures.
+- Canonical route: 96 checks, zero failures.
+- Full alternate playthrough: 147 checks, zero failures.
 
 See tests/verify_estate_assets.tscn, tests/verify_game_systems.tscn, and
-tests/verify_game_route.tscn.
+tests/verify_game_route.tscn, and tests/verify_full_playthrough.tscn.
