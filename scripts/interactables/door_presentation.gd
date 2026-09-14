@@ -48,7 +48,7 @@ func depart(player: CharacterBody2D) -> void:
 	var align := create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	align.tween_property(player, "global_position", staging, 0.22)
 	await align.finished
-	EventBus.audio_requested.emit("door")
+	EventBus.audio_requested.emit("door_open")
 	await animate_open(true)
 	player.animation_hold = 0.0
 	player.play_animation("walk")
@@ -72,7 +72,8 @@ func arrive(player: CharacterBody2D) -> void:
 	emerge.tween_property(player.get_node("Visual"), "modulate:a", 1.0, 0.34)
 	await emerge.finished
 	player.play_animation("idle")
-	EventBus.audio_requested.emit("door")
+	EventBus.audio_requested.emit("door_open")
 	await animate_open(false)
+	EventBus.audio_requested.emit("door_close")
 	player.control_enabled = true
 	arrival_completed = true

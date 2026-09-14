@@ -139,6 +139,7 @@ func _take_item() -> void:
 
 func _read_letter() -> void:
 	if FreedomLedger.collect_letter(interaction_id):
+		EventBus.audio_requested.emit("astonishment")
 		var hud = get_tree().get_first_node_in_group("hud")
 		if hud != null:
 			hud.show_letter(title, text)
@@ -151,6 +152,7 @@ func _take_key(player: Node2D) -> void:
 	if not FreedomLedger.has_requirement(required_flag):
 		say("The seal is still holding.")
 	elif FreedomLedger.restore_sense(sense):
+		EventBus.audio_requested.emit("key_grab")
 		if sense == "hearing":
 			EventBus.audio_requested.emit("monster_screech")
 			EventBus.tension_changed.emit("SEARCHING")
@@ -170,7 +172,7 @@ func _work_puzzle(player: Node2D) -> void:
 		say("I need a lockpick.")
 		return
 	player.control_enabled = false
-	EventBus.audio_requested.emit("lockpick")
+	EventBus.audio_requested.emit("key_unlock")
 	await get_tree().create_timer(action_seconds, false).timeout
 	if GameManager.state != GameManager.State.PLAYING:
 		return
@@ -260,6 +262,7 @@ func _player_is_detected() -> bool:
 func _unlock_intro(player: CharacterBody2D) -> void:
 	if not FreedomLedger.flags.get("intro_door_tried", false):
 		FreedomLedger.flags["intro_door_tried"] = true
+		EventBus.audio_requested.emit("door_knock")
 		say("Locked.", 1.4)
 		say("Of course.", 1.4)
 	elif not FreedomLedger.flags.get("lockpick_tool", false):
@@ -268,9 +271,9 @@ func _unlock_intro(player: CharacterBody2D) -> void:
 		say("I should take my flashlight.")
 	else:
 		player.control_enabled = false
-		EventBus.audio_requested.emit("lockpick")
+		EventBus.audio_requested.emit("key_unlock")
 		await get_tree().create_timer(1.2, false).timeout
-		EventBus.audio_requested.emit("door")
+		EventBus.audio_requested.emit("door_open")
 		EventBus.audio_requested.emit("building_creak")
 		player.get_node("Camera2D").cinematic_focus(global_position + Vector2(200, -70), 2.0)
 		say("Hello?", 1.8)
@@ -291,7 +294,7 @@ func _exit(player: CharacterBody2D) -> void:
 	if ending_type == "front_door":
 		if FreedomLedger.current_stage == 0 and not FreedomLedger.flags.get("door_tested", false):
 			FreedomLedger.flags["door_tested"] = true
-			EventBus.audio_requested.emit("door")
+			EventBus.audio_requested.emit("door_knock")
 			return
 		candidate = "untouched" if FreedomLedger.current_stage == 0 else ("loop" if FreedomLedger.current_stage == 3 else "")
 	if not candidate.is_empty() and FreedomLedger.eligible(candidate):
@@ -305,4 +308,6 @@ func _depart(player: CharacterBody2D) -> void:
 	if presentation != null and presentation.has_method("depart"):
 		await presentation.depart(player)
 	else:
-		EventBus.audio_requested.emit("door")
+		EventBus.audio_requested.emit("door_open")
+		await get_tree().create_timer(0.45, false).timeout
+		EventBus.audio_requested.emit("door_close")

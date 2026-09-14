@@ -29,6 +29,7 @@ var animation_hold: float = 0.0
 var sigil_cooldown: float = 0.0
 var stun_cooldown: float = 0.0
 var touch_evasion_cooldown: float = 0.0
+var was_sprinting: bool = false
 
 @onready var visual: Node2D = $Visual
 @onready var sprite: AnimatedSprite2D = $Visual/AnimatedSprite2D
@@ -73,6 +74,13 @@ func _physics_process(delta: float) -> void:
 	is_crouching = Input.is_action_pressed("crouch")
 	is_sprinting = Input.is_action_pressed("sprint") and not is_crouching
 	var axis := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+	var currently_sprinting = is_sprinting and axis.length_squared() > 0.01 and not holding_breath
+	if currently_sprinting != was_sprinting:
+		if currently_sprinting:
+			EventBus.audio_requested.emit("start_running_breathing")
+		else:
+			EventBus.audio_requested.emit("stop_running_breathing")
+		was_sprinting = currently_sprinting
 	var speed := crouch_speed if is_crouching else (sprint_speed if is_sprinting else walk_speed)
 	var desired := Vector2(axis.x, axis.y * depth_ratio) * speed
 	velocity = velocity.move_toward(desired, acceleration * delta)
@@ -145,6 +153,8 @@ func use_gadget() -> bool:
 		return false
 	var point := global_position + facing * (260.0 if gadget == "bottle" else 180.0)
 	EventBus.noise_created.emit(point, 576.0 if gadget == "bottle" else 384.0, "GLASS" if gadget == "bottle" else "GENERIC")
+	if gadget == "bottle":
+		EventBus.audio_requested.emit("glass_break")
 	if GameManager.zone == "echoes" and FreedomLedger.current_part == 2 and FreedomLedger.part2_seed.get("full_gadgets", false):
 		FreedomLedger.mechanic_uses += 1
 	EventBus.ability_used.emit(gadget)
@@ -228,6 +238,7 @@ func take_hit(amount: float = 25.0) -> void:
 	if FreedomLedger.damage(amount):
 		EventBus.player_caught.emit()
 	else:
+		EventBus.audio_requested.emit("player_scream")
 		play_action("damage", 0.55)
 
 func _caught() -> void:

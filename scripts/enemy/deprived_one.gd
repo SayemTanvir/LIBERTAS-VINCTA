@@ -58,6 +58,7 @@ var ambush_clock: float = 0.0
 var hit_cooldown: float = 0.0
 var stun_seconds: float = 0.0
 var detection_active: bool = false
+var _footstep_clock: float = 0.0
 
 @onready var sprite: AnimatedSprite2D = $Visual/AnimatedSprite2D
 
@@ -98,7 +99,9 @@ func change_state(next: State) -> void:
 			state_limit = ambush_seconds
 	var searching := state in [State.INVESTIGATE, State.HUNT_AUDIO, State.INVESTIGATE_LAST_SEEN, State.PREDICT_HUNT, State.AMBUSH]
 	EventBus.tension_changed.emit("CHASE" if state == State.CHASE else ("SEARCHING" if searching else "CALM"))
-	if searching:
+	if state in [State.HUNT_AUDIO, State.CHASE]:
+		EventBus.audio_requested.emit("monster_growl")
+	elif searching:
 		EventBus.audio_requested.emit("monster_search")
 
 func _patrol_state() -> State:
@@ -282,6 +285,12 @@ func _move(delta: float) -> void:
 		path_clock = 0.0
 		stalled_time = 0.0
 		change_state(State.INVESTIGATE)
+	# Monster footstep audio ticks
+	_footstep_clock -= delta
+	if _footstep_clock <= 0.0 and global_position.distance_to(before) > 0.5:
+		var interval := 0.35 if state == State.CHASE else 0.55
+		_footstep_clock = interval
+		EventBus.audio_requested.emit("monster_footstep")
 	var animation := "idle"
 	if global_position.distance_to(before) > 0.01:
 		animation = "run" if state == State.CHASE else "walk"
