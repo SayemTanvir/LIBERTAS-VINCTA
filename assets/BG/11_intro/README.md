@@ -1,5 +1,25 @@
 # Hollowmere cinematic source sheets
 
+## HD background upgrade (2026-09-15)
+
+The runtime now uses `05_house_hd.png`, a complete **1254 x 1254 RGB** image
+generated with OpenAI's built-in image generation using `01_house_animation.png`
+as reference. It replaces the tiny house crops described below. The original
+four sheets remain unchanged; bats, lightning and weather remain animated.
+The new image is imported losslessly, without resizing, and sampled as a whole
+with square proportions during the slow camera approach. It is a detailed
+reconstruction of the Gothic house rather than a pixel-identical enlargement.
+
+Prompt summary: Reconstruct one high-resolution view of the supplied Gothic
+mansion, preserving its asymmetrical stone architecture, pointed right tower,
+amber windows, upper-right full moon, trees, mist and rain-wet approach. Resolve
+masonry, slate, window mullions and reflections in cinematic painted realism.
+Retain the midnight teal palette. Single square scene, opaque sky, no labels,
+text, bats, lightning or rain streaks (these are animated separately).
+The prompt requested ideally 2048 x 2048; delivered native resolution is 1254 x 1254.
+
+## Original sheet integration (superseded for the house)
+
 All four PNGs were supplied by the project owner. Their original pixels are unchanged.
 
 | Sheet | Runtime use |
