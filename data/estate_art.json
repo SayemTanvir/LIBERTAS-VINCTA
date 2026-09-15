@@ -42,7 +42,6 @@
     "high_chair": {"file": "RestaurantFixtures/fooddrink_restaurant_fixtures_high_chair_child_01.png"},
     "lectern": {"file": "RestaurantFixtures/fooddrink_restaurant_fixtures_host_stand_podium_01.png"},
     "family_table": {"file": "RestaurantFixtures/fooddrink_restaurant_fixtures_table_family_long_01.png"},
-    "dining_table": {"file": "RestaurantFixtures/fooddrink_restaurant_fixtures_table_dining_square_four_01.png"},
     "side_table": {"file": "CafeFixtures/fooddrink_cafe_fixtures_table_cafe_small_round_01.png"},
     "wood_chair": {"file": "CafeFixtures/fooddrink_cafe_fixtures_chair_wood_cafe_01.png"},
     "settee": {"file": "CafeFixtures/fooddrink_cafe_fixtures_booth_sofa_double_01.png"},
@@ -58,11 +57,11 @@
     "creamer": {"file": "CafeProps/fooddrink_cafe_props_sugar_creamer_pair_01.png"},
     "water_set": {"file": "CafeProps/fooddrink_cafe_props_water_bottle_glasses_set_01.png"},
     "string_lights": {"file": "CafeProps/fooddrink_cafe_props_string_lights_warm_segment_01.png"},
+    "string_light_bulb": {"file": "CafeProps/fooddrink_cafe_props_string_lights_warm_segment_01.png", "region": [163, 120, 35, 39]},
     "book": {"file": "RestaurantProps/fooddrink_restaurant_props_menu_book_blank_01.png"},
     "mirror_frame": {"file": "RestaurantProps/fooddrink_restaurant_props_qr_stand_blank_frame_01.png"},
     "serving_cart": {"file": "RestaurantProps/fooddrink_restaurant_props_drink_cart_wheeled_01.png"},
     "plates": {"file": "RestaurantProps/fooddrink_restaurant_props_plates_tower_01.png"},
-    "place_setting": {"file": "RestaurantProps/fooddrink_restaurant_props_place_setting_complete_01.png"},
     "stock_pot": {"file": "RestaurantProps/fooddrink_restaurant_props_stock_pot_large_01.png"},
     "pans": {"file": "RestaurantProps/fooddrink_restaurant_props_pans_commercial_pair_01.png"},
     "dish_tub": {"file": "RestaurantProps/fooddrink_restaurant_props_bus_tub_dishes_01.png"},
@@ -88,6 +87,7 @@
     },
     "ground": {
       "wall_tint": "#697d77", "floor_tint": "#647770", "prop_tint": "#b3b3a8",
+      "ceiling_lights": [{"room": "GF-02", "height": 128, "sag": 72, "bulbs": 11}],
       "passage_labels": {"front_door": "Front Door", "upper_stairs": "Upper Floor", "basement_stairs": "Cellar"},
       "surfaces": [[0, 2400, "panel_wall", "wood_floor"], [2400, 4800, "panel_wall", "wood_floor"], [4800, 7200, "kitchen_wall", "tile_floor"]],
       "furniture": {
@@ -107,7 +107,7 @@
         "coat_rack_hide": {"asset": "coat_stand", "width": 72, "scale": 0.78}
       },
       "decorations": [
-        ["string_lights", 1100, 278, 190], ["pans", 2460, 305, 62], ["stock_pot", 2590, 305, 48],
+        ["pans", 2460, 305, 62], ["stock_pot", 2590, 305, 48],
         ["coat_stand", 350, 392, 43], ["bookshelf", 780, 392, 91],
         ["side_table", 1190, 392, 68, [["book", 0, -43, 29]]],
         ["dining_chair", 1420, 392, 50], ["side_table", 1640, 392, 54, [["candle", 0, -39, 22]]],

@@ -17,6 +17,15 @@ func begin(player: Node2D, hud: CanvasLayer) -> void:
 	var normal_shadow := shadow.scale
 	camera.zoom = normal_zoom * intimate_zoom
 	hud.fade.color = Color.BLACK
+	if GameManager.entry == "start" and not FreedomLedger.flags.get("estate_prologue_seen", false):
+		presentation = &"INTRO_CINEMATIC"
+		var cinematic := preload("res://scripts/intro/estate_cinematic.gd").new()
+		hud.root.add_child(cinematic)
+		# Keep the existing pause menu above the prologue, including its settings pages.
+		hud.root.move_child(cinematic, hud.reader.get_index())
+		await cinematic.finished
+		FreedomLedger.flags["estate_prologue_seen"] = true
+		cinematic.queue_free()
 	presentation = &"INTRO_PRONE"
 	# death_w row 2, column 11: face toward floor, arms folded underneath.
 	# No death signal/state/audio and no transform changes to body or collision.

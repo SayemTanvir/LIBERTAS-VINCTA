@@ -67,6 +67,7 @@ func _write_contact_sheet() -> void:
 
 func _pose(prop_name: String) -> BaseInteractable:
 	var prop: BaseInteractable = room.props.get_node(prop_name)
+	player.global_position = prop.global_position + prop.action_position_offset
 	prop._prepare_action_pose(player)
 	player.play_action(prop._action_animation(), prop.action_seconds)
 	return prop

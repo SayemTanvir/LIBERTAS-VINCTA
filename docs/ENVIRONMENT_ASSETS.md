@@ -21,7 +21,7 @@ inspect them while playing.
 | Chamber of Echoes | Forge, broken choir floor, clocks, letter props and the sealed Nexus descent |
 | Ley-Nexus | Cathedral shell, center seal, closed return threshold and three simultaneously visible anchors |
 
-The asset catalog exposes 60 verified textures, including generated atlases for keys,
+The asset catalog exposes 58 verified textures, including generated atlases for keys,
 letters, flashlight, tool pouch, doors, stairs and cathedral props. Modern cafe equipment, neon signs, takeaway packaging,
 fresh desserts and unrelated bar equipment remain unused. Existing character,
 footstep and ambience integrations are preserved. The warm piano music is not
@@ -62,11 +62,12 @@ the foyer's formerly blank corridor. Exit approaches remain unobstructed. Doors
 foreshorten around their left edge to expose a framed dark opening. Els walks
 through it, emerges from the matching open doorway, then closes it from y=418.
 
-Loose pickups use contrasting backing markers with normal floor draw order. The
-Hearing Key is at (1960, 525), in the open space beside the piano, with a pulsing
-gold marker. Interaction prompts identify nearby pickups and passage destinations.
-Puzzle steps, noise intensity, progression IDs and key requirements are unchanged.
-The floor flashlight is 32 pixels wide. Once collected, a 14-pixel copy remains
+Loose pickups use small contact ellipses and glints below the character layer. The
+22-pixel Hearing Key is at (1960, 478), in the open space beside the piano.
+Prompts identify nearby pickups, passage destinations, and completed puzzle steps.
+Puzzle interactions face their targets without moving Els; authored action offsets
+provide additional reachable selection points. Noise and key requirements are unchanged.
+The floor flashlight is 26 pixels wide. Once collected, a 14-pixel copy remains
 in Els's hand and its 130-pixel light pool stays behind her sprite on the floor.
 The tool pouch uses `interact`, rather than the key-specific `pickup` action.
 

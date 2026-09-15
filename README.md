@@ -42,6 +42,8 @@ See [Rules and Steps to Solve the Game Story](<RULE AND STEPS TO SOLVE THE GAME 
 
 The flashlight has 90 seconds of charge and drains three times faster while sprinting. Recharge stations take 12 stationary seconds. Breath can be held for 6 seconds and has a 15-second cooldown. Batteries, bottles, clocks, and lockpicks are persistent checkpoint inventory.
 
+Character dialogue follows its speaker; narration uses a separate cinematic strip. Puzzles keep Els at her approach point, show step progress beside the E prompt, and remember partial progress when revisiting a room. See the [gameplay polish report](docs/GAMEPLAY_POLISH_REPORT.md) for pickup, animation, and verification details.
+
 ## Part I
 
 The room graph uses the literal IDs `GF-01` through `GF-10`, `UF-01` through `UF-07`, and `BS-01` through `BS-09`. Hearing, Sight, and Memory activate successively stronger enemy behavior.
@@ -79,12 +81,13 @@ The maintained Godot tests cover layout/art, systems, the canonical route, and c
 
 ```powershell
 godot --headless --path . tests/verify_image_ui.tscn
+godot --headless --path . tests/verify_gameplay_polish.tscn
 godot --headless --path . tests/verify_estate_assets.tscn
 godot --headless --path . tests/verify_game_systems.tscn
 godot --headless --path . tests/verify_game_route.tscn
 godot --headless --path . tests/verify_full_playthrough.tscn
 ```
 
-Current results: 592 UI checks, 686 asset/layout checks, 66 systems checks, 96 canonical-route checks, and 150 full-playthrough checks, all with zero failures. Together they cover Awakening, all four Part I outcomes, all three Nexus endings, one-time story triggers, branch mechanics, doorway arrivals, capture, checkpoint restoration, door-free respawn, restored movement control, target-facing puzzle poses, and the false-exit Loop reset.
+Current results: 592 UI checks, 123 gameplay-polish checks, 680 asset/layout checks, 66 systems checks, 96 canonical-route checks, and 150 full-playthrough checks, all with zero failures. Together they cover Awakening, all four Part I outcomes, all three Nexus endings, one-time story triggers, branch mechanics, doorway arrivals, capture, checkpoint restoration, door-free respawn, restored movement control, target-facing puzzle poses, and the false-exit Loop reset.
 
 See the [professional playtest report](docs/PRO_PLAYTEST_REPORT.md), [asset credits](ASSET_CREDITS.md), and [AI disclosure](AI_DISCLOSURE.md).

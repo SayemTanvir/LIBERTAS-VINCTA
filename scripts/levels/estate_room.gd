@@ -1,6 +1,7 @@
 extends Node2D
 ## Layout data supplies replaceable props; collision/navigation are independent of art.
 const EstateArt := preload("res://scripts/levels/estate_art.gd")
+const EstateAtmosphere := preload("res://scripts/levels/estate_atmosphere.gd")
 @export_enum("intro", "ground", "upper", "basement", "roots", "echoes", "nexus") var zone_id: String = "ground"
 @export var debug_noise: bool = false
 @export var environment_art: PackedScene
@@ -63,6 +64,9 @@ func _ready() -> void:
 	_marker("EnemySpawn", Vector2(float(layout.enemy), 560))
 	if estate_art != null:
 		estate_art.dress(self)
+		var atmosphere := EstateAtmosphere.new()
+		add_child(atmosphere)
+		atmosphere.configure(self)
 	_build_grid()
 	$Backdrop.visible = show_placeholder_environment or _uses_imported_art()
 	if environment_art != null:
@@ -141,8 +145,8 @@ func _build_surface_markings() -> void:
 	elif zone_id == "nexus":
 		_polygon($Backdrop, "NexusRing", Rect2(260, 365, 1280, 250), Color(0.12, 0.24, 0.25, 0.32))
 	elif zone_id == "intro":
-		_polygon($Backdrop, "Moonlight", Rect2(180, 355, 390, 190), Color(0.5, 0.58, 0.68, 0.22))
 		if not _uses_imported_art():
+			_polygon($Backdrop, "Moonlight", Rect2(180, 355, 390, 190), Color(0.5, 0.58, 0.68, 0.22))
 			_polygon($Backdrop, "DarkCorridorBeyondDoor", Rect2(1600, 355, 200, 279), Color("#161b22"))
 
 func _wall(label: String, rect: Rect2) -> void:

@@ -13,6 +13,7 @@ anchor_bottom = 1.0
 color = Color(0.015, 0.018, 0.024, 1)
 mouse_filter = 2
 [node name="MessageBubble" parent="." instance=ExtResource("2")]
+narration = true
 [node name="Ambience" type="AudioStreamPlayer" parent="."]
 bus = &"Ambience"
 volume_db = -16.0

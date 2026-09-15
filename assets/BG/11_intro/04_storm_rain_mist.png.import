@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://sbbgb6ugag1o"
-path="res://.godot/imported/fooddrink_restaurant_fixtures_table_dining_square_four_01.png-696448c8737a61d257e86201473bb8a8.ctex"
+uid="uid://djtd8boafgmq6"
+path="res://.godot/imported/04_storm_rain_mist.png-08587242e570c28dc62cb2b5658ecde0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/environment/props/food_drink_2d_mega_props/Tiles/RestaurantFixtures/fooddrink_restaurant_fixtures_table_dining_square_four_01.png"
-dest_files=["res://.godot/imported/fooddrink_restaurant_fixtures_table_dining_square_four_01.png-696448c8737a61d257e86201473bb8a8.ctex"]
+source_file="res://assets/BG/11_intro/04_storm_rain_mist.png"
+dest_files=["res://.godot/imported/04_storm_rain_mist.png-08587242e570c28dc62cb2b5658ecde0.ctex"]
 
 [params]
 

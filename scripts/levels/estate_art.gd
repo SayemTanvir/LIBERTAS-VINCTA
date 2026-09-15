@@ -53,17 +53,6 @@ func build_backdrop(room: Node2D) -> void:
 	_rect(art, Rect2(0, 634, room.room_width, 16), Color("#252c28"))
 	_rect(art, Rect2(0, 110, 12, 540), Color("#343c37"))
 	_rect(art, Rect2(room.room_width - 12, 110, 12, 540), Color("#343c37"))
-	for i in room.layout.rooms.size():
-		var room_spec: Dictionary = room.layout.rooms[i]
-		var label := Label.new()
-		label.text = str(room_spec.id) + "  " + str(room_spec.name)
-		label.position = Vector2(float(room_spec.start) + 48, 128)
-		label.add_theme_font_size_override("font_size", 16)
-		label.add_theme_color_override("font_shadow_color", Color("#171d19"))
-		label.add_theme_constant_override("shadow_offset_y", 1)
-		label.modulate = Color("#a6aaa0")
-		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		art.add_child(label)
 	if room.zone_id in ["intro", "ground", "upper"]:
 		for x in range(500, int(room.room_width), 960):
 			var clear_of_passages := true
@@ -92,6 +81,9 @@ func dress(room: Node2D) -> void:
 	for id in zone.get("interactables", {}):
 		var prop: Node2D = room.props.get_node_or_null(NodePath(str(id).to_pascal_case()))
 		if prop == null:
+			continue
+		if prop.kind in ["key", "letter", "flashlight", "tool", "item"]:
+			# Pickup dressing owns the entire visual; do not leave old furniture shadows/details.
 			continue
 		var spec: Dictionary = zone.interactables[id]
 		var visual: Node2D = prop.get_node("Visual")
@@ -136,14 +128,58 @@ func dress(room: Node2D) -> void:
 			var footprint := Vector2(dimensions[0], dimensions[1])
 			room._wall("WallFurniture" + str(decoration_index), Rect2(prop.position - Vector2(footprint.x * 0.5, footprint.y), footprint))
 		decoration_index += 1
+	for light_spec in zone.get("ceiling_lights", []):
+		for room_spec in room.layout.rooms:
+			if str(room_spec.id) == str(light_spec.room):
+				_ceiling_string_lights(room, room_spec, light_spec, tint)
+
+func _ceiling_string_lights(room: Node2D, bounds: Dictionary, spec: Dictionary, tint: Color) -> void:
+	var strand := Node2D.new()
+	strand.name = "CeilingStringLights"
+	strand.position = Vector2(float(bounds.start), float(spec.height))
+	room.props.add_child(strand)
+	var width := float(bounds.end) - float(bounds.start)
+	var sag := float(spec.sag)
+	var cable := Line2D.new()
+	cable.name = "Cable"
+	cable.width = 3.0
+	cable.default_color = Color("252c2d")
+	cable.antialiased = true
+	# Both ends attach at ceiling height, with a smooth bend at the midpoint.
+	for index in 65:
+		var t := float(index) / 64.0
+		cable.add_point(Vector2(width * t, 4.0 * sag * t * (1.0 - t)))
+	strand.add_child(cable)
+	var bulb_count := int(spec.bulbs)
+	for index in bulb_count:
+		var t := float(index + 1) / float(bulb_count + 1)
+		var anchor := Vector2(width * t, 4.0 * sag * t * (1.0 - t))
+		var socket := Line2D.new()
+		socket.width = 6.0
+		socket.default_color = cable.default_color
+		socket.add_point(anchor)
+		socket.add_point(anchor + Vector2(0, 6))
+		strand.add_child(socket)
+		var bulb := Sprite2D.new()
+		bulb.name = "Bulb" + str(index + 1)
+		strand.add_child(bulb)
+		_set_sprite(bulb, "string_light_bulb", 18.0, anchor + Vector2(0, 24), tint)
+		# Keep the existing warm glow and individual flicker on each bulb.
+		bulb.set_meta("estate_asset", "string_lights")
 
 func _dress_pickup(prop: BaseInteractable) -> void:
 	var visual: Node2D = prop.get_node("Visual")
 	var sprite: Sprite2D = visual.get_node("Sprite2D")
 	var item_assets := {"battery": "battery_pickup", "bottle": "bottle_pickup", "clock": "clock_pickup", "lockpick": "lockpick_pickup"}
 	var asset: String = item_assets.get(prop.item_id, "tool_pouch") if prop.kind == "item" else {"key": "key", "letter": "letter", "flashlight": "flashlight_pickup", "tool": "tool_pouch"}[prop.kind]
-	var width: float = 30.0 if prop.kind == "item" else (32.0 if prop.kind == "flashlight" else (42.0 if prop.kind in ["key", "tool"] else 34.0))
+	var width: float = {"key": 22.0, "letter": 25.0, "flashlight": 26.0, "tool": 29.0}.get(prop.kind, 23.0)
+	if prop.kind == "item":
+		width = {"battery": 16.0, "bottle": 17.0, "clock": 23.0, "lockpick": 24.0}.get(prop.item_id, 23.0)
 	_set_sprite(sprite, asset, width, Vector2.ZERO, Color.WHITE)
+	# Loose objects belong to the floor plane, below every character and piece of furniture.
+	prop.z_index = -1
+	visual.scale = Vector2.ONE
+	visual.position = Vector2.ZERO
 	visual.get_node("PlaceholderVisual").hide()
 	visual.z_index = 0
 	if prop.display_name.is_empty():
@@ -152,6 +188,7 @@ func _dress_pickup(prop: BaseInteractable) -> void:
 	marker.name = "PickupMarker"
 	marker.set_script(PickupMarker)
 	marker.is_key = prop.kind == "key"
+	marker.radius = width * 0.6
 	visual.add_child(marker)
 	visual.move_child(marker, 0)
 
@@ -206,7 +243,19 @@ func _dress_passage(prop: BaseInteractable, caption: String) -> void:
 	presentation.configure(sprite, plaque)
 
 func _furnish(parent: Node2D, spec: Dictionary, tint: Color, sprite: Sprite2D = null) -> void:
-	_shadow(parent, float(spec.width))
+	if str(spec.asset) == "settee":
+		# Follow the booth's solid plinth instead of a detached oval floor shadow.
+		var shadow := Polygon2D.new()
+		shadow.name = "ContactShadow"
+		shadow.color = Color(0.025, 0.03, 0.025, 0.42)
+		var width := float(spec.width)
+		shadow.polygon = PackedVector2Array([
+			Vector2(-0.47, -0.20) * width, Vector2(0.0, -0.015) * width,
+			Vector2(0.47, -0.18) * width, Vector2(0.47, -0.15) * width,
+			Vector2(0.0, 0.015) * width, Vector2(-0.47, -0.17) * width])
+		parent.add_child(shadow)
+	else:
+		_shadow(parent, float(spec.width))
 	if sprite == null:
 		sprite = Sprite2D.new()
 		sprite.name = "Sprite2D"
@@ -221,7 +270,7 @@ func _furnish(parent: Node2D, spec: Dictionary, tint: Color, sprite: Sprite2D = 
 
 func _set_sprite(sprite: Sprite2D, key: String, width: float, foot: Vector2, tint: Color) -> void:
 	sprite.texture = texture_for(key)
-	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	sprite.scale = Vector2.ONE * width / sprite.texture.get_width()
 	sprite.position = foot
 	sprite.offset = Vector2(0, -sprite.texture.get_height() * 0.5)

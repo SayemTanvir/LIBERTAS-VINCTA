@@ -10,6 +10,8 @@ var room_name: Label
 var prompt: Label
 var subtitle: RichTextLabel
 var bubble: Control
+var narration: Control
+var active_message: Control
 var reader: Control
 var game_over: Control
 var chapter_complete: Control
@@ -18,7 +20,7 @@ var acknowledged_message: bool = false
 var anchor_status: Label
 var fade: ColorRect
 var pulse: ColorRect
-var peripheral: Array[ColorRect] = []
+var atmosphere_overlay: ColorRect
 
 var subtitle_queue: Array[Dictionary] = []
 var subtitle_time: float = 0.0
@@ -26,6 +28,8 @@ var modal_mode: String = ""
 var ending_shown: bool = false
 var threat_state: String = "CALM"
 var threat_clock: float = 0.0
+var displayed_room_id: String = ""
+var room_reveal: Tween
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -35,6 +39,7 @@ func _ready() -> void:
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.theme = ui_theme
 	add_child(root)
+	_build_peripheral()
 	senses = make_label("", 16)
 	senses.position = Vector2(28, 22)
 	root.add_child(senses)
@@ -48,11 +53,17 @@ func _ready() -> void:
 	room_name.offset_top = 22
 	room_name.offset_bottom = 46
 	room_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	room_name.add_theme_color_override("font_color", Color("c5b58f"))
 	root.add_child(room_name)
 	prompt = make_label("[E]", 19)
 	root.add_child(prompt)
 	bubble = preload("res://scenes/ui/message_bubble.tscn").instantiate()
 	root.add_child(bubble)
+	narration = preload("res://scenes/ui/message_bubble.tscn").instantiate()
+	narration.narration = true
+	narration.name = "Narration"
+	root.add_child(narration)
+	active_message = bubble
 	subtitle = bubble.text_label
 	anchor_status = make_label("", 17)
 	anchor_status.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
@@ -62,7 +73,6 @@ func _ready() -> void:
 	anchor_status.offset_bottom = 100
 	anchor_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	root.add_child(anchor_status)
-	_build_peripheral()
 	pulse = ColorRect.new()
 	pulse.color = Color(0.45, 0.52, 0.56, 0.0)
 	pulse.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -103,21 +113,14 @@ func _anchor_cleansed(_id: String, _total: int) -> void:
 	anchor_status.text = ""
 
 func _build_peripheral() -> void:
-	var specs := [
-		[0.0, 0.0, 1.0, 0.12], [0.0, 0.88, 1.0, 1.0],
-		[0.0, 0.12, 0.08, 0.88], [0.92, 0.12, 1.0, 0.88]
-	]
-	for spec in specs:
-		var edge := ColorRect.new()
-		edge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		edge.anchor_left = spec[0]
-		edge.anchor_top = spec[1]
-		edge.anchor_right = spec[2]
-		edge.anchor_bottom = spec[3]
-		edge.color = Color(0.16, 0.018, 0.025, 0.0)
-		edge.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		root.add_child(edge)
-		peripheral.append(edge)
+	atmosphere_overlay = ColorRect.new()
+	atmosphere_overlay.name = "HorrorVignette"
+	atmosphere_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	atmosphere_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var effect := ShaderMaterial.new()
+	effect.shader = preload("res://shaders/horror_vignette.gdshader")
+	atmosphere_overlay.material = effect
+	root.add_child(atmosphere_overlay)
 
 func make_label(text: String, size: int = 18) -> Label:
 	var label := Label.new()
@@ -128,19 +131,32 @@ func make_label(text: String, size: int = 18) -> Label:
 	return label
 
 func _process(delta: float) -> void:
-	threat_clock += delta
+	if not get_tree().paused:
+		threat_clock += delta
 	_layout_for_viewport()
-	bubble.visible = not subtitle.text.is_empty() and (SessionSettings.subtitles_enabled or acknowledged_message) and not reader.visible and not pause_menu.visible and not game_over.visible and not chapter_complete.visible
+	var message_visible := not subtitle.text.is_empty() and (SessionSettings.subtitles_enabled or acknowledged_message) and not reader.visible and not pause_menu.visible and not game_over.visible and not chapter_complete.visible
+	bubble.visible = active_message == bubble and message_visible
+	narration.visible = active_message == narration and message_visible
 	var playing_hud := GameManager.zone != "intro" and GameManager.state != GameManager.State.ENDING
 	senses.visible = playing_hud
 	vitals.visible = playing_hud
 	room_name.visible = playing_hud
-	senses.text = "  /  ".join(["Hearing " + status("hearing"), "Sight " + status("sight"), "Memory " + status("memory")])
-	vitals.text = "Charge %02d  |  HP %03d  |  B %d  G %d  C %d" % [
+	senses.text = FreedomLedger.freedom_summary()
+	vitals.text = "Charge %02d  |  HP %03d  |  Batteries %d  ·  Bottles %d  ·  Clocks %d" % [
 		ceili(FreedomLedger.flashlight_seconds), ceili(FreedomLedger.hp),
 		int(FreedomLedger.inventory.get("battery", 0)), int(FreedomLedger.inventory.get("bottle", 0)), int(FreedomLedger.inventory.get("clock", 0))]
 	var room = get_tree().get_first_node_in_group("room")
-	room_name.text = room.current_room_id if room != null else ""
+	if room != null and room.current_room_id != displayed_room_id:
+		displayed_room_id = room.current_room_id
+		for section in room.layout.rooms:
+			if section.id == displayed_room_id:
+				room_name.text = str(section.name).to_upper()
+				if room_reveal != null and room_reveal.is_valid():
+					room_reveal.kill()
+				room_name.modulate.a = 0.0
+				room_reveal = create_tween()
+				room_reveal.tween_property(room_name, "modulate:a", 1.0, 0.5)
+				break
 	var player = get_tree().get_first_node_in_group("player")
 	prompt.visible = false
 	var strain := 0.0
@@ -151,28 +167,34 @@ func _process(delta: float) -> void:
 		threat_edge = 0.045 + (sin(threat_clock * 3.2) + 1.0) * 0.018
 	elif threat_state == "CHASE":
 		threat_edge = 0.12 + (sin(threat_clock * 7.0) + 1.0) * 0.055
-	for edge in peripheral:
-		edge.color.a = maxf(strain * 0.62, threat_edge)
+	atmosphere_overlay.material.set_shader_parameter("danger", maxf(strain * 0.62, threat_edge * 3.0))
+	atmosphere_overlay.material.set_shader_parameter("elapsed", threat_clock)
 	if player != null and GameManager.state == GameManager.State.PLAYING:
 		prompt.visible = is_instance_valid(player.target_interactable) or player.hidden_spot != null
 		var target: Node2D = player.hidden_spot if player.hidden_spot != null else player.target_interactable
 		prompt.text = "[E]"
-		if is_instance_valid(target) and not target.display_name.is_empty():
+		if player.hidden_spot != null:
+			prompt.text = "[E] Leave hiding"
+		elif is_instance_valid(target) and not target.display_name.is_empty():
 			prompt.text += " " + target.display_name
+			if target.kind == "puzzle":
+				prompt.text += "  ·  %d/%d" % [target.progress, target.puzzle_steps]
 		prompt.size = prompt.get_minimum_size()
 		var point: Vector2 = player.get_global_transform_with_canvas().origin
-		prompt.position = Vector2(clampf(point.x - prompt.size.x * 0.5, 12, root.size.x - prompt.size.x - 12), point.y - 98)
+		prompt.position = Vector2(clampf(point.x - prompt.size.x * 0.5, 12, root.size.x - prompt.size.x - 12), clampf(point.y + 12, 96, root.size.y - prompt.size.y - 12))
 	if not get_tree().paused:
 		subtitle_time -= delta
 		if subtitle_time <= 0.0:
-			if bubble.visible and bubble.advance_page():
-				subtitle_time = 4.0
+			if not subtitle.text.is_empty() and active_message.advance_page():
+				subtitle_time = _reading_seconds()
 			elif not subtitle_queue.is_empty():
 				var item: Dictionary = subtitle_queue.pop_front()
-				bubble.show_text(item.speaker, item.text)
-				subtitle_time = item.duration
+				_present_message(item.speaker, item.text)
+				subtitle_time = maxf(item.duration, _reading_seconds())
 			else:
-				subtitle.text = ""
+				active_message.dismiss()
+		elif subtitle_time < 0.2 and active_message.page_index + 1 >= active_message.pages.size() and subtitle_queue.is_empty():
+			active_message.fade_out(subtitle_time)
 	if GameManager.state == GameManager.State.ENDING and not ending_shown:
 		ending_shown = true
 		show_ending()
@@ -187,6 +209,20 @@ func status(sense: String) -> String:
 
 func enqueue_subtitle(speaker: String, text: String, duration: float) -> void:
 	subtitle_queue.append({"speaker": speaker, "text": text, "duration": duration})
+
+func _present_message(speaker: String, text: String) -> void:
+	bubble.dismiss()
+	narration.dismiss()
+	var is_narrator := speaker.strip_edges().to_upper() in ["", "NARRATOR", "STORYTELLER", "STORY TELLER"]
+	active_message = narration if is_narrator else bubble
+	if not is_narrator:
+		var group := "enemy" if speaker == "THE DEPRIVED" else "player"
+		bubble.follow_target = get_tree().get_first_node_in_group(group)
+	active_message.show_text("" if is_narrator else speaker, text)
+	subtitle = active_message.text_label
+
+func _reading_seconds() -> float:
+	return clampf(float(subtitle.text.length()) / 22.0, 1.5, 8.0)
 
 func transaction(_sense: String) -> void:
 	pulse.color = Color(0.38, 0.07, 0.08, 0.16)
@@ -223,15 +259,24 @@ func _input(event: InputEvent) -> void:
 			GameManager.pause_game()
 			show_pause()
 		get_viewport().set_input_as_handled()
-	elif bubble.visible and (event.is_action_pressed("interact") or event.is_action_pressed("ui_accept")):
+	elif active_message.visible and (event.is_action_pressed("interact") or event.is_action_pressed("ui_accept")):
+		# Ambient comments must not eat the next lockpick/pickup/hiding press.
+		if not acknowledged_message and event.is_action_pressed("interact") and GameManager.state == GameManager.State.PLAYING:
+			var player = get_tree().get_first_node_in_group("player")
+			if player != null:
+				player._find_interactable()
+				if is_instance_valid(player.target_interactable) or player.hidden_spot != null:
+					return
 		get_viewport().set_input_as_handled()
 		GameManager.block_ui_input()
-		if not bubble.advance_page():
+		if not active_message.advance_page():
 			if acknowledged_message:
 				close_message()
 			else:
-				subtitle.text = ""
+				active_message.dismiss()
 				subtitle_time = 0.0
+		else:
+			subtitle_time = _reading_seconds()
 
 func show_pause() -> void:
 	pause_menu.open()
@@ -244,11 +289,12 @@ func show_letter(title: String, text: String) -> void:
 func show_message(speaker: String, text: String) -> void:
 	GameManager.read_letter()
 	acknowledged_message = true
-	bubble.show_text(speaker, text)
+	_present_message(speaker, text)
 
 func close_message() -> void:
 	acknowledged_message = false
-	subtitle.text = ""
+	active_message.dismiss()
+	subtitle_time = 0.0
 	GameManager.block_ui_input()
 	GameManager.resume()
 

@@ -121,6 +121,13 @@ func damage(amount: float) -> bool:
 	EventBus.player_hurt.emit(amount)
 	return hp <= 0.0
 
+func freedom_summary() -> String:
+	if current_part == 1:
+		var awareness := "blind" if keys_collected.is_empty() else ", ".join(keys_collected)
+		return "Degrees of freedom: %d / 3 bonds released  |  Hound: %s" % [entity_stage, awareness]
+	var choice := "gadgets" if part2_seed.get("full_gadgets", false) else ("partial sigil" if part2_seed.get("hybrid_magic", false) else "blood magic")
+	return "Your freedom: " + choice + "  |  Anchors freed: " + str(anchors_cleansed.size())
+
 func eligible(candidate: String) -> bool:
 	match candidate:
 		"untouched": return current_part == 1 and entity_stage == 0 and detections == 0

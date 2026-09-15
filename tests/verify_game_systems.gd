@@ -196,4 +196,5 @@ func _check_anchor_interrupt(player: CharacterBody2D, enemy: CharacterBody2D) ->
 	await get_tree().create_timer(0.15, false).timeout
 	_check("interrupt_test" not in FreedomLedger.anchors_cleansed, "Detection did not reset anchor channel")
 	_check(not anchor.busy and player.control_enabled, "Interrupted anchor did not return control")
+	_check(player.animation_hold <= 0.0, "Interrupted anchor left movement blocked by its animation")
 	anchor.queue_free()

@@ -1,6 +1,6 @@
 extends CharacterBody2D
 
-const CharacterAnimation := preload("res://scripts/player/character_animation.gd")
+const HOUND_CLIPS := preload("res://assets/sprites/blood_hound/clips.json")
 
 enum State {
 	WANDER_BLIND,
@@ -58,7 +58,8 @@ var ambush_clock: float = 0.0
 var hit_cooldown: float = 0.0
 var stun_seconds: float = 0.0
 var detection_active: bool = false
-var _footstep_clock: float = 0.0
+var _attack_seconds: float = 0.0
+var _visual_speed: float = 0.0
 
 @onready var sprite: AnimatedSprite2D = $Visual/AnimatedSprite2D
 
@@ -74,6 +75,8 @@ func _ready() -> void:
 	EventBus.sense_restored.connect(_restored)
 	EventBus.player_caught.connect(_attack)
 	ambush_clock = ambush_interval
+	sprite.frame_changed.connect(_on_visual_frame_changed)
+	sprite.animation_changed.connect(_sync_frame_mask)
 	_play_visual("idle")
 	change_state(_patrol_state())
 	_observe_debug()
@@ -136,9 +139,8 @@ func _restored(sense: String) -> void:
 				recent_hides.append(str(id))
 		while recent_hides.size() > 5:
 			recent_hides.pop_front()
-		target = room.clamp_point(Vector2(180.0, player.global_position.y))
 		_apply_base_appearance()
-		change_state(State.PREDICT_HUNT)
+		_predict()
 	else:
 		change_state(_patrol_state())
 
@@ -159,13 +161,17 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector2.ZERO
 		_play_visual("stagger")
 		return
+	if _attack_seconds > 0.0:
+		_attack_seconds = maxf(0.0, _attack_seconds - delta)
+		velocity = Vector2.ZERO
+		return
 	state_clock += delta
 	route_clock -= delta
 	ambush_clock -= delta
 	_update_vision(delta)
 	_detect_touch()
 	_update_state(delta)
-	if GameManager.state != GameManager.State.PLAYING:
+	if GameManager.state != GameManager.State.PLAYING or _attack_seconds > 0.0:
 		return
 	_move(delta)
 	_resolve_contact()
@@ -262,7 +268,7 @@ func _choose_patrol_target() -> void:
 func _move(delta: float) -> void:
 	path_clock -= delta
 	if path_clock <= 0.0:
-		path_clock = path_refresh_seconds
+		path_clock = minf(path_refresh_seconds, 0.12) if state in [State.CHASE, State.HUNT_AUDIO, State.PREDICT_HUNT] else path_refresh_seconds
 		path = room.find_path(global_position, target)
 	while not path.is_empty() and global_position.distance_to(path[0]) < 14.0:
 		path.remove_at(0)
@@ -285,15 +291,10 @@ func _move(delta: float) -> void:
 		path_clock = 0.0
 		stalled_time = 0.0
 		change_state(State.INVESTIGATE)
-	# Monster footstep audio ticks
-	_footstep_clock -= delta
-	if _footstep_clock <= 0.0 and global_position.distance_to(before) > 0.5:
-		var interval := 0.35 if state == State.CHASE else 0.55
-		_footstep_clock = interval
-		EventBus.audio_requested.emit("monster_footstep")
 	var animation := "idle"
+	_visual_speed = global_position.distance_to(before) / maxf(delta, 0.001)
 	if global_position.distance_to(before) > 0.01:
-		animation = "run" if state == State.CHASE else "walk"
+		animation = "run" if state == State.CHASE or speed >= audio_hunt_speed else "walk"
 	_play_visual(animation)
 
 func _move_speed() -> float:
@@ -324,6 +325,7 @@ func _resolve_contact() -> void:
 		return
 	if FreedomLedger.current_part == 2:
 		hit_cooldown = 1.1
+		_attack()
 		player.take_hit(contact_damage)
 	else:
 		EventBus.player_caught.emit()
@@ -338,6 +340,9 @@ func _hear(point: Vector2, intensity: float, surface: String) -> void:
 	noise_pings = noise_pings.filter(func(stamp: int): return now - stamp <= 6000)
 	noise_pings.append(now)
 	target = point
+	path_clock = 0.0
+	if global_position.distance_squared_to(point) > 1.0:
+		facing = global_position.direction_to(point)
 	if state == State.HUNT_AUDIO:
 		state_clock = 0.0
 		return
@@ -363,6 +368,8 @@ func can_see_player() -> bool:
 		return false
 	var offset: Vector2 = player.global_position - global_position
 	var reach := vision_range if room.is_exposed(player.global_position) else shadow_vision_range
+	if player.is_crouching and not player.flashlight_enabled:
+		reach *= 0.72
 	if player.flashlight_enabled:
 		reach *= flashlight_range_multiplier
 	if offset.length() > reach:
@@ -428,34 +435,58 @@ func _predict_exit() -> bool:
 func _check_remembered_hide() -> void:
 	if player.hidden_spot != null and global_position.distance_to(player.hidden_spot.global_position) < 45.0 and clear_sight(player.hidden_spot.global_position):
 		if FreedomLedger.current_part == 2:
+			_attack()
 			player.take_hit(remembered_hide_damage)
 		else:
 			EventBus.player_caught.emit()
 
 func stun(seconds: float) -> void:
 	stun_seconds = maxf(stun_seconds, seconds)
+	_attack_seconds = 0.0
 	velocity = Vector2.ZERO
+	_play_visual("stagger")
 
 func _play_visual(animation: String) -> void:
 	_apply_base_appearance()
 	sprite.rotation = 0.0
-	var requested := "idle" if animation == "stagger" else animation
-	var has_art := CharacterAnimation.play(sprite, requested, facing)
-	if animation == "stagger":
-		sprite.rotation = sin(float(Time.get_ticks_msec()) * 0.018) * 0.07
-		sprite.modulate = sprite.modulate.lerp(Color(0.55, 0.72, 0.72), 0.45)
+	# Supplied art is a side profile. Keep the last horizontal facing on vertical travel.
+	if absf(facing.x) > 0.12:
+		sprite.flip_h = facing.x < 0.0
+	var requested := "sniff" if animation == "idle" and state in [State.INVESTIGATE, State.INVESTIGATE_LAST_SEEN, State.AMBUSH] else animation
+	var has_art := sprite.sprite_frames.has_animation(requested)
+	if has_art:
+		if sprite.animation != requested:
+			sprite.play(requested)
+		sprite.speed_scale = clampf(_visual_speed / (sight_chase_speed if requested == "run" else patrol_speed), 0.4, 1.6) if requested in ["walk", "run"] else 1.0
+		_sync_frame_mask()
 	sprite.visible = has_art
 	$Visual/PlaceholderVisual.visible = not has_art
 
+func _sync_frame_mask() -> void:
+	var ids: Array = HOUND_CLIPS.data.get(str(sprite.animation), [])
+	if not ids.is_empty():
+		(sprite.material as ShaderMaterial).set_shader_parameter("clip_id", float(ids[mini(sprite.frame, ids.size() - 1)]))
+
+func _on_visual_frame_changed() -> void:
+	_sync_frame_mask()
+	# Paw contacts drive sound, so faster playback and turns stay in step.
+	if sprite.animation in [&"walk", &"run"] and sprite.frame in [0, 4] and _visual_speed > 1.0 and GameManager.state == GameManager.State.PLAYING:
+		EventBus.audio_requested.emit("monster_footstep")
+
 func _apply_base_appearance() -> void:
 	var true_form: bool = _stage() >= 3 or (FreedomLedger.current_part == 2 and bool(FreedomLedger.part2_seed.get("touch_mutation", false)))
-	sprite.scale = Vector2.ONE * (0.62 if true_form else 0.55)
+	sprite.scale = Vector2.ONE * (0.79 if true_form else 0.70)
+	$Visual/Shadow.scale = Vector2.ONE * (1.13 if true_form else 1.0)
 	sprite.modulate = Color(0.88, 0.76, 0.76) if true_form else Color.WHITE
 
 func _attack() -> void:
 	velocity = Vector2.ZERO
 	if is_instance_valid(player):
 		facing = global_position.direction_to(player.global_position)
+	if _attack_seconds <= 0.0:
+		sprite.play("attack")
+		sprite.set_frame_and_progress(0, 0.0)
+	_attack_seconds = float(sprite.sprite_frames.get_frame_count("attack")) / sprite.sprite_frames.get_animation_speed("attack")
 	_play_visual("attack")
 
 func _observe_debug() -> void:

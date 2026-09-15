@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://buihywwurf1v4"
-path="res://.godot/imported/fooddrink_restaurant_props_place_setting_complete_01.png-277441f2e4db358720951c6390cc1f5a.ctex"
+uid="uid://dxoisyptometh"
+path="res://.godot/imported/02_bat_flight.png-4fdc9da5c3e02c5e6fe265825dd44313.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/environment/props/food_drink_2d_mega_props/Tiles/RestaurantProps/fooddrink_restaurant_props_place_setting_complete_01.png"
-dest_files=["res://.godot/imported/fooddrink_restaurant_props_place_setting_complete_01.png-277441f2e4db358720951c6390cc1f5a.ctex"]
+source_file="res://assets/BG/11_intro/02_bat_flight.png"
+dest_files=["res://.godot/imported/02_bat_flight.png-4fdc9da5c3e02c5e6fe265825dd44313.ctex"]
 
 [params]
 

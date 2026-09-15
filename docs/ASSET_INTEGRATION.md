@@ -5,37 +5,50 @@ Collision, interactions and sensing never infer dimensions or behavior from text
 ## Characters
 
 The playable Els uses `scenes/player/female_frames.tres`, built from the ten sheets in
-`ifat/female`. The existing Deprived One enemy uses `scenes/enemy/zombie_frames.tres`,
-built from the supplied zombie Idle, Walk, Run and Attack1 sheets. Main spawns that
-enemy on the ground, upper and basement floors; it remains dormant until Hearing.
+`ifat/female`. The Deprived One now uses `scenes/enemy/blood_hound_frames.tres`,
+built from the supplied `assets/BG/02_Enemy/blood_hound_horror_monster_animation_sprite_sheet.png`.
+The shared enemy scene replaces the zombie throughout the existing spawn flow.
 
 Both scenes assign SpriteFrames directly, so their art is also visible in the editor.
-Animation names use `<action>_<direction>` with s, sw, w, nw, n, ne, e and se suffixes.
-`character_animation.gd` maps facing to those directions and preserves gait frames
-when turning. Female sheets use direction rows; zombie sheets use separate angle
-files (0 south, 090 east) with frames read left to right, then top to bottom.
+Player animation names use `<action>_<direction>` with s, sw, w, nw, n, ne, e and se suffixes.
+`character_animation.gd` maps player facing to those directions. The Blood Hound sheet
+contains side profiles only: horizontal movement mirrors the sprite, vertical movement
+retains its last horizontal facing, and turns preserve the current gait frame.
 
-Player movement selects idle/walk/run. Crouching slows walk playback and compresses
-the existing Visual node because no crouch sheet was supplied. Interactions select
-interact, pickup, unlock or flashlight; caught plays death and holds its final frame.
-Damage and stagger clips are available for future hooks; this game currently uses
-instant capture rather than health or combat. Zombie animation selects idle when
-stationary, walk while investigating/patrolling, run while chasing, and attack on capture.
+Player movement selects idle/walk/run or the new crouch_idle/crouch_walk poses.
+Hiding moves the fully opaque crouched character into the shelter, and leaving returns
+her to her approach position with collisions restored. The body is never squashed to crouch.
+Key pickup, ordinary collection, lock work, door opening, piano work, reading, recharge
+and channeling have separately selected clips. Caught plays death and holds its final frame.
+The Blood Hound has 40 frames across idle, walk, sniff, run, attack and stagger clips.
+Stationary searches use sniff, patrols use walk, and fast hunts/chases use run.
+Playback follows actual movement speed; paw-contact frames trigger footstep audio.
+Capture and Part II contact damage trigger a one-shot attack with a brief movement hold;
+stun interrupts it with the supplied stagger poses. Damage values and sensing rules remain unchanged.
 
-Both sprites retain fixed 256-pixel cells and a (128, 224) foot anchor, using offset
-(0, -96) on centered sprites. Player scale is 0.4; zombie scale is 0.55. Collision
-remains an independent 24 by 14 foot footprint. No per-frame cropping is performed.
-Awakening retains its existing rotation tween and control lock.
+Blood Hound atlas margins align irregular source regions to a 360 by 224 canvas with
+an authored (180, 204) ground anchor, using offset (0, -92) and scale 0.70 (0.79 in true form).
+The independent 24 by 14 collision footprint stays at the ground origin. A vector mask
+isolates each silhouette where neighboring source poses overlap rectangular crop bounds.
+The source PNG is unchanged; each enemy has its own mask material synchronized on frame changes.
+Awakening keeps its existing collapsed pose, reverse recovery and control lock.
 
 Rebuild the checked-in resources after replacing sheets:
 
 ```powershell
 python scripts/tools/build_character_frames.py
+python scripts/tools/build_blood_hound_frames.py
 ```
 
-Godot imports PNGs automatically; Python is only needed to rebuild resources.
-After pickup, a small flashlight prop is attached to Els's hand. Its compact
-trapezoid light pool renders behind her on the floor; the old radial light is disabled.
+The Blood Hound builder requires Pillow and writes atlas resources, clip IDs and SVG
+mask geometry. Godot imports these assets automatically; Python is only needed to rebuild them.
+Run `tests/verify_enemy_presentation.tscn` for frame/mask, facing, state and floor checks;
+a rendered run also saves all 40 poses and the corrected room views under `build/`.
+After pickup, the supplied directional flashlight holding pose supplies the upper body,
+while the existing walk/run animation supplies the legs. Switching the light changes
+the held pose and beam immediately; it never runs the sheet's turning sequence and
+there is no separate hand-mounted flashlight sprite. Crouching and actions use their
+own complete poses. The existing shadow-casting floor light follows the facing direction.
 
 ## Environment
 
@@ -72,7 +85,7 @@ Els emerges to y=418 before the destination door closes and control returns.
 
 Reusable presets are under `scenes/interactables/`. Assign Texture2D assets at `Visual/Sprite2D.texture`, then align position and scale. The placeholder hides automatically when a texture is supplied. Keep root script, Visual and child names intact.
 
-Use distinct sprites for doors, keys, letters, flashlight, lockpick kit, hiding spots and puzzle seals. Text is replaceable in the layout JSON. IDs must remain unique; progression saves those IDs. Key and letter collection does not depend on visual size. The tool pouch uses the generic reach animation because `pickup` is specifically authored around a brass key.
+Use distinct sprites for doors, keys, letters, flashlight, lockpick kit, hiding spots and puzzle seals. Text is replaceable in the layout JSON. IDs must remain unique; progression saves those IDs. Key and letter collection does not depend on visual size. The tool pouch and ordinary items use the crouching `collect` clip; `pickup` is reserved for the brass key. Collected pickups hide their entire child presentation on collection and reload.
 
 ## Audio
 
@@ -92,13 +105,24 @@ Master, Music, Ambience and SFX buses are defined in `default_bus_layout.tres`. 
 
 ## UI and story
 
+Fresh Start now plays the 22.4-second Hollowmere exterior prologue before Awakening.
+All four supplied `assets/BG/11_intro/` sheets are composed by
+`scripts/intro/estate_cinematic.gd` and `shaders/intro_estate.gdshader`:
+house approach/dissolves, eight-pose bat flight, lightning and moving rain/mist.
+Sheet labels are cropped out; the house's low-alpha artifacts and weather tile seams
+are masked at runtime. Wind, two delayed thunder cues and a title sting use the
+existing audio buses. Enter/Space or the Skip button fades into Awakening; Escape
+pauses the visual timeline and local audio. The composition fits the viewport while
+preserving its aspect ratio. Continue/checkpoint entry bypasses the exterior.
+See `assets/BG/11_intro/README.md` for source frame limitations and mapping.
+
 Assign a Theme resource to `Main/UI.ui_theme`. The UI provides readable default controls without external fonts. Replace sense text with icons only while retaining ledger-driven state. Subtitle queue accepts optional speaker, line and duration; current gameplay uses timed advancement. Letters pause danger and close with E/Esc. No final letter pages are claimed.
 
 Edit Awakening timing/lines in `scripts/intro/awakening.gd` and pickup/door lines in BaseInteractable. Letter slots and provisional text are in the JSON. Ending titles/text are isolated in `GameHUD.show_ending()`. The supplied brief's Els lines are already wired.
 
 ## Integration checklist
 
-1. Verify the integrated female and zombie animations in all eight directions.
+1. Verify the player's eight directions and the Blood Hound's mirrored movement, attack and stun clips.
 2. Assign room-art scenes; hide only environment placeholders.
 3. Align props to their existing foot markers and assign textures.
 4. Assign audio streams and check loops, mix and subtitle timing.

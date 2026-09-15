@@ -26,9 +26,10 @@ static func play(sprite: AnimatedSprite2D, action: String, facing: Vector2) -> b
 		return true
 	# Preserve gait phase when turning, but start new actions at frame zero.
 	var same_action := String(sprite.animation).get_slice("_", 0) == String(next).get_slice("_", 0)
+	var same_gait := String(sprite.animation).get_slice("_", 0) in ["walk", "run"] and String(next).get_slice("_", 0) in ["walk", "run"]
 	var frame := sprite.frame
 	var progress := sprite.frame_progress
 	sprite.play(next)
-	if same_action:
+	if same_action or same_gait:
 		sprite.set_frame_and_progress(mini(frame, sprite.sprite_frames.get_frame_count(next) - 1), progress)
 	return true

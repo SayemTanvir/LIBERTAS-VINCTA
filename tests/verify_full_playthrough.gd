@@ -68,7 +68,7 @@ func _start_campaign() -> bool:
 	if not await _wait_zone("intro"):
 		return false
 	var tool: BaseInteractable = main.room.props.get_node("LockpickTool")
-	_check(tool._action_animation() == "interact", "Tool pouch uses the key-pickup animation")
+	_check(tool._action_animation() == "collect", "Tool pouch must use the ordinary-item collection clip")
 	await _use("IntroExit")
 	await _use("Flashlight")
 	await _use("LockpickTool")
@@ -137,7 +137,8 @@ func _run_partial_mercy() -> bool:
 		return false
 	await _solve("VanitySeal")
 	var player: CharacterBody2D = main.get_node("Entities/Player")
-	_check(_faces_target(player, main.room.props.get_node("VanitySeal")) and player.global_position.distance_to(Vector2(1664, 448)) < 1.0, "Vanity animation pose or angle is misaligned")
+	var vanity: BaseInteractable = main.room.props.get_node("VanitySeal")
+	_check(_faces_target(player, vanity) and player.global_position.distance_to(vanity.global_position + Vector2(0, 30)) < 1.0, "Vanity must face its target without moving Els from her approach")
 	await _use("SightKey")
 	await _use("UpperStairs")
 	if not await _wait_zone("ground"):
