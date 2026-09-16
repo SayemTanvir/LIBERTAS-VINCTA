@@ -1,0 +1,12 @@
+# Hollowmere status-panel art
+
+`hollowmere_metal_plate.png` is the final reference-inspired, text-free backing generated with the built-in imagegen tool. The initial checkerboard-background draft was replaced by an opaque dark-stone version. Game labels, item icons, bars, numbers, and feedback are native live UI in `scripts/ui/survival_panel.gd`, not baked into this image.
+
+## Initial generation prompt
+
+Use case: precise-object-edit. Asset type: real-time horror game HUD backing texture. Edit the provided screenshot reference into a blank reusable HUD plate, preserving its exact worn brass and blackened iron materials, uneven torn metal outline, bolts, scratches, patina, sparse dark blood stains, and restrained cobwebs. Wide horizontal aspect about 2.87:1, front-facing orthographic. Remove ALL letters, numbers, words, keyboard shortcut text, health and flashlight bars and their grooves, all four item icons and circular item sockets, and the horizontal divider: replace their areas with continuous softly worn brass/iron plate texture. Also remove the small raised shortcut plaque so the top-right area is plain metal. The game will draw ALL live UI on top, so leave the central 84% of the width and 76% of the height evenly lit, moderately light aged brass, low contrast, free of strong cracks/stains so dark engraved text stays readable. Concentrate deepest darkness and visual detail at the perimeter. Keep the characteristic missing upper-center metal edge and asymmetrical ragged bottom edge from the reference. Isolate the plate with its bolts and tiny edge cobwebs on a genuinely transparent background; no wall, no bones, no surrounding rectangle. Fill canvas almost edge-to-edge with at most 2% padding. No text, no icons, no bars, no blank circles, no watermark. Output a high-resolution PNG game asset.
+
+## Final background correction prompt
+
+Edit only the checkerboard outside the metal plate in this image. Replace every checkerboard square with very dark charcoal, moss-darkened stone and subtle cobwebs matching the original horror HUD screenshot style. Preserve the metal plate, bolts, scratches, colors, blood stains and interior blank layout exactly. Keep it front-facing, same wide aspect ratio. This version should be fully opaque, no transparency and absolutely no checkerboard anywhere. Use dark stone close to #101614 at the perimeter, with a soft vignette to near-black at the rectangular image edges. No text, icons, bars, circles or added furniture.
+

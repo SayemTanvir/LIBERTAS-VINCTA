@@ -26,7 +26,7 @@ var atmosphere_overlay: ColorRect
 var objective_label: Label
 var ability_label: Label
 var activity_meter: ProgressBar
-var survival_panel: PanelContainer
+var survival_panel: Control
 
 var subtitle_queue: Array[Dictionary] = []
 var subtitle_time: float = 0.0
@@ -48,15 +48,7 @@ func _ready() -> void:
 	_build_peripheral()
 	survival_panel = preload("res://scripts/ui/survival_panel.gd").new()
 	root.add_child(survival_panel)
-	senses = make_label("", 10)
-	senses.position = Vector2(40, 150)
-	root.add_child(senses)
-	senses.reparent(survival_panel.get_child(0), false)
-	senses.position = Vector2(14, 101)
-	senses.size = Vector2(316, 15)
-	senses.add_theme_font_size_override("font_size", 9)
-	senses.add_theme_color_override("font_color", Color("aaa79e"))
-	senses.clip_text = true
+	senses = survival_panel.summary_label
 	vitals = make_label("", 15)
 	vitals.position = Vector2(28, 50)
 	root.add_child(vitals)
@@ -187,7 +179,6 @@ func _process(delta: float) -> void:
 	survival_panel.visible = playing_hud
 	survival_panel.update_values(delta)
 	room_name.visible = playing_hud
-	senses.text = FreedomLedger.freedom_summary().replace("Degrees of freedom: ", "Freedom: ").replace(" bonds released", " bonds").replace("  |  [H] Field guide", "")
 	vitals.text = "Charge %02d  |  HP %03d  |  Batteries %d  ·  Bottles %d  ·  Clocks %d" % [
 		ceili(FreedomLedger.flashlight_seconds), ceili(FreedomLedger.hp),
 		int(FreedomLedger.inventory.get("battery", 0)), int(FreedomLedger.inventory.get("bottle", 0)), int(FreedomLedger.inventory.get("clock", 0))]
@@ -251,18 +242,31 @@ func _process(delta: float) -> void:
 		show_ending()
 
 func _layout_for_viewport() -> void:
-	var narrow := root.size.x < 1100.0
-	survival_panel.scale = Vector2.ONE * minf(1.0, (root.size.x - 36.0) / survival_panel.PANEL_SIZE.x)
+	# canvas_items scales logical pixels down in small windows. Preserve readable
+	# physical HUD text rather than making the enlarged panel tiny again at 800px.
+	var pixel_scale := maxf(get_viewport().get_stretch_transform().get_scale().x, 0.01)
+	var display_width := root.size.x * pixel_scale
+	var margin := 20.0 / pixel_scale
+	var panel_width := minf(clampf(display_width * 0.40, 560.0, 680.0), display_width - 40.0)
+	survival_panel.position = Vector2(margin, margin)
+	survival_panel.scale = Vector2.ONE * panel_width / (survival_panel.PANEL_SIZE.x * pixel_scale)
 	var panel_bottom := survival_panel.position.y + survival_panel.size.y * survival_panel.scale.y
+	var panel_right := survival_panel.position.x + survival_panel.size.x * survival_panel.scale.x
+	var right_space := root.size.x - panel_right - margin * 2.0
+	var narrow := right_space * pixel_scale < 400.0
 	objective_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	ability_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	var width := minf(580.0, root.size.x - 56.0) if narrow else minf(520.0, root.size.x - 560.0)
-	var caption_below := root.size.x < 720.0
-	objective_label.position = Vector2(18 if narrow else root.size.x - width - 28, panel_bottom + (46.0 if caption_below else 14.0) if narrow else 63.0)
+	var width := minf(680.0 / pixel_scale, root.size.x - 36.0) if narrow else minf(520.0 / pixel_scale, right_space)
+	var caption_below := display_width < 1000.0
+	objective_label.add_theme_font_size_override("font_size", maxi(15, ceili(13.0 / pixel_scale)))
+	ability_label.add_theme_font_size_override("font_size", maxi(15, ceili(13.0 / pixel_scale)))
+	objective_label.position = Vector2(margin if narrow else root.size.x - width - margin, panel_bottom + (46.0 if caption_below else 14.0) / pixel_scale if narrow else margin + 42.0 / pixel_scale)
 	objective_label.size = Vector2(width, 1)
 	ability_label.position = Vector2(objective_label.position.x, objective_label.position.y + objective_label.get_minimum_size().y + 12)
 	ability_label.size = Vector2(width, 1)
-	room_name.offset_top = panel_bottom + 10.0 if caption_below else 18.0
+	room_name.offset_right = -margin
+	room_name.offset_left = -margin - 310.0
+	room_name.offset_top = panel_bottom + 10.0 / pixel_scale if caption_below else margin
 	room_name.offset_bottom = room_name.offset_top + 24.0
 	# Narration and a live charge/ritual indicator occupy separate rows.
 	var bottom := 94.0

@@ -3,6 +3,7 @@ extends Control
 signal finished
 
 const DURATION := 22.4
+const INTRO_FONT := preload("res://assets/fonts/horroroid/horroroid.ttf")
 const HOUSE := preload("res://assets/BG/11_intro/05_house_hd.png")
 const BATS := preload("res://assets/BG/11_intro/02_bat_flight.png")
 const LIGHTNING := preload("res://assets/BG/11_intro/03_lightning.png")
@@ -124,7 +125,11 @@ func _caption(text: String, at: Vector2, font_size: int, start: float, end: floa
 	label.position = at
 	label.size = Vector2(565, 195 if font_size > 50 else 108)
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	label.add_theme_font_override("font", serif)
+	label.add_theme_font_override("font", INTRO_FONT if font_size > 50 else serif)
+	if font_size > 50:
+		label.name = "HorroroidTitle"
+		while font_size > 40 and INTRO_FONT.get_string_size("LIBERTAS", HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x > 565:
+			font_size -= 1
 	label.add_theme_font_size_override("font_size", font_size)
 	label.add_theme_color_override("font_color", Color("ba9e68") if brass else Color("e2ded2"))
 	label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.65))

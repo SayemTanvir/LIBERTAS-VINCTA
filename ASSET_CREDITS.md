@@ -37,3 +37,10 @@ failed transparency/grid checks and reference sources.
 The props pack license permits use in games and distribution embedded in an end
 product; it does not permit distributing the standalone source assets. The local
 integration does not publish or redistribute the pack.
+
+## Reference HUD and supplied intro font — 2026-09-16
+
+| Asset | Creator / source | Terms and integration |
+| --- | --- | --- |
+| `assets/ui/hud/hollowmere_metal_plate.png` | Built-in OpenAI imagegen, using the owner's supplied HUD reference | Generated backing only; all labels, bars and counters are live Godot controls. Both prompts are retained in `assets/ui/hud/README.md`. |
+| `assets/fonts/horroroid/horroroid.ttf` | Daniel Zadorozny / Iconian Fonts, 2015; owner's `horroroid.zip` | Original notice retained in `assets/fonts/horroroid/LICENSE.txt`: free non-commercial use; commercial terms through the author. Used for the main-menu and opening-cinematic game title. |

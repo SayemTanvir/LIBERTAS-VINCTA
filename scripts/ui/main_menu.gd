@@ -9,6 +9,7 @@ var caption_index := -1
 var atmosphere_clock := 0.0
 var reveal: Tween
 const BACKGROUND := "res://assets/ui/menu/libertas_vincta_menu_background.png"
+const INTRO_FONT := preload("res://assets/fonts/horroroid/horroroid.ttf")
 
 func _ready() -> void:
 	if pause_context:
@@ -130,7 +131,9 @@ func _label(text: String, at: Vector2, font_size: int, color: Color) -> Label:
 	label.position = at
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if font_size >= 50:
-		label.add_theme_font_override("font", _tracked_font(get_theme_font("font", "GameTitle"), 3))
+		label.add_theme_font_override("font", _tracked_font(INTRO_FONT, 2))
+		while font_size > 40 and label.get_theme_font("font").get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x > 650:
+			font_size -= 1
 		label.add_theme_color_override("font_shadow_color", Color(0.24, 0.035, 0.045, 0.7))
 		label.add_theme_constant_override("shadow_offset_x", 1)
 		label.add_theme_constant_override("shadow_offset_y", 2)
