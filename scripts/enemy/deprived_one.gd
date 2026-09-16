@@ -381,6 +381,9 @@ func _resolve_contact() -> void:
 	if not clear_sight(player.global_position):
 		return
 	if _stage() == 0 and not FreedomLedger.part2_seed.get("touch_mutation", false):
+		# Final Untouched rule (Path A): all senses stay dormant throughout Part II.
+		# Blind contact is intentionally a nonlethal stagger, including the Nexus.
+		# Only the separately seeded Vantree Touch branch bypasses this rule.
 		hit_cooldown = 2.0
 		player.play_action("stagger", 0.7)
 		EventBus.noise_created.emit(player.global_position, 320.0, "GENERIC")

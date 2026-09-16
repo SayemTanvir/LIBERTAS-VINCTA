@@ -247,7 +247,7 @@ func _layout_for_viewport() -> void:
 	var pixel_scale := maxf(get_viewport().get_stretch_transform().get_scale().x, 0.01)
 	var display_width := root.size.x * pixel_scale
 	var margin := 20.0 / pixel_scale
-	var panel_width := minf(clampf(display_width * 0.40, 560.0, 680.0), display_width - 40.0)
+	var panel_width := minf(clampf(display_width * 0.32, 400.0, 480.0), display_width - 40.0)
 	survival_panel.position = Vector2(margin, margin)
 	survival_panel.scale = Vector2.ONE * panel_width / (survival_panel.PANEL_SIZE.x * pixel_scale)
 	var panel_bottom := survival_panel.position.y + survival_panel.size.y * survival_panel.scale.y
@@ -281,6 +281,14 @@ func status(sense: String) -> String:
 	return "restored" if sense in FreedomLedger.keys_collected else "sealed"
 
 func enqueue_subtitle(speaker: String, text: String, duration: float) -> void:
+	if text.strip_edges().is_empty():
+		return
+	# Repeated attempts at a sealed passage must not queue the same comment forever.
+	if subtitle_queue.any(func(item: Dictionary): return item.speaker == speaker and item.text == text):
+		return
+	var message_body := (speaker + "\n" if not speaker.is_empty() and speaker != "ELS" and speaker not in ["NARRATOR", "STORYTELLER", "STORY TELLER"] else "") + text
+	if is_instance_valid(active_message) and active_message.visible and active_message.body == message_body:
+		return
 	subtitle_queue.append({"speaker": speaker, "text": text, "duration": duration})
 
 func _present_message(speaker: String, text: String) -> void:
@@ -417,6 +425,11 @@ func _result_action(id: String) -> void:
 				GameManager.new_game.call_deferred()
 
 func show_ending() -> void:
+	if GameManager.ending in ["severance", "custodian_rest", "vessel"]:
+		get_tree().paused = true
+		var sequence := preload("res://scripts/ui/ending_sequence.gd").new()
+		get_tree().get_first_node_in_group("room").add_child(sequence)
+		await sequence.play(GameManager.ending, self)
 	fade.color.a = 0.88
 	var titles := {
 		"untouched": "UNTOUCHED", "partial_mercy": "PARTIAL MERCY", "vantree": "VANTREE",
@@ -426,9 +439,9 @@ func show_ending() -> void:
 		"untouched": "The front door opens before the house learns her shape.\nEvery stolen sense remains sealed.",
 		"partial_mercy": "Cold water gives way to older stone.\nTwo seals broken. One left dormant.",
 		"vantree": "The conduit recognizes her name.\nBlood and stone carry it downward.",
-		"severance": "The last bond breaks. The Deprived One is gone.",
-		"custodian_rest": "Els takes the empty place and becomes the living ward.",
-		"vessel": "The prison closes around a new key. An unseen hand carries it away."
+		"severance": "The captive and the bond are destroyed.",
+		"custodian_rest": "Els Vantree becomes the living ward.",
+		"vessel": "The prison waits in another key."
 	}
 	get_tree().paused = true
 	modal_mode = "ending"

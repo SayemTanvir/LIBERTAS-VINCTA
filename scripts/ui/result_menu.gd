@@ -7,7 +7,7 @@ func _ready() -> void:
 	build_sheet("Chapter complete" if chapter else "The estate claims you", "Every freedom has a price." if chapter else "Your last checkpoint is waiting.", [
 		{"id": primary, "label": "Continue  ›" if chapter else "Retry checkpoint  ›", "rect": Rect2(84, 451, 370, 56)},
 		{"id": "home", "label": "Main menu", "rect": Rect2(84, 523, 370, 52)}], "LIBERTAS VINCTA  /  " + ("A FATE WRITTEN" if chapter else "A LIFE INTERRUPTED"))
-	outcome_label = Style.label(design, "", Rect2(84, 290, 850, 52), 30, Style.BRASS, true)
+	outcome_label = Style.label(design, "", Rect2(84, 290, 850, 52), 30, Style.BRASS)
 	Style.label(design, "", Rect2(84, 355, 1000, 52), 17, Style.MUTED).name = "OutcomeDetail"
 	footer_label.text = "↑ ↓  Navigate     Enter  Select"
 

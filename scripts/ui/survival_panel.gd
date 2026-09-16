@@ -1,10 +1,10 @@
 extends Control
 ## Reference-matched metal plate with live labels, resource meters and inventory.
-const PANEL_SIZE := Vector2(640, 212)
-const CONTENT_LEFT := 30.0
-const CONTENT_RIGHT := 610.0
-const METER_WIDTH := 276.0
-const ITEM_PITCH := 145.0
+const PANEL_SIZE := Vector2(480, 159)
+const CONTENT_LEFT := 22.0
+const CONTENT_RIGHT := 458.0
+const METER_WIDTH := 206.0
+const ITEM_PITCH := 109.0
 const PLATE := preload("res://assets/ui/hud/hollowmere_metal_plate.png")
 const METER_SHADER := preload("res://shaders/hud_resource_meter.gdshader")
 const INK := Color("e7ddce")
@@ -49,47 +49,47 @@ func _ready() -> void:
 	detail.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(detail)
 	detail.draw.connect(_draw_fittings.bind(detail))
-	_label("ELS VANTREE", Rect2(CONTENT_LEFT, 22, 290, 26), 20)
-	var shortcuts := _label("[TAB] BAG    [H] GUIDE", Rect2(340, 22, 270, 26), 14)
+	_label("ELS VANTREE", Rect2(CONTENT_LEFT, 14, 210, 23), 17)
+	var shortcuts := _label("[TAB] BAG    [H] GUIDE", Rect2(250, 14, 208, 23), 12)
 	shortcuts.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	shortcuts.add_theme_color_override("font_color", MUTED)
-	_label("HEALTH", Rect2(CONTENT_LEFT, 64, 117, 28), 16).add_theme_color_override("font_color", MUTED)
-	health_value = _label("", Rect2(153, 64, 153, 28), 24)
+	_label("HEALTH", Rect2(CONTENT_LEFT, 44, 90, 25), 12).add_theme_color_override("font_color", MUTED)
+	health_value = _label("", Rect2(112, 44, 116, 25), 18)
 	health_value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	_label("FLASHLIGHT", Rect2(334, 64, 164, 28), 16).add_theme_color_override("font_color", MUTED)
-	charge_value = _label("", Rect2(512, 64, 98, 28), 24)
+	_label("FLASHLIGHT", Rect2(252, 44, 120, 25), 12).add_theme_color_override("font_color", MUTED)
+	charge_value = _label("", Rect2(380, 44, 78, 25), 18)
 	charge_value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	health_trail = _bar(Vector2(CONTENT_LEFT, 99), Vector2(METER_WIDTH, 8), Color("ad8a5d"))
-	health_bar = _bar(Vector2(CONTENT_LEFT, 99), Vector2(METER_WIDTH, 8), Color("974851"), true)
-	charge_bar = _bar(Vector2(334, 99), Vector2(METER_WIDTH, 8), Color("7fa8a2"))
+	health_trail = _bar(Vector2(CONTENT_LEFT, 74), Vector2(METER_WIDTH, 8), Color("ad8a5d"))
+	health_bar = _bar(Vector2(CONTENT_LEFT, 74), Vector2(METER_WIDTH, 8), Color("974851"), true)
+	charge_bar = _bar(Vector2(252, 74), Vector2(METER_WIDTH, 8), Color("7fa8a2"))
 	var art := preload("res://scripts/levels/estate_art.gd").new()
 	var i := 0
 	for item in ["battery", "bottle", "clock", "lockpick"]:
-		var x := 50.0 + i * ITEM_PITCH
+		var x := 36.0 + i * ITEM_PITCH
 		var icon := TextureRect.new()
 		icon.name = item.to_pascal_case() + "Icon"
 		icon.texture = art.texture_for(item + "_pickup")
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		icon.position = Vector2(x - 12, 132)
-		icon.size = Vector2(24, 30)
+		icon.position = Vector2(x - 9, 99)
+		icon.size = Vector2(18, 24)
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(icon)
 		item_icons[item] = icon
-		var caption := _label(item.to_upper(), Rect2(x + 28, 125, 96, 21), 14)
+		var caption := _label(item.to_upper(), Rect2(x + 21, 93, 73, 18), 11)
 		caption.add_theme_color_override("font_color", MUTED)
-		item_values[item] = _label("0", Rect2(x + 28, 146, 96, 28), 24)
+		item_values[item] = _label("0", Rect2(x + 21, 111, 73, 23), 17)
 		item_pulses[item] = 0.0
 		i += 1
-	summary_label = _label("", Rect2(CONTENT_LEFT, 184, CONTENT_RIGHT - CONTENT_LEFT, 22), 14)
+	summary_label = _label("", Rect2(CONTENT_LEFT, 137, CONTENT_RIGHT - CONTENT_LEFT, 18), 11)
 	summary_label.name = "FreedomSummary"
 	summary_label.add_theme_color_override("font_color", MUTED)
 	update_values(0.0)
 
 func _draw_fittings(canvas: Control) -> void:
-	for y in [55.0, 118.0, 179.0]:
+	for y in [40.0, 89.0, 134.0]:
 		canvas.draw_line(Vector2(CONTENT_LEFT, y), Vector2(CONTENT_RIGHT, y), Color(0.56, 0.48, 0.35, 0.38), 1.0)
-	for bounds in [Rect2(28, 97, 280, 12), Rect2(332, 97, 280, 12)]:
+	for bounds in [Rect2(20, 72, 210, 12), Rect2(250, 72, 210, 12)]:
 		var groove := StyleBoxFlat.new()
 		groove.bg_color = Color("161d19")
 		groove.border_color = Color("625944")
@@ -99,12 +99,12 @@ func _draw_fittings(canvas: Control) -> void:
 		groove.shadow_size = 2
 		canvas.draw_style_box(groove, bounds)
 	for i in 4:
-		var center := Vector2(50 + i * ITEM_PITCH, 147)
-		canvas.draw_circle(center + Vector2(0, 1), 20, Color(0, 0, 0, 0.65), true, -1, true)
-		canvas.draw_circle(center, 19, Color("504a3b"), true, -1, true)
-		canvas.draw_arc(center, 19, PI, TAU, 32, Color("948369"), 1.0, true)
-		canvas.draw_circle(center, 16, Color("111c1c"), true, -1, true)
-		for offset in [Vector2(0, -18), Vector2(0, 18)]:
+		var center := Vector2(36 + i * ITEM_PITCH, 111)
+		canvas.draw_circle(center + Vector2(0, 1), 15, Color(0, 0, 0, 0.65), true, -1, true)
+		canvas.draw_circle(center, 14, Color("504a3b"), true, -1, true)
+		canvas.draw_arc(center, 14, PI, TAU, 32, Color("948369"), 1.0, true)
+		canvas.draw_circle(center, 12, Color("111c1c"), true, -1, true)
+		for offset in [Vector2(0, -14), Vector2(0, 14)]:
 			_rivet(canvas, center + offset, 1.1)
 
 func _rivet(canvas: Control, at: Vector2, radius: float) -> void:
@@ -125,6 +125,9 @@ func _label(text: String, rect: Rect2, font_size: int) -> Label:
 	label.add_theme_constant_override("shadow_offset_x", 0)
 	label.add_theme_constant_override("shadow_offset_y", 1)
 	add_child(label)
+	# Reset after font overrides/theme inheritance to discard the default font's
+	# larger minimum height (especially important for the compact footer).
+	label.size = rect.size
 	return label
 
 func _bar(at: Vector2, dimensions: Vector2, color: Color, clear_track := false) -> ProgressBar:
@@ -197,7 +200,7 @@ func update_values(delta: float) -> void:
 			item_pulses[item] = 1.0
 		item_pulses[item] = maxf(0.0, float(item_pulses[item]) - step * 1.6)
 		item_values[item].text = str(amount)
-		_fit_text(item_values[item], 24, 96)
+		_fit_text(item_values[item], 17, 73)
 		item_icons[item].self_modulate = Color.WHITE.lerp(Color("ffe2a7"), float(item_pulses[item]))
 		item_previous[item] = amount
 	for material in meter_materials:
@@ -206,7 +209,7 @@ func update_values(delta: float) -> void:
 	(charge_bar.material as ShaderMaterial).set_shader_parameter("pulse", 0.35 if charge <= 20 else 0.0)
 	(charge_bar.material as ShaderMaterial).set_shader_parameter("replenishing", charging_glow)
 	summary_label.text = FreedomLedger.freedom_summary().replace("Degrees of freedom: ", "Freedom: ").replace(" bonds released", " bonds").replace("  |  [H] Field guide", "")
-	_fit_text(summary_label, 14, CONTENT_RIGHT - CONTENT_LEFT)
+	_fit_text(summary_label, 11, CONTENT_RIGHT - CONTENT_LEFT)
 	last_hp = health
 	last_charge = charge
 	initialized = true

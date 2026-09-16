@@ -25,7 +25,7 @@ func _ready() -> void:
 		await get_tree().process_frame
 		var screen := Rect2(Vector2.ZERO, Vector2(resolution))
 		check(is_equal_approx(menu.design.scale.x, menu.design.scale.y), "Artwork proportions preserved at " + str(resolution))
-		var art_bounds: Rect2 = menu.design.get_global_transform() * Rect2(Vector2.ZERO, menu.reference_size)
+		var art_bounds: Rect2 = menu.artwork.get_global_rect()
 		check(art_bounds.grow(0.01).encloses(screen), "Artwork covers every screen edge at " + str(resolution))
 		for label: Label in menu.menu_content.find_children("*", "Label", true, false):
 			check(screen.encloses(label.get_global_rect()), "Title/helper text stays on screen at " + str(resolution))

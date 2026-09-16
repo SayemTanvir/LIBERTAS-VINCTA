@@ -67,6 +67,8 @@ These are the three final outcomes. They do not replace or add to the Part I out
 
 ## Vantree mystery
 
+The optional GF-05 nameplate interaction assembles three floor fragments into **VANTREE**, Els's surname. No first name or family relationship is established there. Its one-time collection state is checkpointed. It is a document clue, not a numbered letter or an additional route requirement. The later CR-04 carving still supplies the full name and impossible date.
+
 The progression from "Custodian" to "Jailer," the Vantree letters, the altar carving, and the ritual architecture imply an inherited role. The carving bears Els's full name with a date centuries before her birth. The game leaves the meaning unresolved.
 
 The supplied story's key breadcrumb remains:

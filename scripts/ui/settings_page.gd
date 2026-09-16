@@ -13,13 +13,14 @@ func _ready() -> void:
 		if i == 8:
 			rect = Rect2(84, 620, 160, 46)
 		items.append({"id": IDS[i], "label": labels[i], "rect": rect})
-	build_sheet("Settings", "Make the estate your own. Changes apply immediately for this session.", items)
+	build_sheet("Settings", "Make the estate your own. Changes apply and save automatically.", items)
 	section("Audio", 84, 258)
 	section("Display & accessibility", 684, 258)
 	values = preload("res://scripts/ui/settings_values.gd").new()
 	values.size = reference_size
 	values.menu = self
 	design.add_child(values)
+	SessionSettings.settings_changed.connect(_settings_changed)
 	value_requested.connect(adjust)
 	selected.connect(_accept)
 	for i in buttons.size() - 1:
@@ -27,8 +28,12 @@ func _ready() -> void:
 	footer_label.text = "← →  Adjust    /    Drag sliders    /    Esc  Back"
 
 func focus_default() -> void:
-	values.queue_redraw()
+	_settings_changed()
 	super.focus_default()
+
+func _settings_changed() -> void:
+	values.queue_redraw()
+	detail_label.text = "Make the estate your own. Changes apply and save automatically." if SessionSettings.last_save_error == OK else "Changes are active, but could not be saved. Check that your save folder is writable."
 
 func adjust(index: int, direction: int) -> void:
 	if AUDIO.has(index):

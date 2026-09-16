@@ -183,8 +183,7 @@ func set_flashlight(enabled: bool, present_action: bool = true) -> void:
 	_update_flashlight_presentation()
 
 func use_gadget() -> bool:
-	if FreedomLedger.flashlight_seconds < 50.0 and FreedomLedger.consume_item("battery"):
-		FreedomLedger.set_flashlight_seconds(FreedomLedger.flashlight_seconds + 45.0)
+	if FreedomLedger.flags.get("flashlight", false) and FreedomLedger.flashlight_seconds < 50.0 and FreedomLedger.recharge_from_batteries(45.0) > 0.0:
 		play_action("interact", 0.55, true)
 		EventBus.ability_used.emit("battery")
 		return true

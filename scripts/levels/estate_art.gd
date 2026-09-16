@@ -113,6 +113,8 @@ func dress(room: Node2D) -> void:
 			bind_facing(room, prop, visual, Rect2(-size.x * 0.5, -size.y - 8, size.x, size.y))
 	for child in room.props.get_children():
 		if child is BaseInteractable:
+			if child.interaction_id == "scratched_nameplate":
+				continue # Its existing-texture fragments own the complete presentation.
 			if child.kind in ["key", "letter", "flashlight", "tool", "item"]:
 				_dress_pickup(child)
 			elif child.kind in ["door", "locked_door", "exit"]:
@@ -123,7 +125,7 @@ func dress(room: Node2D) -> void:
 				_service_marker(child, "CHARGE + REST" if room.zone_id in ["roots", "echoes", "nexus"] else "CHARGE", Color("86d1d3"))
 				room._wall(child.name + "Footprint", Rect2(child.position - Vector2(29, 27), Vector2(58, 19)))
 			elif child.kind == "anchor":
-				var titles := {"LN-A": "SEVERANCE\nFree the captive", "LN-B": "CUSTODIAN'S REST\nEls takes the burden", "LN-C": "VESSEL\nTransfer the prison"}
+				var titles := {"LN-A": "SEVERANCE\nDestroy entity and bond", "LN-B": "CUSTODIAN'S REST\nEls takes the burden", "LN-C": "VESSEL\nTransfer the prison"}
 				_service_marker(child, titles.get(child.interaction_id, "ANCHOR"), Color("dfc287"), -120.0)
 			elif child.interaction_id == "nexus_bell":
 				_service_marker(child, "WARD BELL\nBind the Hound for 32s", Color("eac775"), -105.0)
@@ -407,20 +409,10 @@ func _window(parent: Node2D, point: Vector2) -> void:
 func dress_surfaces(room: Node2D) -> void:
 	var backdrop: Node2D = room.get_node("Backdrop")
 	if room.zone_id == "ground":
-		backdrop.get_node("BrokenGlass").color = Color(0.44, 0.55, 0.53, 0.08)
-		backdrop.get_node("CarpetBypass").color = Color(0.16, 0.23, 0.21, 0.48)
-		_tile_band(backdrop, "tile_floor", Rect2(2380, 550, 1200, 74), Vector2(116, 74), Color(0.34, 0.44, 0.40, 0.34))
-		var random := RandomNumberGenerator.new()
-		random.seed = 147
-		for i in 95:
-			var shard := Polygon2D.new()
-			shard.position = Vector2(random.randf_range(2390, 3570), random.randf_range(363, 533))
-			shard.polygon = PackedVector2Array([Vector2(-4, 2), Vector2(0, -3), Vector2(7, 1)])
-			shard.rotation = random.randf_range(0, TAU)
-			shard.color = Color(0.67, 0.77, 0.75, random.randf_range(0.25, 0.65))
-			backdrop.add_child(shard)
-		for y in [555, 617]:
-			_rect(backdrop, Rect2(2386, y, 1188, 2), Color("#556351"))
+		# Path B: retire the painted glass/safe-lane hints; ordinary flooring
+		# and actual rugs communicate the existing surface rules honestly.
+		backdrop.get_node("BrokenGlass").hide()
+		backdrop.get_node("CarpetBypass").hide()
 	elif room.zone_id == "basement":
 		backdrop.get_node("Water").color = Color(0.13, 0.31, 0.31, 0.56)
 		for x in range(920, 1980, 63):
@@ -428,7 +420,7 @@ func dress_surfaces(room: Node2D) -> void:
 			_rect(backdrop, Rect2(x, y, 23, 1), Color(0.45, 0.62, 0.57, 0.25))
 		_rect(backdrop, Rect2(900, 543, 1100, 2), Color(0.29, 0.45, 0.39, 0.38))
 	elif room.zone_id == "upper":
-		backdrop.get_node("LinenShadowLane").color = Color(0.12, 0.15, 0.17, 0.46)
+		backdrop.get_node("LinenShadowLane").hide()
 		_tile_band(backdrop, "tile_floor", Rect2(2700, 550, 3600, 74), Vector2(116, 74), Color(0.28, 0.25, 0.31, 0.28))
 		for x in [2650, 4300, 5950]:
 			backdrop.get_node("Moonlight" + str(x)).hide()

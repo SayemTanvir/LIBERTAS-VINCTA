@@ -25,7 +25,7 @@ static func objective(room: Node) -> String:
 			return "Find the Sigil Forge in CE-02. Press E to awaken blood rites. [H] Guide"
 		var action := "Q: bottles / clocks" if FreedomLedger.part2_seed.get("full_gadgets", false) else "R: cast a sigil"
 		return "Open Nexus Descent: %d / 3 resonances | %s | [H] Guide" % [mini(FreedomLedger.mechanic_uses, 3), action]
-	return "Follow the roots to the Chamber of Echoes. Power stations restore health and charge."
+	return "Follow the roots to the Chamber of Echoes. Stations restore health; flashlight charging needs batteries."
 
 static func ability_status(player: Node) -> String:
 	if FreedomLedger.part2_seed.get("full_gadgets", false):
@@ -42,7 +42,7 @@ static func ability_status(player: Node) -> String:
 
 static func guide_text() -> String:
 	if FreedomLedger.current_part == 1:
-		return "ELS' FIELD GUIDE\n\nWASD moves; Shift sprints; Ctrl crouches. F switches the flashlight. With the light off, Els lowers it and walks normally. E interacts and leaves hiding. B holds breath for up to 6 seconds.\n\nThe keys grant freedom at a price: every key restores a sense to the Hound. Taking all three creates a false escape. Leave at least one ward sealed.\n\nLook for the cyan CHARGE markers. About 30% of tables have a teal power station. Each room has at most one. Ordinary tables cannot charge the light. Press E and stand still to charge; move to stop at any time. Keep the charge already gained. H opens this guide; Esc closes it."
+		return "ELS' FIELD GUIDE\n\nWASD moves; Shift sprints; Ctrl crouches. F switches the flashlight. With the light off, Els lowers it and walks normally. E interacts and leaves hiding. B holds breath for up to 6 seconds.\n\nThe keys grant freedom at a price: every key restores a sense to the Hound. Taking all three creates a false escape. Leave at least one ward sealed.\n\nLook for the cyan CHARGE markers. About 30% of tables have a teal power station. Each room has at most one. Ordinary tables cannot charge the light. Carry batteries to charge. Each full cell holds 45 seconds; the bag shows each remaining percentage. Press E and stand still to transfer charge; move to stop. Empty cells disappear and unused energy remains. No battery means no charging. H opens this guide; Esc closes it."
 	var body := "DEGREES OF FREEDOM\nYour escape from Hollowmere changed what Els can do — and what the Hound can sense.\n\n"
 	if FreedomLedger.part2_seed.get("full_gadgets", false):
 		body += "CLOCKWORK & GLASS\nYou escaped without opening the wards. The Hound's senses remain sealed. Q uses a battery if charge is below 50 seconds (about 56%); otherwise it throws a bottle, then uses a clock when bottles run out. Bottles/clocks count toward the descent; batteries do not. Use three in Echoes. The supply cache at Nexus Descent replenishes distractions if you run out.\n\n"
@@ -55,5 +55,5 @@ static func guide_text() -> String:
 		if not partial:
 			body += "T — STUN RITE\nWhen the Hound is close (inside the circle's reach), stun it for 6 seconds. Costs 20% of maximum HP (16 HP); cooldown 60 seconds. An out-of-range attempt costs nothing. This rite does not count toward the descent.\n\n"
 		body += "OPEN THE DESCENT\nEach R cast in Echoes counts as one resonance. Reach 3, then use the door in CE-05. Blood-rite users can also evade Touch by moving over the Sunken Choir rubble near the Hound. Power stations restore HP and flashlight charge; use them before you are too weak to cast.\n\n"
-	body += "CONVERGENCE — ONE CHOICE\nRing the golden Ward Bell with E. It binds the Hound for 32 seconds. Move to ONE named anchor and hold E for 20 seconds. Release E, move, or take damage to cancel. A broken ritual can be retried; ring the bell again when its ward fades.\n\nSEVERANCE: break the prison and release its captive.\nCUSTODIAN'S REST: Els takes the burden and seals herself in.\nVESSEL: transfer the prison into a new vessel.\n\nCyan power stations restore charge and HP. Move to stop charging; damage also interrupts it. Hide in the alcove at Nexus Descent or behind the Convergence screens to recover your bearings. H opens this guide; Esc closes it."
+	body += "CONVERGENCE — ONE CHOICE\nRing the golden Ward Bell with E. It binds the Hound for 32 seconds. Move to ONE named anchor and hold E for 20 seconds. Release E, move, or take damage to cancel. A broken ritual can be retried; ring the bell again when its ward fades.\n\nSEVERANCE: destroy the entity and the bond. No next keeper.\nCUSTODIAN'S REST: Els takes the burden and seals herself in.\nVESSEL: transfer the prison into a new vessel.\n\nCyan power stations transfer stored battery charge and restore HP. No battery means no flashlight charge. Each full cell holds 45 seconds; unused charge stays in the bag. Move to stop charging; damage also interrupts it. Hide in the alcove at Nexus Descent or behind the Convergence screens to recover your bearings. H opens this guide; Esc closes it."
 	return body

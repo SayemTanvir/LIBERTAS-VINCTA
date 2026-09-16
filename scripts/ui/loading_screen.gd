@@ -11,9 +11,13 @@ var indicator: Control
 @onready var message: Control = $MessageBubble
 
 func _ready() -> void:
+	theme = preload("res://scripts/ui/menu_typography.gd").menu_theme()
+	preload("res://scripts/ui/menu_typography.gd").enlarge_body.call_deferred(self)
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build_presentation()
 	message.show_text("", "Entering Hollowmere...")
+	# Only this loading-screen instance; shared gameplay bubbles keep their fonts.
+	message.text_label.add_theme_font_override("normal_font", preload("res://scripts/ui/menu_typography.gd").BODY)
 	if DisplayServer.get_name() == "headless":
 		_enter_game.call_deferred()
 		return
@@ -39,6 +43,7 @@ func _build_presentation() -> void:
 	add_child(presentation)
 	move_child(presentation, get_child_count() - 2)
 	var brand := style.label(presentation, "LIBERTAS VINCTA", Rect2(140, 240, 1000, 66), 42, style.PAPER, true)
+	brand.add_theme_font_override("font", preload("res://scripts/ui/menu_typography.gd").TITLE)
 	brand.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var chapter := style.label(presentation, "PART II  /  DEGREES OF FREEDOM" if FreedomLedger.current_part == 2 else "PART I  /  HOLLOWMERE ESTATE", Rect2(140, 328, 1000, 32), 12, style.BRASS)
 	chapter.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

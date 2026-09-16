@@ -12,6 +12,8 @@ const BACKGROUND := "res://assets/ui/menu/libertas_vincta_menu_background.png"
 const INTRO_FONT := preload("res://assets/fonts/horroroid/horroroid.ttf")
 
 func _ready() -> void:
+	theme = preload("res://scripts/ui/menu_typography.gd").menu_theme()
+	preload("res://scripts/ui/menu_typography.gd").enlarge_body.call_deferred(self)
 	if pause_context:
 		preload("res://scripts/ui/menu_art.gd").main(self, true)
 	else:
@@ -33,7 +35,7 @@ func layout_artwork() -> void:
 	if design == null:
 		return
 	# Scenery covers the viewport; independent UI scaling keeps every action visible.
-	var factor := maxf(size.x / reference_size.x, size.y / reference_size.y)
+	var factor := minf(size.x / reference_size.x, size.y / reference_size.y)
 	design.scale = Vector2.ONE * factor
 	design.position = (size - reference_size * factor) * 0.5
 	if menu_content != null:
@@ -49,6 +51,7 @@ func _build_home() -> void:
 	for i in ids.size():
 		items.append({"id": ids[i], "rect": Rect2(874, rows[i], 316, 44), "texture": null})
 	build(background, items, false)
+	cover_background(background)
 	active_art.hide()
 	artwork.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	var atmosphere := ShaderMaterial.new()
@@ -71,15 +74,12 @@ func _build_home() -> void:
 	_label("LIBERTAS", Vector2(84, 248), 68, Color("e5dfd5"))
 	_label("VINCTA", Vector2(84, 322), 68, Color("e5dfd5"))
 	var tagline := _label("Every freedom has a price.", Vector2(92, 432), 17, Color("b2a7a1"))
-	var italic := SystemFont.new()
-	italic.font_names = PackedStringArray(["Georgia", "Times New Roman"])
-	italic.font_italic = true
-	tagline.add_theme_font_override("font", italic)
+	tagline.add_theme_font_override("font", preload("res://scripts/ui/menu_typography.gd").BODY)
 	_rule(Vector2(92, 419), 310)
 	_rule(Vector2(1009, 344), 46)
 	_rule(Vector2(1009, 521), 46)
 	var labels := ["New Game", "Continue", "Settings", "How to Play", "Credits", "Exit"]
-	var button_font := _tracked_font(get_theme_font("font", "GameTitle"), 1)
+	var button_font := _tracked_font(preload("res://scripts/ui/menu_typography.gd").BODY, 1)
 	var hover_material := ShaderMaterial.new()
 	hover_material.shader = preload("res://shaders/menu_hover.gdshader")
 	for i in buttons.size():

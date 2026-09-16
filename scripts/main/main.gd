@@ -95,6 +95,9 @@ func _finish_loop_wake(player: CharacterBody2D) -> void:
 	FreedomLedger.flags["loop_wake"] = false
 	await player.play_respawn()
 	GameManager.state = GameManager.State.PLAYING
+	if FreedomLedger.loop_counter == 2:
+		var fragment := preload("res://scripts/systems/memory_fragment.gd")
+		$UI.show_letter(fragment.TITLE, fragment.TEXT)
 	GameManager.save_checkpoint(player.global_position)
 
 func _finish_checkpoint_respawn(player: CharacterBody2D) -> void:

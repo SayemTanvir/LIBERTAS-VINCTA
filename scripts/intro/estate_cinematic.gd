@@ -41,6 +41,8 @@ var bat_vertices: Array[PackedVector2Array] = []
 var bat_uvs: Array[PackedVector2Array] = []
 
 func _ready() -> void:
+	theme = preload("res://scripts/ui/menu_typography.gd").menu_theme()
+	preload("res://scripts/ui/menu_typography.gd").enlarge_body.call_deferred(self)
 	name = "EstateCinematic"
 	process_mode = Node.PROCESS_MODE_PAUSABLE
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -86,16 +88,13 @@ func _ready() -> void:
 		bar.color = Color("05080b")
 		bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		stage.add_child(bar)
-	var font := SystemFont.new()
-	font.font_names = PackedStringArray(["Georgia", "Times New Roman"])
-	serif = font
+	serif = preload("res://scripts/ui/menu_typography.gd").BODY
 	_caption("H O L L O W M E R E   E S T A T E", Vector2(78, 203), 17, 1.3, 8.4, true)
 	_caption("An offer too generous.\nA signature too easy.", Vector2(74, 248), 35, 2.5, 8.4)
 	_caption("Six hours are missing.", Vector2(78, 374), 20, 5.6, 9.1)
 	_caption("D E G R E E S   O F   F R E E D O M", Vector2(78, 203), 16, 10.0, 20.5, true)
 	_caption("LIBERTAS\nVINCTA", Vector2(72, 237), 67, 10.4, 20.5)
 	_caption("Every freedom has a price.", Vector2(78, 435), 22, 12.2, 20.5)
-	_caption("P R O L O G U E   /   T H E   A P P R A I S A L", Vector2(78, 594), 13, 13.2, 20.5, true)
 	_caption("HOLLOWMERE  /  AFTER DARK", Vector2(78, 15), 12, 1.5, 20.5, true)
 	_caption("A house that remembers.", Vector2(78, 671), 14, 3.0, 20.5)
 	skip_button = Button.new()

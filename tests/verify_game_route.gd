@@ -64,7 +64,7 @@ func _check_rule_table() -> void:
 	FreedomLedger.reset()
 	FreedomLedger.restore_sense("hearing")
 	for i in 4:
-		FreedomLedger.collect_letter("rule_letter_" + str(i))
+		FreedomLedger.collect_letter("vantree_%02d" % (i + 1))
 	_check(FreedomLedger.eligible("vantree"), "Vantree requires one key and four letters")
 	FreedomLedger.restore_sense("sight")
 	_check(FreedomLedger.eligible("partial_mercy"), "Partial Mercy requires two keys")

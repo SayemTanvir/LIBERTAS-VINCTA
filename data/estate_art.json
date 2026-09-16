@@ -156,7 +156,7 @@
       "surfaces": [
         [0, 1800, "panel_wall", "tile_floor"]
       ],
-      "passage_labels": {"intro_exit": "Music Room"},
+      "passage_labels": {"intro_exit": "Grand Foyer"},
       "furniture": {
         "BrokenTable": {"asset": "bench", "width": 152, "position": [990, 408], "footprint": [94, 30]}
       },
@@ -269,8 +269,7 @@
         ["bookshelf", 6190, 392, 91],
         ["bench", 6510, 392, 124],
         ["side_table", 6630, 392, 54, [["candle", 0, -39, 22]]],
-        ["bookshelf", 6860, 392, 75],
-        ["side_table", 7130, 392, 54, [["candle", 0, -39, 22]]]
+        ["bookshelf", 6860, 392, 75]
       ]
     },
     "basement": {

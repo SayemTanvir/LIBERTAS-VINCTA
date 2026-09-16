@@ -1,6 +1,7 @@
 extends "res://scripts/ui/image_state_menu.gd"
 ## A consistent native page over the estate scenery. Input stays in ImageStateMenu.
 const Style := preload("res://scripts/ui/ui_style.gd")
+const Typography := preload("res://scripts/ui/menu_typography.gd")
 var native_ui := true
 var heading_label: Label
 var detail_label: Label
@@ -12,7 +13,8 @@ var reveal_seconds := 0.16
 var reveal_background := false
 
 func build_sheet(title: String, description: String, items: Array[Dictionary], eyebrow: String = "LIBERTAS VINCTA  /  HOLLOWMERE ESTATE") -> void:
-	theme = preload("res://themes/libertas_ui_theme.tres")
+	Typography.enlarge_body.call_deferred(self)
+	theme = Typography.menu_theme()
 	var base := GradientTexture2D.new()
 	base.width = 1280
 	base.height = 720
@@ -21,12 +23,7 @@ func build_sheet(title: String, description: String, items: Array[Dictionary], e
 		item.texture = null
 	build(base, items, false)
 	active_art.hide()
-	artwork.texture = preload("res://assets/ui/menu/hollowmere_dark_menu.png")
-	artwork.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
-	artwork.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	artwork.reparent(self, false)
-	move_child(artwork, 1)
-	artwork.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	cover_background(preload("res://assets/ui/menu/hollowmere_dark_menu.png"))
 	shade = ColorRect.new()
 	shade.color = Color(0.018, 0.027, 0.037, 0.88)
 	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -35,6 +32,7 @@ func build_sheet(title: String, description: String, items: Array[Dictionary], e
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	Style.label(design, eyebrow, Rect2(84, 49, 1050, 24), 11, Style.BRASS)
 	heading_label = Style.label(design, title, Rect2(80, 95, 1100, 75), 52, Style.PAPER, true)
+	heading_label.add_theme_font_override("font", Typography.TITLE)
 	detail_label = Style.label(design, description, Rect2(84, 179, 1060, 46), 16, Style.MUTED)
 	detail_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	Style.rule(design, Rect2(84, 236, 1112, 1))
@@ -86,7 +84,7 @@ func section(title: String, x: float, y: float, width: float = 512) -> void:
 	Style.label(design, title.to_upper(), Rect2(x, y, width, 26), 12, Style.BRASS)
 
 func paragraph(title: String, body: String, x: float, y: float, width: float = 512) -> void:
-	Style.label(design, title, Rect2(x, y, width, 32), 23, Style.PAPER, true)
+	Style.label(design, title, Rect2(x, y, width, 32), 23, Style.PAPER)
 	var text := Style.label(design, body, Rect2(x, y + 40, width, 86), 18, Style.MUTED)
 	text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	text.add_theme_constant_override("line_spacing", 4)

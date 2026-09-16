@@ -7,6 +7,7 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func ink(text: String, rect: Rect2, color: Color = Style.PAPER, font_size: int = 16) -> void:
+	font_size = preload("res://scripts/ui/menu_typography.gd").body_size(font_size)
 	var font := get_theme_default_font()
 	var at := rect.position + Vector2(0, (rect.size.y - font.get_height(font_size)) * 0.5 + font.get_ascent(font_size))
 	draw_string(font, at, text, HORIZONTAL_ALIGNMENT_CENTER, rect.size.x, font_size, color)

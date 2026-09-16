@@ -9,6 +9,7 @@ func check(value: bool, description: String) -> void:
 		push_error(description)
 
 func _ready() -> void:
+	preload("res://tests/settings_fixture.gd").isolate()
 	get_tree().root.notification(MainLoop.NOTIFICATION_APPLICATION_FOCUS_IN)
 	get_tree().root.notification(Node.NOTIFICATION_WM_MOUSE_ENTER)
 	_run.call_deferred()

@@ -215,6 +215,8 @@ func resume() -> void:
 	state = return_state
 
 func read_letter() -> void:
+	if state == State.READING:
+		return
 	return_state = state
 	state = State.READING
 	get_tree().paused = true

@@ -18,14 +18,14 @@ func _ready() -> void:
 	reveal_seconds = 0.3
 	reveal_background = true
 	for button in buttons:
-		button.add_theme_font_override("font", Style.serif())
+		button.add_theme_font_override("font", Typography.BODY)
 		button.add_theme_font_size_override("font_size", 24)
 		var transparent := StyleBoxEmpty.new()
 		transparent.content_margin_left = 16
 		for state in ["normal", "hover", "pressed", "focus", "hover_pressed"]:
 			button.add_theme_stylebox_override(state, transparent)
 	section("Current chapter", 684, 290)
-	location = Style.label(design, "", Rect2(684, 329, 512, 70), 29, Style.PAPER, true)
+	location = Style.label(design, "", Rect2(684, 329, 512, 70), 29, Style.PAPER)
 	location.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	checkpoint_note = Style.label(design, "", Rect2(684, 415, 512, 84), 16, Style.MUTED)
 	checkpoint_note.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

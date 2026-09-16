@@ -7,7 +7,7 @@ func _ready() -> void:
 	section("The people behind Hollowmere", 84, 257)
 	var team := [["Sajib", "Redesign / Direction"], ["Ifat", "Assets / Implementation"], ["Ramim", "Godot Implementation / Story Designer"], ["Tanvir", "Visuals / Sound Effects"]]
 	for i in team.size():
-		team_labels.append(Style.label(design, team[i][0], Rect2(84, 299 + i * 69, 130, 30), 24, Style.PAPER, true))
+		team_labels.append(Style.label(design, team[i][0], Rect2(84, 299 + i * 69, 130, 30), 24, Style.PAPER))
 		team_labels.append(Style.label(design, team[i][1], Rect2(230, 299 + i * 69, 396, 40), 15, Style.MUTED))
 	section("Made with Godot", 684, 257)
 	paragraph("An estate built from many hands", "Godot 4.7. Player artwork and selected scenery use AI-generated assets. Additional artwork and recordings were supplied by the project owner.", 684, 300)

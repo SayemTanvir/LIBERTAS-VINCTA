@@ -5,6 +5,7 @@ var failures: Array[String] = []
 var captures := 0
 
 func _ready() -> void:
+	preload("res://tests/settings_fixture.gd").isolate()
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	GameManager.save_path = "res://build/native_ui_test_save.json"
 	AudioServer.set_bus_mute(0, true)
@@ -118,9 +119,9 @@ func _run() -> void:
 	add_child(reader)
 	reader.open("Els' Field Guide", preload("res://scripts/systems/field_guide.gd").guide_text())
 	await frames()
-	check(reader.scroll.get_v_scroll_bar().max_value > reader.scroll.size.y, "Field guide scrolls")
-	check(reader.scroll.get_v_scroll_bar().visible and reader.scroll.get_v_scroll_bar().size.x >= 5, "Long reading has a visible scrollbar")
-	check(reader.content.text.contains("WASD"), "Full guide text retained")
+	check(reader.document.visible and reader.document.pages.size() > 1, "Field guide uses parchment paging")
+	check(reader.document.next.visible and reader.document.previous.visible, "Long reading has page controls")
+	check(reader.document.full_text.contains("WASD"), "Full guide text retained")
 	await capture("field_guide")
 	FreedomLedger.collect_item("bottle", 3)
 	reader.open("Inventory", "Inventory")

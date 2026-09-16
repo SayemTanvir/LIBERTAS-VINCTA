@@ -8,6 +8,7 @@ var last_action: String = ""
 var cues: Array[String] = []
 
 func _ready() -> void:
+	preload("res://tests/settings_fixture.gd").isolate()
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	get_tree().current_scene = null
 	get_tree().root.notification(MainLoop.NOTIFICATION_APPLICATION_FOCUS_IN)
@@ -158,7 +159,7 @@ func _run() -> void:
 	SessionSettings.set_volume("Master", 0.8)
 	settings.set_selection(3)
 	await key(KEY_RIGHT)
-	check(SessionSettings.resolution == Vector2i(1600, 900), "Resolution applies")
+	check(SessionSettings.resolution == Vector2i(1366, 768), "Laptop resolution applies")
 	settings.set_selection(4)
 	await key(KEY_SPACE)
 	check(SessionSettings.fullscreen, "Accept toggles fullscreen")
@@ -251,11 +252,13 @@ func _run() -> void:
 	await frames(10)
 	check(player.position == position and get_tree().paused, "Letter blocks movement")
 	Input.action_release("move_right")
+	await get_tree().create_timer(0.8, true).timeout
 	await key(KEY_DOWN)
-	check(hud.reader.scroll.scroll_vertical > 0, "Long letter scrolls")
+	check(hud.reader.document.page_index == 1, "Long letter pages forward")
 	await capture("letter")
-	await key(KEY_E)
-	check(not hud.reader.visible and not get_tree().paused, "E closes letter")
+	await key(KEY_ESCAPE)
+	await get_tree().create_timer(0.3, true).timeout
+	check(not hud.reader.visible and not get_tree().paused, "Escape rolls letter closed")
 	# Hold the polling action across dismissal, as a real E key does.
 	var nearby: BaseInteractable = preload("res://scenes/interactables/item_pickup.tscn").instantiate()
 	nearby.interaction_id = "ui_leak_probe"
@@ -308,7 +311,8 @@ func _run() -> void:
 	GameManager.state = GameManager.State.ENDING
 	await frames()
 	check(hud.reader.visible, "Ending narrative preserved on parchment")
-	await key(KEY_ENTER)
+	await key(KEY_ESCAPE)
+	await get_tree().create_timer(0.3, true).timeout
 	check(hud.chapter_complete.visible and get_tree().paused, "Chapter Complete displayed")
 	await key(KEY_DOWN)
 	sync(hud.chapter_complete, 1, "Chapter Main Menu state")
@@ -321,8 +325,9 @@ func _run() -> void:
 	hud = main.get_node("UI")
 	GameManager.ending = "severance"
 	GameManager.state = GameManager.State.ENDING
-	await frames()
-	await key(KEY_ENTER)
+	await get_tree().create_timer(4.6, true).timeout
+	await key(KEY_ESCAPE)
+	await get_tree().create_timer(0.3, true).timeout
 	await key(KEY_DOWN)
 	await key(KEY_ENTER)
 	await frames(5)

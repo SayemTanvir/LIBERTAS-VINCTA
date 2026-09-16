@@ -34,6 +34,8 @@ func texture_layer(texture: Texture2D, rect: Rect2) -> TextureRect:
 	return layer
 
 func build(base: Texture2D, items: Array[Dictionary], whole_images: bool = true) -> void:
+	clip_contents = true
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	entries = items
 	full_states = whole_images
 	reference_size = base.get_size()
@@ -83,6 +85,16 @@ func layout_artwork() -> void:
 	var factor := minf(size.x / reference_size.x, size.y / reference_size.y)
 	design.scale = Vector2.ONE * factor
 	design.position = (size - reference_size * factor) * 0.5
+
+func cover_background(texture: Texture2D) -> void:
+	# The scenery fills any aspect ratio; the design keeps controls and hitboxes
+	# together at a uniform, fully visible scale. No stretching or pointer remapping.
+	artwork.texture = texture
+	artwork.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	artwork.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	artwork.reparent(self, false)
+	move_child(artwork, 1)
+	artwork.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 func set_selection(index: int, sound: bool = true) -> void:
 	if _selecting or buttons.is_empty():

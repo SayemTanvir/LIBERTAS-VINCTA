@@ -4,11 +4,13 @@ extends Node
 const SENSES := ["hearing", "sight", "memory"]
 const MAX_FLASHLIGHT_SECONDS := 90.0
 const BASE_MAX_HP := 100.0
+const CELL_SECONDS := 45.0
 
 var keys_collected: Array[String] = []
 var letter_ids: Array[String] = []
 var flags: Dictionary = {}
 var inventory: Dictionary = {}
+var battery_charges: Array[float] = []
 var hiding_usage: Dictionary = {}
 var detections: int = 0
 var loop_counter: int = 0
@@ -30,10 +32,18 @@ var memory_restored: bool:
 	get: return "memory" in keys_collected
 var letters_found: int:
 	get: return letter_ids.size()
+var estate_letters_found: int:
+	get:
+		var count := 0
+		for i in range(1, 8):
+			if "vantree_%02d" % i in letter_ids:
+				count += 1
+		return count
 var current_stage: int:
 	get: return entity_stage
 
 func reset() -> void:
+	battery_charges.clear()
 	keys_collected.clear()
 	letter_ids.clear()
 	flags.clear()
@@ -53,6 +63,7 @@ func reset() -> void:
 	_emit_status()
 
 func reset_for_loop() -> void:
+	battery_charges.clear()
 	loop_counter += 1
 	keys_collected.clear()
 	letter_ids.clear()
@@ -62,7 +73,9 @@ func reset_for_loop() -> void:
 	flags["loop_wake"] = true
 	if loop_counter >= 2:
 		flags["vantree_memory_fragment_A"] = true
-	inventory = {"battery": 0, "bottle": 0, "clock": 0, "lockpick": 0}
+	# The piano and vanity each need one pick on every repetition.
+	# Retain remaining picks with a two-pick floor; all other ordinary items reset.
+	inventory = {"battery": 0, "bottle": 0, "clock": 0, "lockpick": maxi(2, int(inventory.get("lockpick", 0)))}
 	hiding_usage.clear()
 	detections = 0
 	ending_type = ""
@@ -96,12 +109,20 @@ func collect_letter(id: String) -> bool:
 func collect_item(id: String, amount: int = 1) -> void:
 	if amount <= 0:
 		return
+	if id == "battery":
+		_sync_batteries()
+		for i in amount:
+			battery_charges.append(100.0)
 	inventory[id] = int(inventory.get(id, 0)) + amount
 	EventBus.inventory_changed.emit(id, int(inventory[id]))
 
 func consume_item(id: String, amount: int = 1) -> bool:
 	if amount <= 0 or int(inventory.get(id, 0)) < amount:
 		return false
+	if id == "battery":
+		_sync_batteries()
+		for i in amount:
+			battery_charges.pop_front()
 	inventory[id] = int(inventory[id]) - amount
 	EventBus.inventory_changed.emit(id, int(inventory[id]))
 	return true
@@ -109,6 +130,38 @@ func consume_item(id: String, amount: int = 1) -> bool:
 func record_detection() -> void:
 	detections += 1
 	EventBus.detection_recorded.emit(detections)
+
+func _sync_batteries() -> void:
+	# Migrate legacy count-only saves and scripted supply grants to full cells.
+	var count := clampi(int(inventory.get("battery", 0)), 0, 999)
+	inventory["battery"] = count
+	while battery_charges.size() < count:
+		battery_charges.append(100.0)
+	if battery_charges.size() > count:
+		battery_charges.resize(count)
+
+func battery_percentages() -> Array[float]:
+	_sync_batteries()
+	return battery_charges.duplicate()
+
+func recharge_from_batteries(seconds: float) -> float:
+	if not is_finite(seconds) or seconds <= 0.0:
+		return 0.0
+	_sync_batteries()
+	var wanted := minf(seconds, MAX_FLASHLIGHT_SECONDS - flashlight_seconds)
+	var transferred := 0.0
+	while wanted > 0.00001 and not battery_charges.is_empty():
+		var used := minf(wanted, battery_charges[0] * CELL_SECONDS / 100.0)
+		battery_charges[0] = maxf(0.0, battery_charges[0] - used / CELL_SECONDS * 100.0)
+		transferred += used
+		wanted -= used
+		if battery_charges[0] < 0.0001:
+			battery_charges.pop_front()
+	inventory["battery"] = battery_charges.size()
+	if transferred > 0.0:
+		set_flashlight_seconds(flashlight_seconds + transferred)
+		EventBus.inventory_changed.emit("battery", battery_charges.size())
+	return transferred
 
 func record_hiding_use(id: String) -> void:
 	hiding_usage[id] = int(hiding_usage.get(id, 0)) + 1
@@ -139,7 +192,7 @@ func freedom_summary() -> String:
 func eligible(candidate: String) -> bool:
 	match candidate:
 		"untouched": return current_part == 1 and entity_stage == 0 and detections == 0
-		"vantree": return current_part == 1 and entity_stage == 1 and letters_found >= 4
+		"vantree": return current_part == 1 and entity_stage == 1 and estate_letters_found >= 4
 		"partial_mercy": return current_part == 1 and entity_stage == 2
 		"loop": return current_part == 1 and entity_stage == 3
 		"severance", "custodian_rest", "vessel":
@@ -208,7 +261,9 @@ func has_requirement(requirement: String) -> bool:
 	return bool(flags.get(requirement, false))
 
 func snapshot() -> Dictionary:
+	_sync_batteries()
 	return {
+		"battery_charges": battery_charges.duplicate(),
 		"keys": keys_collected.duplicate(), "letters": letter_ids.duplicate(),
 		"entity_stage": entity_stage, "ending_type": ending_type,
 		"loop_counter": loop_counter, "part2_seed": part2_seed.duplicate(true),
@@ -222,6 +277,12 @@ func snapshot() -> Dictionary:
 func snapshot_is_valid(data: Variant) -> bool:
 	if not data is Dictionary:
 		return false
+	if data.has("battery_charges"):
+		if not data.battery_charges is Array or data.battery_charges.size() > 999:
+			return false
+		for charge in data.battery_charges:
+			if not _finite_number(charge) or float(charge) <= 0.0 or float(charge) > 100.0:
+				return false
 	for key in ["keys", "letters", "anchors"]:
 		if data.has(key):
 			if not data[key] is Array:
@@ -280,6 +341,8 @@ func restore_snapshot(data: Dictionary) -> void:
 	inventory = data.get("inventory", {"battery": 0, "bottle": 0, "clock": 0, "lockpick": 0}).duplicate(true)
 	for id in inventory:
 		inventory[id] = maxi(0, int(inventory[id]))
+	battery_charges.assign(data.get("battery_charges", []))
+	_sync_batteries()
 	hiding_usage = data.get("hiding_usage", {}).duplicate(true)
 	for id in hiding_usage:
 		hiding_usage[id] = maxi(0, int(hiding_usage[id]))

@@ -210,7 +210,7 @@ func _run_loop_and_recovery() -> bool:
 	await hearing_key.interact(player)
 	_check(player.animation_state == "idle" and not FreedomLedger.hearing_restored, "Sealed key played a successful pickup animation")
 	await _solve("PianoSeal")
-	_check(_faces_target(player, main.room.props.get_node("PianoSeal")), "Piano interaction does not face the lock at its actual angle")
+	_check(player.facing == Vector2.UP, "Piano leaves Els facing the keyboard from the bench")
 	await _use("HearingKey")
 	var checkpoint_position: Vector2 = GameManager.checkpoint.position
 	var checkpoint_state: Dictionary = GameManager.checkpoint.ledger.duplicate(true)

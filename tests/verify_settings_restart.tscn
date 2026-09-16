@@ -1,0 +1,4 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://tests/verify_settings_restart.gd" id="1"]
+[node name="SettingsRestart" type="Node"]
+script = ExtResource("1")

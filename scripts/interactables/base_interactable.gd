@@ -31,11 +31,18 @@ var interrupt_serial: int = 0
 
 func _ready() -> void:
 	add_to_group("interactable")
+	if kind == "item" and item_id == "battery":
+		display_name = "Battery · 100%"
 	$Visual/PlaceholderVisual.visible = $Visual/Sprite2D.texture == null
 	EventBus.player_detected.connect(_interrupt_for_detection)
 	EventBus.player_hurt.connect(_interrupt_for_damage)
 	if kind == "puzzle":
 		progress = clampi(int(FreedomLedger.flags.get(interaction_id + "_steps", 0)), 0, puzzle_steps)
+	if interaction_id == "scratched_nameplate":
+		$Visual.hide()
+		var fragments := preload("res://scripts/interactables/nameplate_fragments.gd").new()
+		fragments.name = "NameplateFragments"
+		add_child(fragments)
 	refresh()
 
 func _interrupt_for_detection(_source: Node) -> void:
@@ -47,6 +54,9 @@ func _interrupt_for_damage(_amount: float) -> void:
 func available() -> bool:
 	if busy:
 		return false
+	if interaction_id == "scratched_nameplate":
+		# Older checkpoints only recorded the static inspection, not assembly.
+		return not FreedomLedger.flags.get("nameplate_assembled", false)
 	if interaction_id in ["nexus_bell", "echo_supply_cache"]:
 		return true
 	if kind == "puzzle":
@@ -71,6 +81,8 @@ func available() -> bool:
 
 func refresh() -> void:
 	visible = available() or kind in ["puzzle", "door", "locked_door", "hiding", "exit", "recharge", "vent", "anchor", "lore"]
+	if has_node("NameplateFragments"):
+		$NameplateFragments.set_collected(bool(FreedomLedger.flags.get("nameplate_assembled", false)))
 	if kind in ["flashlight", "tool", "item", "key", "letter"] and not visible:
 		# Remove the entire pickup presentation, including glints, dropped beams and shadows.
 		for child in get_children():
@@ -115,7 +127,11 @@ func interact(player: Node2D) -> void:
 		"puzzle": await _work_puzzle(player)
 		"recharge": await _recharge(player)
 		"forge": _activate_forge()
-		"lore": _reveal_lore()
+		"lore":
+			if interaction_id == "scratched_nameplate":
+				await _assemble_nameplate(player)
+			else:
+				_reveal_lore()
 		"anchor": await _channel_anchor(player)
 		"locked_door": await _unlock_intro(player)
 		"door", "vent": await _travel(player)
@@ -125,6 +141,8 @@ func interact(player: Node2D) -> void:
 	refresh()
 
 func _can_play_action() -> bool:
+	if interaction_id == "piano_seal":
+		return false # Its own approach, seated performance and stand-up sequence.
 	if kind in ["hiding", "lore", "exit", "vent"]:
 		return false
 	if kind == "locked_door":
@@ -132,6 +150,8 @@ func _can_play_action() -> bool:
 	if kind == "forge" and FreedomLedger.hp <= FreedomLedger.max_hp * 0.08:
 		return false
 	if kind == "recharge" and (not FreedomLedger.flags.get("flashlight", false) or (FreedomLedger.flashlight_seconds >= FreedomLedger.MAX_FLASHLIGHT_SECONDS and (FreedomLedger.current_part == 1 or FreedomLedger.hp >= FreedomLedger.max_hp))):
+		return false
+	if kind == "recharge" and FreedomLedger.battery_percentages().is_empty() and (FreedomLedger.current_part == 1 or FreedomLedger.hp >= FreedomLedger.max_hp):
 		return false
 	if kind == "puzzle" and progress == 0 and consumes_lockpick and int(FreedomLedger.inventory.get("lockpick", 0)) == 0:
 		return false
@@ -208,6 +228,21 @@ func _read_letter() -> void:
 		if hud != null:
 			hud.show_letter(title, text)
 
+func _assemble_nameplate(player: Node2D) -> void:
+	var hud = get_tree().get_first_node_in_group("hud")
+	if hud == null:
+		return
+	_prepare_action_pose(player)
+	if not await $NameplateFragments.assemble(player):
+		return
+	FreedomLedger.flags[interaction_id] = true
+	FreedomLedger.flags["nameplate_assembled"] = true
+	$NameplateFragments.set_collected(true)
+	hud.show_letter(title, text)
+	# Save the completed interaction, including its consumed floor fragments.
+	GameManager.save_checkpoint(player.global_position)
+	say("My name, in this house. That doesn't tell me whose portrait it was.", 4.0)
+
 func _hide(player: Node2D) -> void:
 	if player.hidden_spot != null or player.hiding_transition_active:
 		return
@@ -226,7 +261,7 @@ func _take_key(player: Node2D) -> void:
 			FreedomLedger.flags["piano_screech"] = true
 		elif sense == "memory":
 			FreedomLedger.flags["true_form_revealed"] = true
-		say({"hearing": "Something heard that.", "sight": "It turned toward the light.", "memory": "It knows this place now."}[sense], 2.8)
+		say({"hearing": "That cry... it came when I lifted the key.", "sight": "The second ward is open. I should lower my light.", "memory": "The last ward is gone. I shouldn't stay here."}[sense], 2.8)
 		GameManager.save_checkpoint(player.global_position)
 	else:
 		say("Another seal holds this one.")
@@ -235,15 +270,23 @@ func _work_puzzle(player: Node2D) -> void:
 	if not FreedomLedger.has_requirement(required_flag):
 		say("Not yet.")
 		return
-	if progress == 0 and consumes_lockpick and not FreedomLedger.consume_item("lockpick"):
+	if progress == 0 and consumes_lockpick and int(FreedomLedger.inventory.get("lockpick", 0)) == 0:
 		say("I need a lockpick.")
 		return
-	player.control_enabled = false
-	player.velocity = Vector2.ZERO
-	EventBus.audio_requested.emit("key_unlock")
-	await get_tree().create_timer(action_seconds, false).timeout
+	if interaction_id == "piano_seal":
+		var performance := preload("res://scripts/interactables/piano_performance.gd").new()
+		get_parent().add_child(performance)
+		if not await performance.perform(player, self, progress, action_seconds):
+			return
+	else:
+		player.control_enabled = false
+		player.velocity = Vector2.ZERO
+		EventBus.audio_requested.emit("key_unlock")
+		await get_tree().create_timer(action_seconds, false).timeout
 	if GameManager.state != GameManager.State.PLAYING:
 		return
+	if progress == 0 and consumes_lockpick:
+		FreedomLedger.consume_item("lockpick")
 	player.control_enabled = true
 	player.animation_hold = 0.0
 	progress += 1
@@ -251,7 +294,7 @@ func _work_puzzle(player: Node2D) -> void:
 	EventBus.noise_created.emit(global_position, 300.0, "GENERIC")
 	if progress >= puzzle_steps:
 		FreedomLedger.flags[interaction_id] = true
-		say("The seal gives.")
+		say({"piano_seal": "A lock hidden in a piano. There's a key inside.", "vanity_seal": "The vanity's compartment is open.", "ritual_seal": "The stone has split along the seal."}.get(interaction_id, "The seal gives."))
 
 func _recharge(player: Node2D) -> void:
 	if not FreedomLedger.flags.get("flashlight", false):
@@ -262,13 +305,17 @@ func _recharge(player: Node2D) -> void:
 		return
 	var started_serial := interrupt_serial
 	var elapsed := 0.0
+	var can_recover := FreedomLedger.current_part == 2 and FreedomLedger.hp < FreedomLedger.max_hp
+	if FreedomLedger.battery_percentages().is_empty() and not can_recover:
+		say("I need a battery. This station cannot charge an empty bag.")
+		return
 	player.control_enabled = false
 	player.velocity = Vector2.ZERO
 	player.set_flashlight(false, false)
 	player.is_crouching = false
 	player.is_sprinting = false
 	player.visual.scale = Vector2.ONE
-	say("The power station restores me. Move to stop." if FreedomLedger.current_part == 2 else "Charging. Move to stop.", 2.0)
+	say("Recovering. Charging uses my batteries. Move to stop." if FreedomLedger.current_part == 2 else "Charging from my batteries. Move to stop.", 3.0)
 	player.play_action("recharge", 12.0)
 	while elapsed < 12.0:
 		await get_tree().physics_frame
@@ -278,10 +325,13 @@ func _recharge(player: Node2D) -> void:
 			break
 		var step := minf(get_physics_process_delta_time(), 12.0 - elapsed)
 		elapsed += step
-		FreedomLedger.set_flashlight_seconds(FreedomLedger.flashlight_seconds + FreedomLedger.MAX_FLASHLIGHT_SECONDS * step / 12.0)
+		FreedomLedger.recharge_from_batteries(FreedomLedger.MAX_FLASHLIGHT_SECONDS * step / 12.0)
 		if FreedomLedger.current_part == 2:
 			FreedomLedger.heal(FreedomLedger.max_hp * step / 12.0)
 		EventBus.anchor_progress.emit("Charging — move to stop", elapsed, 12.0)
+		var charge_done := FreedomLedger.flashlight_seconds >= FreedomLedger.MAX_FLASHLIGHT_SECONDS or FreedomLedger.battery_percentages().is_empty()
+		if charge_done and (FreedomLedger.current_part == 1 or FreedomLedger.hp >= FreedomLedger.max_hp):
+			break
 	player.animation_hold = 0.0
 	player.control_enabled = GameManager.state == GameManager.State.PLAYING
 	if player.control_enabled:
@@ -302,6 +352,12 @@ func _activate_forge() -> void:
 	say("Blood rites awakened. R: silencing circle. T: close-range stun. H: field guide.", 4.0)
 
 func _reveal_lore() -> void:
+	if interaction_id == "the_note":
+		var hud = get_tree().get_first_node_in_group("hud")
+		if hud != null:
+			FreedomLedger.flags[interaction_id] = true
+			hud.show_letter(title, text)
+		return
 	if interaction_id == "nexus_bell":
 		var room = get_tree().get_first_node_in_group("room")
 		if room != null and not room.ring_ward_bell():

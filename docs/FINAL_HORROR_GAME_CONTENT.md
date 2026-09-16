@@ -2,6 +2,8 @@
 
 **Hollowmere Estate · Complete spoiler edition · 16 September 2026**
 
+**Runtime update:** All thirteen complete first-person letter bodies below are integrated in `data/estate_layout.json`, retaining neutral numbered titles and original IDs/positions. Documents use the original parchment with animated unrolling, typewriter text, and forward/back paging. The GF-05 nameplate assembly reveals **VANTREE** without resolving Els's ancestry.
+
 This document answers the supplied eight-part content-generation brief. It combines the existing story and playable routes with newly authored room descriptions, complete letters, inspection copy, and ending presentation. It is a narrative and environmental design deliverable; writing this file does not install its new prose or cinematics in the game.
 
 **Reading key:** **Established** means supported by the current canon or runtime data. **Authored expansion** means final proposed writing or visual direction created for this document. **Implementation gap** identifies a difference that must be resolved before the corresponding proposed experience can ship. Throughout the object catalog, detailed wear, ownership interpretations, and suggested inspection lines are authored expansions unless explicitly identified as existing text. Actual item quantities, coordinates, gates, and state changes come from the current project.
@@ -66,7 +68,7 @@ Authored art direction: upper rooms retain tarnished brass and faded plum uphols
 | Partial Mercy Part II | Hearing and Sight remain active; Memory remains sealed | A partial circle blocks Hearing only; cover still matters |
 | Untouched Part II | All three ordinary senses remain dormant | Use the gadget route; do not describe an unsupported sensory awakening |
 
-The current Untouched Hound first becomes an active encounter at CR-03, but its stage-zero contact remains a nonlethal stagger. A lethal Untouched chase would require a separately approved mechanics change; this bible does not quietly grant it Touch or Sight.
+The current Untouched Hound first becomes an active encounter at CR-03, but its stage-zero contact remains a nonlethal stagger. This is the deliberate final branch rule through the Nexus: no damage on blind contact, no Touch or Sight awakening.
 
 In Part I, a committed successful attack causes capture. In Part II, attacks reduce HP. The attack winds up and checks reach, facing, cover, and hiding state again at its strike frame. Blood circles suppress senses while the Hound is inside their area; they do not make Els immune to contact. Doors and furniture are spatial constraints, not universal sanctuaries. There is no salt, firearm, spoken exorcism, or piano melody that defeats the entity.
 
@@ -162,7 +164,7 @@ Black resolves into the Cold Foyer at 2:47 AM. Els is on the floor; her dropped 
 >
 > After that... nothing. Six hours just gone.
 
-She tests the locked Music Room-labeled door: “Locked.” Then: “Of course.” The naming is an existing presentation quirk: this door loads the Ground Floor at the Grand Foyer rather than directly placing her beside the piano. She recovers the flashlight—“Mine...” / “How did it get over there?”—and the tool pouch—“At least I came prepared.” Her hands make a competent unlocking movement. The door opens, the building creaks, and she calls “Hello?” No reply identifies the creature.
+She tests the locked Grand Foyer door: “Locked.” Then: “Of course.” The door loads the Ground Floor at the Grand Foyer (GF-01), matching its label. She recovers the flashlight—“Mine...” / “How did it get over there?”—and the tool pouch—“At least I came prepared.” Her hands make a competent unlocking movement. The door opens, the building creaks, and she calls “Hello?” No reply identifies the creature.
 
 The Grand Foyer offers a front door and a note. The quiet route is already possible: test the front door, then use it again without taking a key or being detected. Most players instead interpret the house as a collection of tasks and move toward the Music Room. The first piano seal rewards patience; its key rewards the wrong participant. The resulting screech and Els's “Something heard that.” transform the preceding footsteps into a new threat.
 
@@ -213,7 +215,7 @@ The player should finish remembering an action they performed confidently before
 
 The current map contains **37 named rooms across seven zones**. Rooms within a zone are contiguous horizontal spaces; moving east or west crosses an open room boundary. Only explicitly cataloged doors and vents perform scene travel. Coordinates below are internal zone coordinates, supplied for unambiguous placement rather than intended HUD text. The normal walkable depth is approximately y=354–634.
 
-Room lighting descriptions are art direction. Current Sight exposure is determined by configured x-ranges and line of sight, not the brightness of an individual flickering sprite. Likewise, the painted pantry bypass and upper shadow lane do not independently supply their implied mechanical protection in the current implementation.
+Room lighting descriptions are art direction. Current Sight exposure is determined by configured x-ranges and line of sight, not the brightness of an individual flickering sprite. The misleading pantry glass/bypass and upper shadow strip have been removed. Actual rugs, configured light ranges, and opaque furniture retain their existing rules.
 
 ### Intro
 
@@ -253,9 +255,9 @@ Room lighting descriptions are art direction. Current Sight exposure is determin
 
 #### GF-04 — Servant's Pantry
 
-- **Physical layout:** A service pantry crowded at the rear with cookware and shelving. A screen-like wardrobe provides concealment; bottles lie farther east. Broken-glass dressing leads toward the corridor.
+- **Physical layout:** A service pantry crowded at the rear with cookware and shelving. A screen-like wardrobe provides concealment; bottles lie farther east. The passage continues east around ordinary furniture.
 - **Narrative purpose:** Routine domestic work becomes a sound hazard as soon as Hearing returns.
-- **Gameplay:** Enter crouched to avoid the cookware event; take two bottles and learn the marked hide. The decorative glass is not a separately implemented GLASS surface here.
+- **Gameplay:** Enter crouched to avoid the cookware event; take two bottles and learn the marked hide. The misleading decorative shard field has been removed.
 - **Map placement:** ground, x=2160–2880; configured floor types: WOOD; individual dressing rugs override their own footprints to carpet.
 - **Open boundaries:** west to GF-03; east to GF-05. Travel doors and vents are listed individually below.
 
@@ -263,7 +265,7 @@ Room lighting descriptions are art direction. Current Sight exposure is determin
 
 - **Physical layout:** A narrow-feeling side passage built from benches, a service sideboard, a loose clock, and a scratched nameplate. The lower lane leaves room to pass the rear furniture.
 - **Narrative purpose:** Absence becomes evidence: a name has been removed more carefully than the rest of the room was maintained.
-- **Gameplay:** Collect the wind-up clock, examine the nameplate, and continue quietly. The painted lower bypass does not itself override WOOD to CARPET in current code.
+- **Gameplay:** Collect the wind-up clock, examine the nameplate, and continue quietly. Use actual rugs and crouching for quieter steps; the misleading painted bypass has been removed.
 - **Map placement:** ground, x=2880–3600; configured floor types: WOOD; individual dressing rugs override their own footprints to carpet.
 - **Open boundaries:** west to GF-04; east to GF-06. Travel doors and vents are listed individually below.
 
@@ -361,7 +363,7 @@ Room lighting descriptions are art direction. Current Sight exposure is determin
 
 - **Physical layout:** The ventilation junction has shelves, a bench, small candle furniture, and two separate vent mouths. The usable floor ends at the zone boundary.
 - **Narrative purpose:** Service shortcuts connect grand architecture to the cellar it conceals.
-- **Gameplay:** Choose the ground vent or the basement vent by its prompt. A legacy candle table beyond x=7000 is unreachable dressing, flagged for removal rather than a hidden room.
+- **Gameplay:** Choose the ground vent or the basement vent by its prompt. The legacy candle table beyond x=7000 and its candle have been removed.
 - **Map placement:** upper, x=6000–7000; configured floor types: CARPET; individual dressing rugs override their own footprints to carpet.
 - **Open boundaries:** west to UF-06. Travel doors and vents are listed individually below.
 
@@ -579,7 +581,7 @@ OBJECT NAME: Music Room — intro_exit [`intro/intro_exit`]
 - Location: GF-00 — Cold Foyer; intro x=1590, y=362.
 - Appearance: A tall dark passage frame with a clearly placed handle, a restrained destination marker, and an unobstructed approach for the door action.
 - Lore/backstory tied to this object: The opening connects established parts of Hollowmere or its buried prison. Its label expresses function; it does not establish a separate unseen room.
-- In-game purpose: Music Room-labeled introductory lock; actually loads Ground Floor at GF-01. Requires a prior door test, the flashlight, and the tool-pouch flag.
+- In-game purpose: Grand Foyer introductory lock; loads Ground Floor at GF-01. Requires a prior door test, the flashlight, and the tool-pouch flag.
 - Player interaction: E checks requirements, plays the planted unlock/open/departure action, and loads the linked arrival. A denied requirement gives a hint without moving Els. The successful introductory unlock takes 1.2 seconds before opening and the “Hello?” beat; it does not spend a pouch pick.
 - Connection to other objects/clues: Destination `ground` / `start`; GF-01. Only the requirement explicitly stated for this passage gates travel.
 
@@ -589,7 +591,7 @@ OBJECT NAME: Power station and support table — gf_00_charge_1 [`intro/gf_00_ch
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `flashlight` in GF-00; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Bench — intro/BrokenTable [`intro/BrokenTable`]
@@ -874,7 +876,7 @@ OBJECT NAME: Power station and support table — gf_01_charge_1 [`ground/gf_01_c
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `front_door` in GF-01; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Coat Stand — ground/decoration-03 [`ground/decoration-03`]
@@ -953,9 +955,9 @@ OBJECT NAME: Memory fragment A — the second Loop [`vantree_memory_fragment_A`]
 
 - Location: Persistent story flag after a second completed Loop; no separate floor pickup or reader page currently exists.
 - Appearance: Authored future presentation: a brief imperfect memory-card treatment with the same paper grain as letters. Do not render it as a physical object to collect.
-- Lore/backstory tied to this object: Established: the second Loop sets this flag. Its full content and on-screen reveal are not implemented in the examined scripts.
+- Lore/backstory tied to this object: Established: the second Loop sets this flag. Its approved first-person page opens after the second wake and remains accessible from the inventory.
 - In-game purpose: Secret recognition of repetition. Implementation gap: the reset run lacks enough reachable lockpicks to complete both required lock-work puzzles.
-- Player interaction: Current behavior is a flag assignment only if a second Loop occurs. Authored first-person fragment: “I remember the relief before the doorway. I remember believing that a full hand meant an open road. I do not remember leaving. The room remembers how to receive me.” This is proposed narrative copy, not recovered canon.
+- Player interaction: On the second Loop, open the parchment reader with the approved fragment: “I remember the relief before the doorway. I remember believing that a full hand meant an open road. I do not remember leaving. The room remembers how to receive me.” The fragment expresses uncertain memory and adds no definitive ancestry or entity origin.
 - Connection to other objects/clues: Loop outcome, piano and vanity lockpick costs, and the GF-07 spare. The intended repeat route needs a supply correction before it is ordinarily finishable.
 
 ### GF-02 — Dining Hall
@@ -974,8 +976,8 @@ OBJECT NAME: Flashlight Battery [`ground/ground_battery`]
 - Location: GF-02 — Dining Hall; ground x=1280, y=470.
 - Appearance: A short practical flashlight cell with dulled metal ends and a worn wrapper; keep it smaller than Els's hand span. This pickup grants 1; a multi-item pickup is one placed bundle.
 - Lore/backstory tied to this object: A practical supply compatible with Els's own light; its original purchaser is unknown.
-- In-game purpose: Restore 45 seconds of charge, capped at 90, when Q selects a battery.
-- Player interaction: E takes the bundle, adds 1 battery, and removes the floor sprite for the run. Q chooses a battery first only below 50 seconds charge, otherwise bottles before clocks; it consumes one selected item.
+- In-game purpose: Each full cell stores 45 seconds of energy. Q transfers up to 45 seconds, capped at 90 total; unused energy stays on that cell.
+- Player interaction: E takes the bundle, adds 1 battery, and removes the floor sprite for the run. Q transfers battery energy first only below 50 seconds charge, otherwise consumes bottles before clocks. Battery energy is retained until spent; the bag lists each cell percentage.
 - Connection to other objects/clues: `dining_table_hide` in GF-02; the inventory count confirms acquisition.
 
 OBJECT NAME: Power station and support table — gf_02_charge_1 [`ground/gf_02_charge_1`]
@@ -984,7 +986,7 @@ OBJECT NAME: Power station and support table — gf_02_charge_1 [`ground/gf_02_c
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `dining_table_hide` in GF-02; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Settee — ground/Furniture1 [`ground/Furniture1`]
@@ -1218,7 +1220,7 @@ OBJECT NAME: Vantree - I [`ground/vantree_01`]
 
 - Location: GF-03 — Music Room; ground x=2070, y=455.
 - Appearance: A separate folded page, numbered 1, with a readable central text block and frayed handling edges. In Music Room, keep its small warm pickup highlight distinct from the closed decorative books.
-- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is authored expansion for this document.
+- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is integrated in the runtime paging reader.
 - In-game purpose: Counted estate letter toward the four-of-seven Vantree gate.
 - Player interaction: E collects the page, removes its floor representation, and opens the paused reader. Current complete runtime text: “The first ward took hearing. Silence made the prisoner gentle, or seemed to.”
 
@@ -1237,7 +1239,7 @@ OBJECT NAME: Power station and support table — gf_03_charge_1 [`ground/gf_03_c
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `piano_seal` in GF-03; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Sideboard — ground/Furniture2 [`ground/Furniture2`]
@@ -1383,7 +1385,7 @@ OBJECT NAME: Glass Bottles x2 [`ground/pantry_bottles`]
 - Appearance: A usable dark glass bottle with a clear neck silhouette and a small floor contact shadow. This pickup grants 2; a multi-item pickup is one placed bundle.
 - Lore/backstory tied to this object: A household supply repurposed into a deliberate sound source. Decorative bottles elsewhere remain separate.
 - In-game purpose: Q places a GLASS noise 260 units ahead, radius 576; counts toward the Echoes gate only on Untouched.
-- Player interaction: E takes the bundle, adds 2 bottles, and removes the floor sprite for the run. Q chooses a battery first only below 50 seconds charge, otherwise bottles before clocks; it consumes one selected item.
+- Player interaction: E takes the bundle, adds 2 bottles, and removes the floor sprite for the run. Q transfers battery energy first only below 50 seconds charge, otherwise consumes bottles before clocks. Battery energy is retained until spent; the bag lists each cell percentage.
 - Connection to other objects/clues: `pantry_wardrobe` in GF-04; the inventory count confirms acquisition.
 
 OBJECT NAME: Power station and support table — gf_04_charge_1 [`ground/gf_04_charge_1`]
@@ -1392,7 +1394,7 @@ OBJECT NAME: Power station and support table — gf_04_charge_1 [`ground/gf_04_c
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `pantry_wardrobe` in GF-04; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Pans — ground/decoration-01 [`ground/decoration-01`]
@@ -1521,23 +1523,13 @@ OBJECT NAME: Window — ground/window-2420 [`ground/window-2420`]
 - Player interaction: Current behavior: no E interaction. Authored inspection copy, if an examine system is later added: “I can see beyond it. I cannot get through it.”
 - Connection to other objects/clues: Nearest functional landmark: `pantry_wardrobe` in GF-04.
 
-OBJECT NAME: Broken-glass field [`ground/glass-field`]
+OBJECT NAME: Retired pantry glass field [`ground/glass-field`]
 
-- Location: GF-04 into GF-05; visual shard scatter x=2390–3570, y=363–533.
-- Appearance: Ninety-five small angular shards catch isolated highlights; the field is one environmental assembly, not ninety-five collectible items.
-- Lore/backstory tied to this object: Broken service glass supports the scene of disrupted domestic work; who broke it is unknown.
-- In-game purpose: Visual hazard hint. Implementation gap: this field currently does not override the underlying WOOD surface to GLASS.
-- Player interaction: No E interaction. Current footsteps follow the underlying configured surface; do not promise an automatic glass-triggered hunt merely from crossing the artwork.
-- Connection to other objects/clues: Actual GLASS noise comes from thrown bottles or an uncrouched creaking-floor step.
+- Runtime status: Removed the false glass-hazard artwork; ordinary underlying surfaces remain.
 
-OBJECT NAME: Painted pantry lower bypass [`ground/pantry-bypass`]
+OBJECT NAME: Retired pantry bypass [`ground/pantry-bypass`]
 
-- Location: GF-04 into GF-05; x=2380–3580, y=550–624.
-- Appearance: A dark bordered lower strip separates the approach lane from the visual shard field.
-- Lore/backstory tied to this object: A service route should allow careful passage around clutter.
-- In-game purpose: Visual route cue. Implementation gap: the strip alone does not create CARPET noise behavior.
-- Player interaction: Move around footprints and crouch for quieter steps. Actual dressing rugs provide carpet where their footprints overlap.
-- Connection to other objects/clues: Cookware entry event, glass-field assembly, and surface_at.
+- Runtime status: Removed the misleading quiet-lane artwork; actual rugs still reduce footstep noise.
 
 ### GF-05 — Side Corridor
 
@@ -1547,16 +1539,16 @@ OBJECT NAME: Wind-Up Clock [`ground/side_clock`]
 - Appearance: A palm-sized wind-up clock/watch with a brass rim, dark dial, and short winding crown. Authored dial rests at 2:47 before use; it is a visual echo, not a time-setting puzzle. This pickup grants 1; a multi-item pickup is one placed bundle.
 - Lore/backstory tied to this object: A portable mechanism turns a domestic measure of time into a sound lure. Its hands do not establish elapsed world time.
 - In-game purpose: Q places a GENERIC noise 180 units ahead, radius 384; counts toward the Echoes gate only on Untouched. The current implementation emits a single noise event, not a persistent ticking actor.
-- Player interaction: E takes the bundle, adds 1 clock, and removes the floor sprite for the run. Q chooses a battery first only below 50 seconds charge, otherwise bottles before clocks; it consumes one selected item.
+- Player interaction: E takes the bundle, adds 1 clock, and removes the floor sprite for the run. Q transfers battery energy first only below 50 seconds charge, otherwise consumes bottles before clocks. Battery energy is retained until spent; the bag lists each cell percentage.
 - Connection to other objects/clues: `scratched_nameplate` in GF-05; the inventory count confirms acquisition.
 
-OBJECT NAME: The removed family name [`ground/scratched_nameplate`]
+OBJECT NAME: The broken Vantree nameplate [`ground/scratched_nameplate`]
 
-- Location: GF-05 — Side Corridor; ground x=3420, y=420.
-- Appearance: A metal nameplate with deliberate scoring across its identifying letters; a pale outline marks where a name should be legible.
-- Lore/backstory tied to this object: Established: the removal is more careful than the surrounding portrait treatment. No readable surname is recovered here.
+- Location: GF-05 — Side Corridor; ground x=3420, y=480.
+- Appearance: Three fallen metal fragments and two smaller chips, using the existing weathered-metal texture.
+- Lore/backstory tied to this object: Assembly recovers VANTREE, Els's family name. No first name survives and no ancestry is established.
 - In-game purpose: Environmental identity clue; no item or gate flag requirement depends on reading it.
-- Player interaction: E reveals: “A family name has been cut away more carefully than the portrait above it.” Proposed Els inspection: “Someone wanted the name gone. Not the place where it belonged.”
+- Player interaction: E plays a short reach, then lifts and joins the fragments in a paused inspection. The reconstructed account opens in the existing document reader. The three collected pieces disappear; two non-interactive chips remain. The one-time state is saved in the checkpoint. Els comments: “My name, in this house. That doesn't tell me whose portrait it was.”
 - Connection to other objects/clues: The Vantree letters and the complete name at CR-04. The nearby portrait is described by lore; there is no separate placed collectible photograph in the current data.
 
 OBJECT NAME: Power station and support table — gf_05_charge_1 [`ground/gf_05_charge_1`]
@@ -1565,7 +1557,7 @@ OBJECT NAME: Power station and support table — gf_05_charge_1 [`ground/gf_05_c
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `side_clock` in GF-05; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Bench — ground/Furniture3 [`ground/Furniture3`]
@@ -1673,7 +1665,7 @@ OBJECT NAME: Vantree - II [`ground/vantree_02`]
 
 - Location: GF-06 — Reading Nook; ground x=3850, y=460.
 - Appearance: A separate folded page, numbered 2, with a readable central text block and frayed handling edges. In Reading Nook, keep its small warm pickup highlight distinct from the closed decorative books.
-- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is authored expansion for this document.
+- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is integrated in the runtime paging reader.
 - In-game purpose: Counted estate letter toward the four-of-seven Vantree gate.
 - Player interaction: E collects the page, removes its floor representation, and opens the paused reader. Current complete runtime text: “A custodian keeps a door. A jailer decides who is permitted to need one.”
 
@@ -1692,7 +1684,7 @@ OBJECT NAME: Power station and support table — ground_recharge [`ground/ground
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `vantree_02` in GF-06; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Bookshelf — ground/Furniture4 [`ground/Furniture4`]
@@ -1820,7 +1812,7 @@ OBJECT NAME: Power station and support table — gf_07_charge_1 [`ground/gf_07_c
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `coat_rack_hide` in GF-07; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Serving Cart — ground/decoration-15 [`ground/decoration-15`]
@@ -2094,7 +2086,7 @@ OBJECT NAME: Power station and support table — gf_09_charge_1 [`ground/gf_09_c
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `upper_stairs` in GF-09; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Bench — ground/Furniture6 [`ground/Furniture6`]
@@ -2195,7 +2187,7 @@ OBJECT NAME: Power station and support table — gf_10_charge_1 [`ground/gf_10_c
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `basement_stairs` in GF-10; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Sideboard — ground/decoration-21 [`ground/decoration-21`]
@@ -2312,7 +2304,7 @@ OBJECT NAME: Vantree - III [`upper/vantree_03`]
 
 - Location: UF-01 — Portrait Gallery; upper x=700, y=455.
 - Appearance: A separate folded page, numbered 3, with a readable central text block and frayed handling edges. In Portrait Gallery, keep its small warm pickup highlight distinct from the closed decorative books.
-- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is authored expansion for this document.
+- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is integrated in the runtime paging reader.
 - In-game purpose: Counted estate letter toward the four-of-seven Vantree gate.
 - Player interaction: E collects the page, removes its floor representation, and opens the paused reader. Current complete runtime text: “It watched the portraits before it watched us. We covered every painted eye.”
 
@@ -2331,7 +2323,7 @@ OBJECT NAME: Power station and support table — uf_01_charge_1 [`upper/uf_01_ch
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `vantree_03` in UF-01; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Bench — upper/decoration-01 [`upper/decoration-01`]
@@ -2495,7 +2487,7 @@ OBJECT NAME: Power station and support table — uf_02_charge_1 [`upper/uf_02_ch
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `upper_hide_01` in UF-02; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Bench — upper/Furniture1 [`upper/Furniture1`]
@@ -2675,7 +2667,7 @@ OBJECT NAME: Vantree - IV [`upper/vantree_04`]
 
 - Location: UF-03 — Nursery; upper x=2780, y=450.
 - Appearance: A separate folded page, numbered 4, with a readable central text block and frayed handling edges. In Nursery, keep its small warm pickup highlight distinct from the closed decorative books.
-- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is authored expansion for this document.
+- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is integrated in the runtime paging reader.
 - In-game purpose: Counted estate letter toward the four-of-seven Vantree gate.
 - Player interaction: E collects the page, removes its floor representation, and opens the paused reader. Current complete runtime text: “The Custodian was a kinder word. Jailer was the honest one.”
 
@@ -2694,7 +2686,7 @@ OBJECT NAME: Power station and support table — uf_03_charge_1 [`upper/uf_03_ch
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `upper_hide_02` in UF-03; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Settee — upper/Furniture3 [`upper/Furniture3`]
@@ -2841,14 +2833,9 @@ OBJECT NAME: Window — upper/window-2420 [`upper/window-2420`]
 - Player interaction: Current behavior: no E interaction. Authored inspection copy, if an examine system is later added: “I can see beyond it. I cannot get through it.”
 - Connection to other objects/clues: Nearest functional landmark: `upper_hide_02` in UF-03.
 
-OBJECT NAME: Upper lower shadow lane [`upper/shadow-lane`]
+OBJECT NAME: Retired upper shadow strip [`upper/shadow-lane`]
 
-- Location: UF-03 through UF-07; visual strip x=2700–6300, y=550–624.
-- Appearance: A subdued bordered lower lane offers a visual path under the pale upper-floor light bands.
-- Lore/backstory tied to this object: A service-like edge contrasts with the formal rooms.
-- In-game purpose: Visual cue only: current exposure uses x-ranges, so walking lower does not automatically remove exposure.
-- Player interaction: Turn off the torch, crouch, and use actual opaque furniture/line-of-sight cover. Do not rely on this painted strip alone.
-- Connection to other objects/clues: Sight Key, vanity, and configured light_regions.
+- Runtime status: Removed the false safe-lane artwork; Sight still uses configured light ranges and opaque cover.
 
 OBJECT NAME: Upper moonlight band 1 [`upper/moon-band-1`]
 
@@ -2875,8 +2862,8 @@ OBJECT NAME: Flashlight Battery [`upper/upper_battery`]
 - Location: UF-04 — Linen Hall; upper x=3770, y=470.
 - Appearance: A short practical flashlight cell with dulled metal ends and a worn wrapper; keep it smaller than Els's hand span. This pickup grants 1; a multi-item pickup is one placed bundle.
 - Lore/backstory tied to this object: A practical supply compatible with Els's own light; its original purchaser is unknown.
-- In-game purpose: Restore 45 seconds of charge, capped at 90, when Q selects a battery.
-- Player interaction: E takes the bundle, adds 1 battery, and removes the floor sprite for the run. Q chooses a battery first only below 50 seconds charge, otherwise bottles before clocks; it consumes one selected item.
+- In-game purpose: Each full cell stores 45 seconds of energy. Q transfers up to 45 seconds, capped at 90 total; unused energy stays on that cell.
+- Player interaction: E takes the bundle, adds 1 battery, and removes the floor sprite for the run. Q transfers battery energy first only below 50 seconds charge, otherwise consumes bottles before clocks. Battery energy is retained until spent; the bag lists each cell percentage.
 - Connection to other objects/clues: `upper_vent` in UF-04; the inventory count confirms acquisition.
 
 OBJECT NAME: Power station and support table — uf_04_charge_1 [`upper/uf_04_charge_1`]
@@ -2885,7 +2872,7 @@ OBJECT NAME: Power station and support table — uf_04_charge_1 [`upper/uf_04_ch
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `upper_vent` in UF-04; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Sideboard — upper/Furniture2 [`upper/Furniture2`]
@@ -3040,7 +3027,7 @@ OBJECT NAME: Power station and support table — upper_recharge [`upper/upper_re
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `bathroom_bottle` in UF-05; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Glass Bottle [`upper/bathroom_bottle`]
@@ -3049,7 +3036,7 @@ OBJECT NAME: Glass Bottle [`upper/bathroom_bottle`]
 - Appearance: A usable dark glass bottle with a clear neck silhouette and a small floor contact shadow. This pickup grants 1; a multi-item pickup is one placed bundle.
 - Lore/backstory tied to this object: A household supply repurposed into a deliberate sound source. Decorative bottles elsewhere remain separate.
 - In-game purpose: Q places a GLASS noise 260 units ahead, radius 576; counts toward the Echoes gate only on Untouched.
-- Player interaction: E takes the bundle, adds 1 bottle, and removes the floor sprite for the run. Q chooses a battery first only below 50 seconds charge, otherwise bottles before clocks; it consumes one selected item.
+- Player interaction: E takes the bundle, adds 1 bottle, and removes the floor sprite for the run. Q transfers battery energy first only below 50 seconds charge, otherwise consumes bottles before clocks. Battery energy is retained until spent; the bag lists each cell percentage.
 - Connection to other objects/clues: `upper_stairs` in UF-06; the inventory count confirms acquisition.
 
 OBJECT NAME: Washstand — upper/Furniture4 [`upper/Furniture4`]
@@ -3305,7 +3292,7 @@ OBJECT NAME: Power station and support table — uf_07_charge_1 [`upper/uf_07_ch
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `vent_to_ground` in UF-07; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Sideboard — upper/Furniture6 [`upper/Furniture6`]
@@ -3371,23 +3358,13 @@ OBJECT NAME: Bookshelf — upper/decoration-18 [`upper/decoration-18`]
 - Player interaction: Current behavior: no E interaction. Authored inspection copy, if an examine system is later added: “The useful page would have to be somewhere else.”
 - Connection to other objects/clues: Nearest functional landmark: `vent_to_basement` in UF-07.
 
-OBJECT NAME: Side Table — upper/decoration-19 [`upper/decoration-19`]
+OBJECT NAME: Removed legacy upper candle table [`upper/decoration-19`]
 
-- Location: UF-07 — Vent Junction A; upper x=7130, y=392. Beyond the playable eastern boundary.
-- Appearance: A compact dark-wood table with a narrow apron, four visible feet, and a dull circular mark on its top. A pale scrape marks the near-left edge. Art width specification: 54 units before its parent/asset scale.
-- Lore/backstory tied to this object: Small domestic surfaces kept ordinary tasks within reach of the larger work of the room. Here its placement supports the room’s role: service junction storage.
-- In-game purpose: Legacy out-of-bounds dressing: remove or move inside a deliberate layout pass; it is not a secret reachable object.
-- Player interaction: Unreachable in ordinary play; no pickup or clue depends on it.
-- Connection to other objects/clues: Nearest functional landmark: `vent_to_basement` in UF-07.
+- Runtime status: Removed the table at x=7130 beyond the 7000-wide zone. This is not a reachable object or secret.
 
-OBJECT NAME: Candle — upper/decoration-19/detail-1 [`upper/decoration-19/detail-1`]
+OBJECT NAME: Removed legacy candle detail [`upper/decoration-19/detail-1`]
 
-- Location: UF-07 — Vent Junction A; upper x=7130, y=392. Detail on `upper/decoration-19`, local offset [0, -39]; parent coordinates shown. Beyond the playable eastern boundary.
-- Appearance: A short wax candle with a blackened wick, uneven rim, and a localized warm halo. A pale scrape marks the near-left edge. Art width specification: 22 units before its parent/asset scale.
-- Lore/backstory tied to this object: The light suggests continuing maintenance but does not prove a recent visitor. Here its placement supports the room’s role: service junction storage.
-- In-game purpose: Legacy out-of-bounds dressing: remove or move inside a deliberate layout pass; it is not a secret reachable object.
-- Player interaction: Unreachable in ordinary play; no pickup or clue depends on it.
-- Connection to other objects/clues: Mounted on `upper/decoration-19`; Nearest functional landmark: `vent_to_basement` in UF-07.
+- Runtime status: Removed together with its out-of-bounds parent table.
 
 OBJECT NAME: Ordinary table — uf_07_charge_2 [`uf_07_charge_2`]
 
@@ -3460,7 +3437,7 @@ OBJECT NAME: Power station and support table — bs_01_charge_1 [`basement/bs_01
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `ground_stairs` in BS-01; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Bottle Crate — basement/decoration-01 [`basement/decoration-01`]
@@ -3579,7 +3556,7 @@ OBJECT NAME: Power station and support table — bs_04_charge_1 [`basement/bs_04
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `maintenance_exit` in BS-04; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Sideboard — basement/Furniture1 [`basement/Furniture1`]
@@ -3725,7 +3702,7 @@ OBJECT NAME: Power station and support table — bs_02_charge_1 [`basement/bs_02
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `basement_vent` in BS-02; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Sideboard — basement/Furniture2 [`basement/Furniture2`]
@@ -3896,7 +3873,7 @@ OBJECT NAME: Vantree - V [`basement/vantree_05`]
 
 - Location: BS-03 — Ossuary Nook; basement x=3460, y=450.
 - Appearance: A separate folded page, numbered 5, with a readable central text block and frayed handling edges. In Ossuary Nook, keep its small warm pickup highlight distinct from the closed decorative books.
-- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is authored expansion for this document.
+- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is integrated in the runtime paging reader.
 - In-game purpose: Counted estate letter toward the four-of-seven Vantree gate.
 - Player interaction: E collects the page, removes its floor representation, and opens the paused reader. Current complete runtime text: “Memory made refuge into evidence. Every hiding place became a confession.”
 
@@ -3913,7 +3890,7 @@ OBJECT NAME: Vantree - VI [`basement/vantree_06`]
 
 - Location: BS-03 — Ossuary Nook; basement x=3780, y=470.
 - Appearance: A separate folded page, numbered 6, with a readable central text block and frayed handling edges. In Ossuary Nook, keep its small warm pickup highlight distinct from the closed decorative books.
-- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is authored expansion for this document.
+- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is integrated in the runtime paging reader.
 - In-game purpose: Counted estate letter toward the four-of-seven Vantree gate.
 - Player interaction: E collects the page, removes its floor representation, and opens the paused reader. Current complete runtime text: “Below the house, the roots carry an older sentence into older stone.”
 
@@ -3930,7 +3907,7 @@ OBJECT NAME: Vantree - VII [`basement/vantree_07`]
 
 - Location: BS-03 — Ossuary Nook; basement x=4120, y=450.
 - Appearance: A separate folded page, numbered 7, with a readable central text block and frayed handling edges. In Ossuary Nook, keep its small warm pickup highlight distinct from the closed decorative books.
-- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is authored expansion for this document.
+- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is integrated in the runtime paging reader.
 - In-game purpose: Counted estate letter toward the four-of-seven Vantree gate.
 - Player interaction: E collects the page, removes its floor representation, and opens the paused reader. Current complete runtime text: “Leave one ward closed. Freedom is not the same thing as completion.”
 
@@ -3949,7 +3926,7 @@ OBJECT NAME: Power station and support table — bs_03_charge_1 [`basement/bs_03
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `vantree_05` in BS-03; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Wine Shelf — basement/Furniture4 [`basement/Furniture4`]
@@ -4104,7 +4081,7 @@ OBJECT NAME: Power station and support table — bs_05_charge_1 [`basement/bs_05
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `ritual_seal` in BS-05; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Sideboard — basement/Furniture5 [`basement/Furniture5`]
@@ -4259,7 +4236,7 @@ OBJECT NAME: Glass Bottles x2 [`basement/root_bottles`]
 - Appearance: A usable dark glass bottle with a clear neck silhouette and a small floor contact shadow. This pickup grants 2; a multi-item pickup is one placed bundle.
 - Lore/backstory tied to this object: A household supply repurposed into a deliberate sound source. Decorative bottles elsewhere remain separate.
 - In-game purpose: Q places a GLASS noise 260 units ahead, radius 576; counts toward the Echoes gate only on Untouched.
-- Player interaction: E takes the bundle, adds 2 bottles, and removes the floor sprite for the run. Q chooses a battery first only below 50 seconds charge, otherwise bottles before clocks; it consumes one selected item.
+- Player interaction: E takes the bundle, adds 2 bottles, and removes the floor sprite for the run. Q transfers battery energy first only below 50 seconds charge, otherwise consumes bottles before clocks. Battery energy is retained until spent; the bag lists each cell percentage.
 - Connection to other objects/clues: `root_clock` in BS-06; the inventory count confirms acquisition.
 
 OBJECT NAME: Wind-Up Clock [`basement/root_clock`]
@@ -4268,7 +4245,7 @@ OBJECT NAME: Wind-Up Clock [`basement/root_clock`]
 - Appearance: A palm-sized wind-up clock/watch with a brass rim, dark dial, and short winding crown. Authored dial rests at 2:47 before use; it is a visual echo, not a time-setting puzzle. This pickup grants 1; a multi-item pickup is one placed bundle.
 - Lore/backstory tied to this object: A portable mechanism turns a domestic measure of time into a sound lure. Its hands do not establish elapsed world time.
 - In-game purpose: Q places a GENERIC noise 180 units ahead, radius 384; counts toward the Echoes gate only on Untouched. The current implementation emits a single noise event, not a persistent ticking actor.
-- Player interaction: E takes the bundle, adds 1 clock, and removes the floor sprite for the run. Q chooses a battery first only below 50 seconds charge, otherwise bottles before clocks; it consumes one selected item.
+- Player interaction: E takes the bundle, adds 1 clock, and removes the floor sprite for the run. Q transfers battery energy first only below 50 seconds charge, otherwise consumes bottles before clocks. Battery energy is retained until spent; the bag lists each cell percentage.
 - Connection to other objects/clues: `root_bottles` in BS-06; the inventory count confirms acquisition.
 
 OBJECT NAME: Power station and support table — basement_recharge [`basement/basement_recharge`]
@@ -4277,7 +4254,7 @@ OBJECT NAME: Power station and support table — basement_recharge [`basement/ba
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. Part I stations do not heal or protect Els from capture. It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `root_clock` in BS-06; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Wine Shelf — basement/Furniture6 [`basement/Furniture6`]
@@ -4578,7 +4555,7 @@ OBJECT NAME: Power station and support table — cr_01_charge_1 [`roots/cr_01_ch
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight and health. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. In Part II it also restores HP gradually up to the branch maximum (80 Vantree, 100 otherwise). It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. In Part II it also restores HP gradually up to the branch maximum (80 Vantree, 100 otherwise). It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `vantree_08` in CR-02; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Cat Rubble — roots/decoration-01 [`roots/decoration-01`]
@@ -4677,7 +4654,7 @@ OBJECT NAME: Vantree - VIII [`roots/vantree_08`]
 
 - Location: CR-02 — Flooded Nave; roots x=1550, y=465.
 - Appearance: A separate folded page, numbered 8, with a readable central text block and frayed handling edges. In Flooded Nave, keep its small warm pickup highlight distinct from the closed decorative books.
-- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is authored expansion for this document.
+- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is integrated in the runtime paging reader.
 - In-game purpose: Optional Part II lore collectible; it does not add a new key or replace a branch-use requirement.
 - Player interaction: E collects the page, removes its floor representation, and opens the paused reader. Current complete runtime text: “The roots predate the house. We did not build a prison. We inherited one.”
 
@@ -4695,8 +4672,8 @@ OBJECT NAME: Flashlight Battery [`roots/roots_battery`]
 - Location: CR-02 — Flooded Nave; roots x=1880, y=485.
 - Appearance: A short practical flashlight cell with dulled metal ends and a worn wrapper; keep it smaller than Els's hand span. This pickup grants 1; a multi-item pickup is one placed bundle.
 - Lore/backstory tied to this object: A practical supply compatible with Els's own light; its original purchaser is unknown.
-- In-game purpose: Restore 45 seconds of charge, capped at 90, when Q selects a battery.
-- Player interaction: E takes the bundle, adds 1 battery, and removes the floor sprite for the run. Q chooses a battery first only below 50 seconds charge, otherwise bottles before clocks; it consumes one selected item.
+- In-game purpose: Each full cell stores 45 seconds of energy. Q transfers up to 45 seconds, capped at 90 total; unused energy stays on that cell.
+- Player interaction: E takes the bundle, adds 1 battery, and removes the floor sprite for the run. Q transfers battery energy first only below 50 seconds charge, otherwise consumes bottles before clocks. Battery energy is retained until spent; the bag lists each cell percentage.
 - Connection to other objects/clues: `vantree_08` in CR-02; the inventory count confirms acquisition.
 
 OBJECT NAME: Ordinary table — cr_02_charge_1 [`cr_02_charge_1`]
@@ -4815,7 +4792,7 @@ OBJECT NAME: Power station and support table — cr_03_charge_1 [`roots/cr_03_ch
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight and health. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. In Part II it also restores HP gradually up to the branch maximum (80 Vantree, 100 otherwise). It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. In Part II it also restores HP gradually up to the branch maximum (80 Vantree, 100 otherwise). It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `roots_battery` in CR-02; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Cat Rubble — roots/decoration-03 [`roots/decoration-03`]
@@ -5051,7 +5028,7 @@ OBJECT NAME: Vantree - IX [`roots/vantree_09`]
 
 - Location: CR-05 — Crypt Row; roots x=4170, y=450.
 - Appearance: A separate folded page, numbered 9, with a readable central text block and frayed handling edges. In Crypt Row, keep its small warm pickup highlight distinct from the closed decorative books.
-- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is authored expansion for this document.
+- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is integrated in the runtime paging reader.
 - In-game purpose: Optional Part II lore collectible; it does not add a new key or replace a branch-use requirement.
 - Player interaction: E collects the page, removes its floor representation, and opens the paused reader. Current complete runtime text: “Each keeper arrived believing the name belonged to somebody else.”
 
@@ -5068,7 +5045,7 @@ OBJECT NAME: Vantree - X [`roots/vantree_10`]
 
 - Location: CR-05 — Crypt Row; roots x=4470, y=470.
 - Appearance: A separate folded page, numbered 10, with a readable central text block and frayed handling edges. In Crypt Row, keep its small warm pickup highlight distinct from the closed decorative books.
-- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is authored expansion for this document.
+- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is integrated in the runtime paging reader.
 - In-game purpose: Optional Part II lore collectible; it does not add a new key or replace a branch-use requirement.
 - Player interaction: E collects the page, removes its floor representation, and opens the paused reader. Current complete runtime text: “The ward moved from hand to hand, and every hand called that movement freedom.”
 
@@ -5085,7 +5062,7 @@ OBJECT NAME: Vantree - XI [`roots/vantree_11`]
 
 - Location: CR-05 — Crypt Row; roots x=4770, y=450.
 - Appearance: A separate folded page, numbered 11, with a readable central text block and frayed handling edges. In Crypt Row, keep its small warm pickup highlight distinct from the closed decorative books.
-- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is authored expansion for this document.
+- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is integrated in the runtime paging reader.
 - In-game purpose: Optional Part II lore collectible; it does not add a new key or replace a branch-use requirement.
 - Player interaction: E collects the page, removes its floor representation, and opens the paused reader. Current complete runtime text: “The empty hand was never counted. That omission became the ritual.”
 
@@ -5140,7 +5117,7 @@ OBJECT NAME: Glass Bottles x2 [`roots/roots_bottles`]
 - Appearance: A usable dark glass bottle with a clear neck silhouette and a small floor contact shadow. This pickup grants 2; a multi-item pickup is one placed bundle.
 - Lore/backstory tied to this object: A household supply repurposed into a deliberate sound source. Decorative bottles elsewhere remain separate.
 - In-game purpose: Q places a GLASS noise 260 units ahead, radius 576; counts toward the Echoes gate only on Untouched.
-- Player interaction: E takes the bundle, adds 2 bottles, and removes the floor sprite for the run. Q chooses a battery first only below 50 seconds charge, otherwise bottles before clocks; it consumes one selected item.
+- Player interaction: E takes the bundle, adds 2 bottles, and removes the floor sprite for the run. Q transfers battery energy first only below 50 seconds charge, otherwise consumes bottles before clocks. Battery energy is retained until spent; the bag lists each cell percentage.
 - Connection to other objects/clues: `crypt_alcove_04` in CR-05; the inventory count confirms acquisition.
 
 OBJECT NAME: Power station and support table — cr_05_charge_1 [`roots/cr_05_charge_1`]
@@ -5149,7 +5126,7 @@ OBJECT NAME: Power station and support table — cr_05_charge_1 [`roots/cr_05_ch
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight and health. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. In Part II it also restores HP gradually up to the branch maximum (80 Vantree, 100 otherwise). It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. In Part II it also restores HP gradually up to the branch maximum (80 Vantree, 100 otherwise). It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `crypt_alcove_02` in CR-05; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Sarcophagus — roots/decoration-05 [`roots/decoration-05`]
@@ -5470,7 +5447,7 @@ OBJECT NAME: Power station and support table — ce_02_charge_1 [`echoes/ce_02_c
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight and health. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. In Part II it also restores HP gradually up to the branch maximum (80 Vantree, 100 otherwise). It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. In Part II it also restores HP gradually up to the branch maximum (80 Vantree, 100 otherwise). It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `sigil_forge` in CE-02; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Candle — echoes/decoration-05 [`echoes/decoration-05`]
@@ -5596,7 +5573,7 @@ OBJECT NAME: Vantree - XII [`echoes/vantree_12`]
 
 - Location: CE-03 — Vault of Whispers; echoes x=2480, y=450.
 - Appearance: A separate folded page, numbered 12, with a readable central text block and frayed handling edges. In Vault of Whispers, keep its small warm pickup highlight distinct from the closed decorative books.
-- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is authored expansion for this document.
+- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is integrated in the runtime paging reader.
 - In-game purpose: Optional Part II lore collectible; it does not add a new key or replace a branch-use requirement.
 - Player interaction: E collects the page, removes its floor representation, and opens the paused reader. Current complete runtime text: “The prisoner learned our voices by listening to the shape of our fear.”
 
@@ -5613,7 +5590,7 @@ OBJECT NAME: Vantree - XIII [`echoes/vantree_13`]
 
 - Location: CE-03 — Vault of Whispers; echoes x=3020, y=470.
 - Appearance: A separate folded page, numbered 13, with a readable central text block and frayed handling edges. In Vault of Whispers, keep its small warm pickup highlight distinct from the closed decorative books.
-- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is authored expansion for this document.
+- Lore/backstory tied to this object: Established excerpt from the anonymous Vantree papers; individual author, date, and kinship are unknown. The complete first-person body below is integrated in the runtime paging reader.
 - In-game purpose: Optional Part II lore collectible; it does not add a new key or replace a branch-use requirement.
 - Player interaction: E collects the page, removes its floor representation, and opens the paused reader. Current complete runtime text: “When it finally spoke, it used the voice of the next keeper.”
 
@@ -5625,11 +5602,10 @@ OBJECT NAME: Vantree - XIII [`echoes/vantree_13`]
   >
   > I have no final instruction that makes this clean. I can leave you the words I keep trying to forgive in myself:
   >
-  > Forgive me, if you’re reading this.
-  >
-  > It has to be someone.
-  >
   > I am no longer certain that the second sentence is true.
+  >
+  > Forgive me, if you're reading this.
+  > It has to be someone.
 - Connection to other objects/clues: First voice, the canonical apology breadcrumb, and the final burden decision.
 
 OBJECT NAME: The voice-bearing sarcophagus [`echoes/first_voice`]
@@ -5757,7 +5733,7 @@ OBJECT NAME: Wind-Up Clock x3 [`echoes/echo_clock`]
 - Appearance: A palm-sized wind-up clock/watch with a brass rim, dark dial, and short winding crown. Authored dial rests at 2:47 before use; it is a visual echo, not a time-setting puzzle. This pickup grants 3; a multi-item pickup is one placed bundle.
 - Lore/backstory tied to this object: A portable mechanism turns a domestic measure of time into a sound lure. Its hands do not establish elapsed world time.
 - In-game purpose: Q places a GENERIC noise 180 units ahead, radius 384; counts toward the Echoes gate only on Untouched. The current implementation emits a single noise event, not a persistent ticking actor.
-- Player interaction: E takes the bundle, adds 3 clocks, and removes the floor sprite for the run. Q chooses a battery first only below 50 seconds charge, otherwise bottles before clocks; it consumes one selected item.
+- Player interaction: E takes the bundle, adds 3 clocks, and removes the floor sprite for the run. Q transfers battery energy first only below 50 seconds charge, otherwise consumes bottles before clocks. Battery energy is retained until spent; the bag lists each cell percentage.
 - Connection to other objects/clues: `echo_supply_cache` in CE-05; the inventory count confirms acquisition.
 
 OBJECT NAME: Cat Rubble — echoes/decoration-02 [`echoes/decoration-02`]
@@ -5921,7 +5897,7 @@ OBJECT NAME: Power station and support table — ce_05_charge_1 [`echoes/ce_05_c
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight and health. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. In Part II it also restores HP gradually up to the branch maximum (80 Vantree, 100 otherwise). It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. In Part II it also restores HP gradually up to the branch maximum (80 Vantree, 100 otherwise). It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `nexus_descent` in CE-05; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Ritual Stone — echoes/decoration-07 [`echoes/decoration-07`]
@@ -6085,7 +6061,7 @@ OBJECT NAME: Power station and support table — ln_center_charge_1 [`nexus/ln_c
 - Appearance: A compact teal electrical unit with a cable and cyan CHARGE marker on its dedicated support table. Its tabletop footprint remains readable; it is visually distinct from the ordinary side tables.
 - Lore/backstory tied to this object: Established function: restore Els's flashlight and health. Authored interpretation: practical equipment has been maintained within the old structure; its installer is unidentified.
 - In-game purpose: Reusable resource recovery; at most one active station per named room.
-- Player interaction: E starts a gradual 12-second charge up to 90 seconds. Movement or damage interrupts while preserving charge gained. In Part II it also restores HP gradually up to the branch maximum (80 Vantree, 100 otherwise). It is not consumed and creates no additional battery item.
+- Player interaction: E transfers carried battery energy gradually, at 90 seconds per 12-second session, capped at 90. No battery means no flashlight charge. Movement or damage interrupts while preserving charge gained. In Part II it also restores HP gradually up to the branch maximum (80 Vantree, 100 otherwise). It is not consumed and creates no additional battery item.
 - Connection to other objects/clues: `LN-A` in LN-CENTER; distinguish this marker from unpowered nearby tables.
 
 OBJECT NAME: Ritual Stone — nexus/decoration-01 [`nexus/decoration-01`]
@@ -6242,11 +6218,11 @@ OBJECT NAME: Convergence ward floor [`nexus/ring`]
 
 **Hint order:** (1) the visible dropped flashlight and Els's appraisal recollection; (2) the first door response, “Locked.” / “Of course.”; (3) “I need my tools.” if the pouch is absent; (4) “I should take my flashlight.” if the light is absent; (5) the two recognizable pickup prompts. The player may physically collect the kit before testing the door, but the required door-test flag still needs one interaction.
 
-**Failure:** a missing prerequisite produces a hint and no travel. **Success:** an unlock/open action, “Hello?”, and travel to the Ground Floor. The Music Room label on this introductory door does not indicate direct placement at the piano.
+**Failure:** a missing prerequisite produces a hint and no travel. **Success:** an unlock/open action, “Hello?”, and travel to the Ground Floor. The Grand Foyer label matches arrival at GF-01; continue to GF-03 for the piano.
 
 ### P02 — Piano ward / Hearing
 
-**Location:** GF-03. **Solution:** with at least one lockpick, stand at a valid piano interaction point and complete three E actions of 1.1 seconds each. Take `hearing_key` separately. The first work action spends one pick; the next two do not.
+**Location:** GF-03. **Solution:** with at least one lockpick, stand at a valid piano interaction point and complete three E actions. Each includes a collision-aware approach, a seated bench pose, a 1.1-second piano phrase, and standing up. Take `hearing_key` separately. The first work action spends one pick; the next two do not.
 
 **Hint order:** (1) foyer note on three wards and senses; (2) piano work prompt; (3) a missing-pick hint if needed; (4) step completion feedback and “The seal gives.”; (5) the newly available key; (6) the screech, Els's “Something heard that.”, and Letter I explaining the consequence. Letter I can be collected before taking the key if the player chooses to inspect that side of the room first.
 
@@ -6287,7 +6263,7 @@ OBJECT NAME: Convergence ward floor [`nexus/ring`]
 
 ### P07 — Resource and stealth discipline
 
-This is a recurring survival problem rather than a hidden code. The flashlight holds **90 seconds**, draining **one second per second during ordinary lit play** and **three per second while sprinting with it on**. A battery adds **45 seconds** up to the cap. A cyan station restores charge gradually over **12 seconds**; movement or damage stops charging while keeping the amount restored. In Part II it also restores HP to the branch maximum. An ordinary table supplies no recharge.
+This is a recurring survival problem rather than a hidden code. The flashlight holds **90 seconds**, draining **one second per second during ordinary lit play** and **three per second while sprinting with it on**. A full battery stores **45 seconds**. Individual percentages persist; partial use preserves the remainder and an empty cell disappears. A cyan station transfers only carried battery energy, at **90 seconds per 12 seconds**; movement or damage stops charging while keeping the amount restored. In Part II it also restores HP to the branch maximum. An ordinary table supplies no recharge.
 
 **Hint order:** (1) recovered flashlight and F feedback; (2) cyan CHARGE markers; (3) remaining-charge HUD and inventory; (4) station prompt and move-to-stop instruction; (5) H field guide. Q selects a battery first if charge is below 50 and one is carried; otherwise a bottle, then a clock. Empty or ineligible inventory produces feedback without creating an item.
 
@@ -6327,7 +6303,7 @@ The R circle lasts **12 seconds**, radius **192**, and suppresses all senses inc
 
 **Location:** LN-CENTER. **Solution:** recover and choose the desired anchor before committing. Ring the golden bell with E for **32 seconds** of binding; move to LN-A, LN-B, or LN-C and hold E for **20 continuous seconds**. This leaves 12 seconds for travel and settling into the interaction. Ring again after expiry if the attempt is interrupted.
 
-**Hint order:** (1) sealed return marker; (2) all three named anchor labels; (3) golden bell's 32-second label; (4) Els's spoken one-choice/twenty-second instruction; (5) progress bar and ward countdown; (6) H field guide. Current short labels saying “Free the captive” or “release its captive” at LN-A are less precise than canon; final copy should explicitly say **destroy the entity and break the inherited bond** so the choice is accurately informed.
+**Hint order:** (1) sealed return marker; (2) all three named anchor labels; (3) golden bell's 32-second label; (4) Els's spoken one-choice/twenty-second instruction; (5) progress bar and ward countdown; (6) H field guide. LN-A now says **Destroy entity and bond**, matching Severance's consequence. The guide gives the same rule.
 
 **Failure:** detection at the start refuses the channel; detection, damage, movement, or releasing E during the channel resets progress. Pausing does not consume the protection window. **Success:** the chosen anchor triggers its one final ending immediately. There is no three-anchor completion reward and no retreat door to search for.
 
@@ -6335,9 +6311,7 @@ The R circle lasts **12 seconds**, radius **192**, and suppresses all senses inc
 
 **Intended solution:** complete the three-key Front Door Loop twice in the same continuing run. A second completion sets `vantree_memory_fragment_A`. The first Loop already communicates the puzzle's warning; the second acknowledges that the player deliberately tested it.
 
-**Current implementation gap:** Loop resets lockpicks to zero and returns to GF-01, while the three-pick pouch remains in the inaccessible introductory scene. The reachable GF-07 spare supplies only one pick; piano and vanity require two in total. Consequently, the intended second Loop cannot be promised as an ordinarily finishable route in the current build. The flag also has no implemented reader presentation.
-
-**Concrete proposed completion requirement:** supply at least two reachable picks after a Loop without clearing its counter, then surface the authored fragment on the second Loop recovery. This proposal is documentation only. Until implemented, list the secret as blocked rather than telling a player to keep searching for an undocumented tool source.
+**Implemented:** each Loop retains remaining lockpicks with a minimum of two. Keys, letters, other ordinary supplies, hiding history and route flags reset as before; the Loop counter and flashlight ownership survive. A second full repetition is reachable. After the second wake, the approved Memory Fragment A opens in the parchment reader and can be reread from the bag.
 
 <a id="events"></a>
 
@@ -6371,7 +6345,7 @@ These entries distinguish a deliberate story trigger from a repeatable AI conseq
 | EV-20 | Blind stage-zero contact without Touch | Els staggers and creates a noise; no lethal strike | Deprivation has a visible behavioral meaning; applies to Untouched's unchanged stage too |
 | EV-21 | Valid Part I exit | Outcome card identifies Untouched, Vantree, or Partial Mercy; Continue offers the lower journey | Escape has consequences that determine the next act |
 | EV-22 | Three-key Front Door use | Brief transition and Grand Foyer recovery; reset ordinary run state, increment Loop counter | Completion repeats captivity |
-| EV-23 | Second Loop, if made reachable | Set memory-fragment flag | Recognition of repetition; visible fragment presentation is proposed, not implemented |
+| EV-23 | Second Loop wake | Set memory-fragment flag and open its parchment page | Recognition of repetition; the same page remains in the bag |
 | EV-24 | Entry to CR-01 | Threat suppression and no narration | Deliberate rest; do not insert an explanatory monologue or forced scare |
 | EV-25 | First entry to CR-03 | Enable the first lower active encounter; later Roots travel can also be threatened outside CR-01 | Reintroduce danger through the branch's actual rules |
 | EV-26 | Vantree Touch within local transmission range | The Hound tracks Els's floor position even when she crouches or stops; a nearby stone cue supports the mechanic | Stillness is no longer an adequate safety strategy |
@@ -6430,10 +6404,10 @@ The numbered route below first gives a complete Vantree run with every letter an
 7. In GF-01, read `the_note` at (430,485). It is lore, not letter 1 of 7. Keep zero-key Front Door interaction for the Untouched branch below; the canonical route continues east.
 8. Optionally inspect/sabotage the foyer clock at (620,430). It creates a noise at its own location; the effect becomes consequential when Hearing is active. There is no time-setting puzzle. Use the GF-01 station at (275,430) only if charge requires it.
 9. Enter GF-02 and collect the battery at (1280,470). Note the actual under-table hide at (1050,565) and the station at (890,405). Other dining furniture is not automatically interactive. Before Hearing, a blind bump is a stagger rather than a lethal capture.
-10. Enter GF-03. Approach the piano at (1780,438). Press E, wait 1.1 seconds; press E, wait; press E, wait. This spends one pick total, leaving two from the pouch. Do not return to a distant alignment point between presses.
+10. Enter GF-03. Approach the piano at (1780,438). Press E and wait for Els to approach, sit, play and stand; repeat twice. This spends one pick total, leaving two from the pouch. Do not return to a distant alignment point between presses.
 11. Collect the separate Hearing Key at (1960,478). The screech announces the new sound rule. Read Letter I at (2070,455). There is a station at (1610,495), but begin charging only when the approach is clear.
 12. Before crossing into GF-04, crouch. Uncrouched entry creates the cookware noise at (2520,410). Collect two bottles at (2710,474). The marked pantry wardrobe at (2380,430) is available as a refuge; it is not guaranteed protection if the Hound witnessed entry. The station is (2260,495).
-13. Continue through GF-05, navigating around the furniture. Collect the clock at (3070,470) and read the nameplate at (3420,420). Crouching is quieter. The painted lower bypass is useful for orientation but currently remains underlying wood except where an actual rug overlaps; the visual glass field itself is not a GLASS surface. Station: (2980,405).
+13. Continue through GF-05, navigating around the furniture. Collect the clock at (3070,470) and read the nameplate fragments at (3420,480). Crouching is quieter. The misleading painted bypass and glass field are removed. Actual rugs provide CARPET; other floor areas retain their configured surface. Station: (2980,405).
 14. In GF-06, read Letter II at (3850,460). Use `ground_recharge` at (4170,430) if needed. A full 12-second action fills up to the cap; moving early keeps the charge already gained.
 15. In GF-07, collect the spare pick at (4870,470). Inventory should now contain three picks if only the piano has spent one. The marked coat-rack hide is (4520,430); the station is (4630,495).
 16. Crouch through GF-08 to avoid the creaking boards' loud GLASS-class steps. The vent at (5480,405) goes to UF-04 and can serve as an optional shortcut, but this full letter route continues to the main stairs. Neither of the Trophy Hall's two ordinary tables charges.
@@ -6444,7 +6418,7 @@ The numbered route below first gives a complete Vantree run with every letter an
 21. Cross UF-02 without collecting Sight. The vanity is at (1740,440), its separate key at (1910,480), the under-bed hide at (1420,570), and the station at (1240,495). On Vantree, leave the vanity and Sight Key alone. After Hearing alone, sound is the current enemy sense; do not invent Sight before taking its key.
 22. Reach UF-01 and read Letter III at (700,455). You now have all four upper/ground estate letters needed for the conduit. If required, charge at (240,405).
 23. Return east through UF-02, UF-03, UF-04, and UF-05 to UF-06. Use the ground-return door at (5560,362) to arrive at GF-09. Do not use a similarly shaped decorative screen as an interaction target.
-24. Optional full-map detour before returning: from UF-06 continue east into UF-07. Its station is (6170,495). The vent at (6300,410) returns to GF-08; the vent at (6750,410) goes to BS-02. Neither adds a collectible. A legacy candle table beyond the x=7000 boundary is unreachable and contains no secret. Return via the stairs if following the route exactly.
+24. Optional full-map detour before returning: from UF-06 continue east into UF-07. Its station is (6170,495). The vent at (6300,410) returns to GF-08; the vent at (6750,410) goes to BS-02. Neither adds a collectible. The old candle table beyond the x=7000 boundary has been removed. Return via the stairs if following the route exactly.
 25. From GF-09, go east to GF-10. Charge at (6650,495) if needed and use the cellar stairs at (6980,362). Arrive in BS-01 at the paired return stair.
 26. In BS-01, note the ground-return door at (180,362) and station at (275,430). Continue east. The basement's physical order is **BS-01 → BS-04 → BS-02 → BS-03 → BS-05 → BS-06 → BS-09**. There are no playable BS-07 or BS-08 rooms.
 27. Cross the water of BS-04 carefully; WATER steps are loud. The station is (1145,405). The Flood Tunnel at (1500,362) requires exactly two senses and will not accept this one-key Vantree state. Continue east.
@@ -6503,9 +6477,9 @@ The numbered route below first gives a complete Vantree run with every letter an
 68. At (4720,435), press E once and allow the 1.25-second cracked-seal action to complete. It consumes no pick. Collect Memory at (5000,480). All three senses are active, and the Hound can use earlier hiding history.
 69. Optional completionist supplies: continue to BS-06 for the two bottles, clock, and recharge. BS-09 cannot give Vantree with three keys. Return west through the basement to BS-01. Vary refuges and avoid obvious repeated exits when the Hound is nearby; the all-three-key state is deliberately more dangerous.
 70. Use the BS-01 ground stairs (180,362), arriving at GF-10. Travel west across the Ground Floor. Crouch through GF-08, use cover after Sight, and direct distractions away from the intended westward route. Reusing the same hide after Memory is a risk.
-71. Reach the Front Door at (180,362) in GF-01 and press E. Three keys produce the Loop. Els recovers in the Grand Foyer; there is no Part II unlock. The Loop counter increases, while ordinary inventory, letters, keys, and hiding history reset. Flashlight ownership survives the reset.
-72. **Secret intent:** a second successful repetition would set `vantree_memory_fragment_A`. **Current limitation:** the reset gives zero lockpicks and only the reachable GF-07 spare replaces one; piano and vanity need two. No documented normal route returns to the intro pouch. Therefore the second completion and its proposed memory page are not a currently finishable player-facing secret route. The corrective supply requirement and authored page are specified in Sections 5–6.
-73. To reach the final act from a first-Loop recovery without that missing pick supply, the zero-key Untouched Front Door route remains available: test and reuse it with zero detections. Alternatively, the one available spare can start the piano and enable the Hearing-only Vantree route after collecting four letters again. The missing second pick blocks the two-puzzle replay, not every possible continuation from Loop.
+71. Reach the Front Door at (180,362) in GF-01 and press E. Three keys produce the Loop. Els recovers in the Grand Foyer; there is no Part II unlock. The Loop counter increases, while letters, keys, hiding history, and ordinary supplies reset; remaining lockpicks survive with a minimum of two. Flashlight ownership survives the reset.
+72. Repeat the piano, vanity and Memory route using the two retained lockpicks. Complete the Front Door Loop again. The second wake sets `vantree_memory_fragment_A` and opens its approved first-person parchment page. The bag provides a reread button.
+73. After either Loop, the ordinary branch choices remain available. Untouched still requires no keys and zero detections; Vantree requires Hearing only and four of Letters I?VII; Partial Mercy requires Hearing and Sight.
 
 ### G. Every final ending — choose one after any successful Part I branch
 
@@ -6592,19 +6566,19 @@ Each listed ID is an actual recharge interaction. All other ordinary tables stay
 
 ### J. Optional discoveries, branches, and production reconciliation
 
-**Optional content available now:** the foyer note and clock interaction; scratched nameplate; all thirteen letters across a sufficiently exploratory Vantree or Partial Mercy run; every listed loose supply; the linked vent shortcuts; the deliberate first Loop; and the alternative Vantree Touch-evasion gate solution. There is no implemented hidden BS-07/BS-08, secret attic, fourth Nexus anchor, collectible newspaper, or achievement system established by the examined data. A room's decorative book or unreachable candle table does not imply a missing quest.
+**Optional content available now:** the foyer note and clock interaction; scratched nameplate; all thirteen letters across a sufficiently exploratory Vantree or Partial Mercy run; every listed loose supply; the linked vent shortcuts; the deliberate first Loop; and the alternative Vantree Touch-evasion gate solution. There is no implemented hidden BS-07/BS-08, secret attic, fourth Nexus anchor, collectible newspaper, or achievement system established by the examined data. Decorative books do not imply missing quests. The legacy upper candle table beyond x=7000 has been removed.
 
-**Specific changes needed before the proposed final content is fully reflected in the executable:**
+**Seven implementation gaps ? resolved choices:**
 
-1. Replace the thirteen short runtime letter strings with the authored complete bodies through a reader that supports paging, while preserving IDs and the four-of-seven gate. Place the canonical apology breadcrumb as part of the proposed final Letter XIII text without inventing a named author.
-2. Implement the distinct final ending treatments and accurate LN-A choice copy. Canon says Severance destroys both entity and bond; the current “Free the captive” shorthand can mislead the player about that choice.
-3. Resolve the second-Loop lockpick shortage and add an actual presentation for the memory-fragment flag. A concrete minimum is two reachable picks after reset. Retain the Loop counter through that correction.
-4. Align visual hints with actual rules: either make the pantry glass/bypass and upper shadow lane mechanically truthful or revise their visual instruction and guide copy. This document's walkthrough uses current code behavior and does not promise protection those strips do not provide.
-5. Resolve the introductory “Music Room” label versus its actual GF-01 destination. Rename the label for the existing route or deliberately change the map transition; do not silently describe a different arrival.
-6. Remove the out-of-bounds upper candle table and its candle detail, or intentionally relocate them inside a reviewed room layout. Keep purposeful furnishings and distinguish decorative crates, tables, and screens from usable supplies, stations, and hides.
-7. If Untouched is meant to offer a lethal lower pursuit, design and document that branch change explicitly. Current code keeps the three senses dormant and stage-zero contact nonlethal. Do not claim such a threat already exists or contradict the seal rules to manufacture it.
+1. **Resolved:** All thirteen full authored letters use the unrolling, typewritten parchment reader with forward/back paging. The gate explicitly counts four of Letters I–VII only. Letter XIII ends with the canonical anonymous apology.
+2. **Resolved:** Severance collapses the anchor and fades the Hound/ward lines; Custodian's Rest surrounds Els with a settling ward; Vessel contracts the lines into a key and uses Els's key-pickup action. All three have their exact authored lines/cards. LN-A says “Destroy entity and bond.”
+3. **Resolved:** Every Loop retains remaining lockpicks with a two-pick minimum. The second wake opens approved Memory Fragment A; the inventory supports rereading it. Ordinary resets and the counter remain intact.
+4. **Resolved:** Path B: removed the misleading pantry glass/bypass and upper shadow-strip visuals. Actual rugs, surface rules, Sight exposure and line-of-sight cover are unchanged; catalog and walkthrough claims are corrected.
+5. **Resolved:** Path A: renamed the intro door Grand Foyer. Its existing Ground Floor / GF-01 destination is unchanged.
+6. **Resolved:** Path A: removed the upper side table at (7130,392) and its candle. Other zone furnishings remain within their declared bounds.
+7. **Resolved:** Path A: Untouched deliberately keeps all three senses dormant throughout Part II, including the Nexus. Blind contact staggers without HP loss; no new lethal ability or lore is introduced.
 
-These are reviewable design requirements, not gameplay edits performed by this Markdown deliverable. The prior UI, horror-atmosphere, and action-animation work is reflected in the intended presentation language; this document does not claim that every newly authored inspection line or ending shot has been implemented.
+These seven changes are implemented. This does not imply that unrelated proposed inspection lines or unapproved artwork have been integrated. See `docs/IMPLEMENTATION_GAPS_REPORT.md` for executable checks and remaining presentation limits.
 
 ### K. Final continuity check
 
@@ -6614,8 +6588,10 @@ These are reviewable design requirements, not gameplay edits performed by this M
 - Vantree keeps Hearing only and requires four estate letters; Partial Mercy keeps Memory closed; Untouched takes no key; three-key Front Door escape always Loops.
 - CR-01 remains narration-free and threat-free; CR-04's carving is automatic once; CE-03's spoken entity line is Vantree-only.
 - Echoes requires three successful uses of the current branch mechanic. Partial sigils do not block Sight, full sigils do not prevent contact damage, and T does not count as a gate use.
-- Each final route completes one 20-second anchor under a reusable 32-second bell ward. The three final choices retain their canonical consequences.
+- Each final route completes one 20-second anchor under a reusable 32-second bell ward, then its distinct short sequence and exact authored line/card.
+- Full Letters I?XIII use the unrolling, paged, typewritten original parchment. Only I?VII count toward the four-letter gate. XIII retains its anonymous apology.
+- The second Loop is reachable with two retained picks and presents Memory Fragment A.
+- Untouched stays nonlethal on blind contact through the Nexus; Touch remains exclusive to Vantree.
 - Unknown ancestry, entity origin, missing hours, and ritual origin remain unresolved. The expanded first-person pages express uncertainty rather than replacing it with a fabricated definitive history.
 
 **End of final content bible.**
-

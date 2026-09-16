@@ -70,6 +70,11 @@ func _ready() -> void:
 		add_child(atmosphere)
 		atmosphere.configure(self)
 	_build_grid()
+	# Retired misleading stealth strips stay hidden even with placeholder art.
+	for retired in ["BrokenGlass", "CarpetBypass", "LinenShadowLane"]:
+		var strip := get_node_or_null("Backdrop/" + retired)
+		if strip != null:
+			strip.hide()
 	$Backdrop.visible = show_placeholder_environment or _uses_imported_art()
 	if environment_art != null:
 		var art := environment_art.instantiate()
