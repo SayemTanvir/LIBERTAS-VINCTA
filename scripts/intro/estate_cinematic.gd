@@ -3,14 +3,13 @@ extends Control
 signal finished
 
 const DURATION := 22.4
-const HOUSE := preload("res://assets/BG/11_intro/01_house_animation.png")
+const HOUSE := preload("res://assets/BG/11_intro/05_house_hd.png")
 const BATS := preload("res://assets/BG/11_intro/02_bat_flight.png")
 const LIGHTNING := preload("res://assets/BG/11_intro/03_lightning.png")
 const STORM := preload("res://assets/BG/11_intro/04_storm_rain_mist.png")
 const THUNDER := preload("res://assets/audio/others/distantsounds/thunder1.wav")
 const WIND := preload("res://assets/audio/others/distantsounds/wind1.wav")
 const STING := preload("res://assets/audio/stinger/stinger2.wav")
-const ROW_Y := [64.0, 300.0, 536.0, 768.0]
 # Nonuniform wing silhouettes: polygons isolate neighboring wings without recutting art.
 const BAT_OUTLINES := [
 	[Vector2(6, 105), Vector2(290, 105), Vector2(293, 360), Vector2(245, 535), Vector2(64, 535), Vector2(6, 355)],
@@ -62,7 +61,7 @@ func _ready() -> void:
 	landscape.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	effect = ShaderMaterial.new()
 	effect.shader = preload("res://shaders/intro_estate.gdshader")
-	effect.set_shader_parameter("house_sheet", HOUSE)
+	effect.set_shader_parameter("house_background", HOUSE)
 	effect.set_shader_parameter("storm_sheet", STORM)
 	effect.set_shader_parameter("lightning_sheet", LIGHTNING)
 	landscape.material = effect
@@ -174,10 +173,6 @@ func _process(delta: float) -> void:
 		finished.emit()
 
 func _update_presentation() -> void:
-	var phase := elapsed / 2.8
-	effect.set_shader_parameter("house_a", _house_region(floori(phase)))
-	effect.set_shader_parameter("house_b", _house_region(floori(phase) + 1))
-	effect.set_shader_parameter("dissolve", smoothstep(0.0, 1.0, fmod(phase, 1.0)))
 	effect.set_shader_parameter("elapsed", elapsed)
 	effect.set_shader_parameter("approach", smoothstep(0.0, DURATION, elapsed))
 	var lightning := _strike(5.3) + _strike(15.2)
@@ -195,11 +190,6 @@ func _update_presentation() -> void:
 	for player in audio:
 		player.volume_db = float(player.get_meta("base_volume")) + linear_to_db(maxf(0.001, 1.0 - blackout))
 	stage.get_child(1).queue_redraw()
-
-func _house_region(index: int) -> Vector4:
-	# Progress through base, rain and mist rows without an abrupt row switch.
-	var row: int = [0, 2, 3][mini(floori(index / 3.0), 2)]
-	return Vector4(6 + (index % 8) * 192, ROW_Y[row], 185, 180)
 
 func _strike(at: float) -> float:
 	var t := elapsed - at

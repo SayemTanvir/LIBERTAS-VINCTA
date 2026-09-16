@@ -94,11 +94,13 @@ func collect_letter(id: String) -> bool:
 	return true
 
 func collect_item(id: String, amount: int = 1) -> void:
+	if amount <= 0:
+		return
 	inventory[id] = int(inventory.get(id, 0)) + amount
 	EventBus.inventory_changed.emit(id, int(inventory[id]))
 
 func consume_item(id: String, amount: int = 1) -> bool:
-	if int(inventory.get(id, 0)) < amount:
+	if amount <= 0 or int(inventory.get(id, 0)) < amount:
 		return false
 	inventory[id] = int(inventory[id]) - amount
 	EventBus.inventory_changed.emit(id, int(inventory[id]))
@@ -116,17 +118,23 @@ func set_flashlight_seconds(value: float) -> void:
 	EventBus.battery_changed.emit(flashlight_seconds, MAX_FLASHLIGHT_SECONDS)
 
 func damage(amount: float) -> bool:
+	if not is_finite(amount) or amount <= 0.0:
+		return hp <= 0.0
 	hp = maxf(0.0, hp - amount)
 	EventBus.health_changed.emit(hp, max_hp)
 	EventBus.player_hurt.emit(amount)
 	return hp <= 0.0
 
+func heal(amount: float) -> void:
+	hp = minf(max_hp, hp + maxf(0.0, amount))
+	EventBus.health_changed.emit(hp, max_hp)
+
 func freedom_summary() -> String:
 	if current_part == 1:
 		var awareness := "blind" if keys_collected.is_empty() else ", ".join(keys_collected)
 		return "Degrees of freedom: %d / 3 bonds released  |  Hound: %s" % [entity_stage, awareness]
-	var choice := "gadgets" if part2_seed.get("full_gadgets", false) else ("partial sigil" if part2_seed.get("hybrid_magic", false) else "blood magic")
-	return "Your freedom: " + choice + "  |  Anchors freed: " + str(anchors_cleansed.size())
+	var choice := "Clockwork & glass" if part2_seed.get("full_gadgets", false) else ("Partial sigil" if part2_seed.get("hybrid_magic", false) else "Blood rites")
+	return "Degrees of freedom: " + choice + "  |  [H] Field guide"
 
 func eligible(candidate: String) -> bool:
 	match candidate:
@@ -211,22 +219,79 @@ func snapshot() -> Dictionary:
 		"anchors": anchors_cleansed.duplicate()
 	}
 
+func snapshot_is_valid(data: Variant) -> bool:
+	if not data is Dictionary:
+		return false
+	for key in ["keys", "letters", "anchors"]:
+		if data.has(key):
+			if not data[key] is Array:
+				return false
+			for value in data[key]:
+				if not value is String:
+					return false
+	var keys: Array = data.get("keys", [])
+	if keys.size() > SENSES.size():
+		return false
+	for i in keys.size():
+		if keys[i] != SENSES[i]:
+			return false
+	for key in ["flags", "inventory", "hiding_usage", "part2_seed"]:
+		if data.has(key) and not data[key] is Dictionary:
+			return false
+	for value in data.get("flags", {}).values():
+		if not (value is bool or value is String or _finite_number(value)):
+			return false
+	for key in data.get("flags", {}):
+		if str(key).ends_with("_steps") and not _finite_number(data.flags[key]):
+			return false
+	for key in ["entity_stage", "loop_counter", "detections", "current_part", "flashlight_seconds", "max_hp", "hp", "mechanic_uses"]:
+		if data.has(key) and not _finite_number(data[key]):
+			return false
+	for key in ["loop_counter", "detections", "mechanic_uses"]:
+		if absf(float(data.get(key, 0))) > 2147483647.0:
+			return false
+	for key in ["inventory", "hiding_usage"]:
+		for value in data.get(key, {}).values():
+			if not _finite_number(value) or absf(float(value)) > 2147483647.0:
+				return false
+	var part := float(data.get("current_part", 1))
+	if part != 1.0 and part != 2.0:
+		return false
+	if int(data.get("current_part", 1)) == 2:
+		var seed_data: Dictionary = data.get("part2_seed", {})
+		if seed_data.get("part1_ending", "") not in ["untouched", "vantree", "partial_mercy"]:
+			return false
+	return true
+
+func _finite_number(value: Variant) -> bool:
+	return (value is int or value is float) and is_finite(float(value))
+
 func restore_snapshot(data: Dictionary) -> void:
+	if not snapshot_is_valid(data):
+		push_warning("Invalid ledger snapshot; current state retained.")
+		return
 	keys_collected.assign(data.get("keys", []))
 	letter_ids.assign(data.get("letters", []))
-	entity_stage = int(data.get("entity_stage", keys_collected.size()))
+	entity_stage = keys_collected.size()
 	ending_type = str(data.get("ending_type", ""))
-	loop_counter = int(data.get("loop_counter", 0))
+	loop_counter = maxi(0, int(data.get("loop_counter", 0)))
 	part2_seed = data.get("part2_seed", {}).duplicate(true)
 	flags = data.get("flags", {}).duplicate(true)
 	inventory = data.get("inventory", {"battery": 0, "bottle": 0, "clock": 0, "lockpick": 0}).duplicate(true)
+	for id in inventory:
+		inventory[id] = maxi(0, int(inventory[id]))
 	hiding_usage = data.get("hiding_usage", {}).duplicate(true)
-	detections = int(data.get("detections", 0))
+	for id in hiding_usage:
+		hiding_usage[id] = maxi(0, int(hiding_usage[id]))
+	detections = maxi(0, int(data.get("detections", 0)))
 	current_part = int(data.get("current_part", 1))
-	flashlight_seconds = float(data.get("flashlight_seconds", MAX_FLASHLIGHT_SECONDS))
-	max_hp = float(data.get("max_hp", BASE_MAX_HP))
-	hp = float(data.get("hp", max_hp))
-	mechanic_uses = int(data.get("mechanic_uses", 0))
+	if current_part == 2:
+		# Branch effects are derived from the ending, not unchecked serialized flags.
+		part2_seed = _build_part2_seed(str(part2_seed.part1_ending))
+	flashlight_seconds = clampf(float(data.get("flashlight_seconds", MAX_FLASHLIGHT_SECONDS)), 0.0, MAX_FLASHLIGHT_SECONDS)
+	max_hp = BASE_MAX_HP * (0.8 if current_part == 2 and part2_seed.get("blood_magic", false) else 1.0)
+	hp = clampf(float(data.get("hp", max_hp)), 0.0, max_hp)
+	mechanic_uses = maxi(0, int(data.get("mechanic_uses", 0)))
 	anchors_cleansed.assign(data.get("anchors", []))
 	_emit_status()
 

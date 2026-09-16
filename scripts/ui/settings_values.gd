@@ -1,56 +1,36 @@
 extends Control
-## Live values and controls drawn from the restored full-resolution artwork.
-var source: Texture2D
-var paper_source: Texture2D
-var serif: SystemFont
+## Native slider tracks, numerical values and explicit on/off switches.
+const Style := preload("res://scripts/ui/ui_style.gd")
+var menu: Control
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	serif = SystemFont.new()
-	serif.font_names = PackedStringArray(["Georgia", "Times New Roman"])
 
-func paper(rect: Rect2) -> void:
-	# Restore the exact matching clean pixels, never a stretched paper swatch.
-	draw_texture_rect_region(paper_source, rect, rect)
-
-func diamond(center: Vector2) -> void:
-	var offsets := PackedVector2Array([Vector2(0, -20), Vector2(19, 0), Vector2(0, 21), Vector2(-18, 0)])
-	var points := PackedVector2Array()
-	var uvs := PackedVector2Array()
-	for offset in offsets:
-		points.append(center + offset)
-		uvs.append((Vector2(940, 329) + offset) / source.get_size())
-	draw_colored_polygon(points, Color.WHITE, uvs, source)
-
-func ink(value: String, rect: Rect2, font_size: int = 26) -> void:
-	var baseline := rect.position + Vector2(0, (rect.size.y - serif.get_height(font_size)) * 0.5 + serif.get_ascent(font_size))
-	draw_string(serif, baseline, value, HORIZONTAL_ALIGNMENT_CENTER, rect.size.x, font_size, Color(0.12, 0.055, 0.025))
+func ink(text: String, rect: Rect2, color: Color = Style.PAPER, font_size: int = 16) -> void:
+	var font := get_theme_default_font()
+	var at := rect.position + Vector2(0, (rect.size.y - font.get_height(font_size)) * 0.5 + font.get_ascent(font_size))
+	draw_string(font, at, text, HORIZONTAL_ALIGNMENT_CENTER, rect.size.x, font_size, color)
 
 func _draw() -> void:
-	if source == null or serif == null:
+	if menu == null:
 		return
-	for i in 3:
-		var y := 329.0 + i * 64.0
-		var volume: float = SessionSettings.volumes[["Master", "Music", "SFX"][i]]
-		paper(Rect2(782, y - 29, 239, 58))
-		# Rebuild the track from its empty part and original engraved end caps.
-		draw_texture_rect_region(source, Rect2(802, y - 9, 196, 18), Rect2(973, 320, 21, 18))
-		draw_texture_rect_region(source, Rect2(790, y - 12, 18, 24), Rect2(790, 317, 18, 24))
-		draw_texture_rect_region(source, Rect2(997, y - 12, 18, 24), Rect2(997, 317, 18, 24))
-		if volume > 0:
-			draw_texture_rect_region(source, Rect2(802, y - 5, 196 * volume, 10), Rect2(811, 324, 90, 10))
-		diamond(Vector2(802 + 196 * volume, y))
-		paper(Rect2(1027, y - 20, 74, 40))
-		ink(str(roundi(volume * 100)) + "%", Rect2(1027, y - 17, 74, 35), 24)
-	paper(Rect2(837, 540, 196, 39))
-	var resolution: Vector2i = SessionSettings.resolution
-	ink("%d x %d" % [resolution.x, resolution.y], Rect2(842, 541, 187, 36), 25)
-	for i in 2:
-		var y := 626.0 + i * 64
-		var enabled: bool = SessionSettings.fullscreen if i == 0 else SessionSettings.screen_shake
-		# Preserve the outer gold checkbox; cover only the baked checkmark.
-		paper(Rect2(814, y - 17, 33, 35))
-		if enabled:
-			draw_texture_rect_region(source, Rect2(817, y - 13, 26, 27), Rect2(817, 613, 26, 27))
-		paper(Rect2(871, y - 20, 87, 40))
-		ink("On" if enabled else "Off", Rect2(873, y - 18, 82, 36))
+	for index in menu.AUDIO:
+		var pos: Vector2 = menu.buttons[index].position
+		var value: float = SessionSettings.volumes[menu.AUDIO[index]]
+		var start := pos + Vector2(228, 26)
+		draw_line(start, start + Vector2(192, 0), Style.RULE, 3, true)
+		draw_line(start, start + Vector2(192 * value, 0), Style.BRASS, 3, true)
+		draw_circle(start + Vector2(192 * value, 0), 5, Style.PAPER, true, -1, true)
+		ink("%d%%" % roundi(value * 100), Rect2(pos + Vector2(430, 0), Vector2(66, 52)))
+	var res_pos: Vector2 = menu.buttons[3].position
+	ink("‹", Rect2(res_pos + Vector2(247, 0), Vector2(32, 52)), Style.BRASS, 24)
+	ink("%d × %d" % [SessionSettings.resolution.x, SessionSettings.resolution.y], Rect2(res_pos + Vector2(274, 0), Vector2(191, 52)))
+	ink("›", Rect2(res_pos + Vector2(468, 0), Vector2(28, 52)), Style.BRASS, 24)
+	var toggles := {4: SessionSettings.fullscreen, 5: SessionSettings.screen_shake, 7: SessionSettings.subtitles_enabled}
+	for index in toggles:
+		var pos: Vector2 = menu.buttons[index].position
+		var enabled: bool = toggles[index]
+		ink("On" if enabled else "Off", Rect2(pos + Vector2(357, 0), Vector2(56, 52)), Style.PAPER if enabled else Style.MUTED)
+		var box := Style.panel(Color("2b3938") if enabled else Color("1c2228"), Style.BRASS if enabled else Style.RULE, 0)
+		draw_style_box(box, Rect2(pos + Vector2(433, 15), Vector2(52, 23)))
+		draw_rect(Rect2(pos + Vector2(464 if enabled else 437, 19), Vector2(16, 15)), Style.PAPER if enabled else Style.MUTED)

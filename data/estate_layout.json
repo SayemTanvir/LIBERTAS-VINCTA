@@ -8,7 +8,8 @@
     "props": [
       ["flashlight", "flashlight", 430, 480],
       ["lockpick_tool", "lockpick_tool", 900, 430],
-      ["locked_door", "intro_exit", 1590, 362, {"destination": "ground"}]
+      ["locked_door", "intro_exit", 1590, 362, {"destination": "ground"}],
+      ["recharge_station", "gf_00_charge_1", 520, 405, {"display_name": "Power station"}]
     ]
   },
   "ground": {
@@ -44,12 +45,20 @@
       ["item_pickup", "side_clock", 3070, 470, {"display_name": "Wind-Up Clock", "item_id": "clock"}],
       ["lore", "scratched_nameplate", 3420, 420, {"display_name": "Scratched Nameplate", "text": "A family name has been cut away more carefully than the portrait above it."}],
       ["letter_pickup", "vantree_02", 3850, 460, {"title": "Vantree - II", "text": "A custodian keeps a door. A jailer decides who is permitted to need one."}],
-      ["recharge_station", "ground_recharge", 4170, 430],
+      ["recharge_station", "ground_recharge", 4170, 430, {"display_name": "Power station"}],
       ["hiding_spot", "coat_rack_hide", 4520, 430, {"display_name": "Hide among coats", "hiding_priority": "low"}],
       ["item_pickup", "coat_lockpick", 4870, 470, {"display_name": "Lockpick", "item_id": "lockpick"}],
       ["vent", "ground_vent", 5480, 405, {"destination": "upper", "entrance": "upper_vent"}],
       ["door", "upper_stairs", 6140, 362, {"destination": "upper", "entrance": "upper_stairs", "required_flag": "hearing", "text": "The hearing seal binds these stairs."}],
-      ["door", "basement_stairs", 6980, 362, {"destination": "basement", "entrance": "ground_stairs", "required_flag": "hearing", "text": "The cellar lock answers only to the first key."}]
+      ["door", "basement_stairs", 6980, 362, {"destination": "basement", "entrance": "ground_stairs", "required_flag": "hearing", "text": "The cellar lock answers only to the first key."}],
+      ["recharge_station", "gf_01_charge_1", 275, 430, {"display_name": "Power station"}],
+      ["recharge_station", "gf_02_charge_1", 890, 405, {"display_name": "Power station"}],
+      ["recharge_station", "gf_03_charge_1", 1610, 495, {"display_name": "Power station"}],
+      ["recharge_station", "gf_04_charge_1", 2260, 495, {"display_name": "Power station"}],
+      ["recharge_station", "gf_05_charge_1", 2980, 405, {"display_name": "Power station"}],
+      ["recharge_station", "gf_07_charge_1", 4630, 495, {"display_name": "Power station"}],
+      ["recharge_station", "gf_09_charge_1", 6035, 405, {"display_name": "Power station"}],
+      ["recharge_station", "gf_10_charge_1", 6650, 495, {"display_name": "Power station"}]
     ]
   },
   "upper": {
@@ -76,11 +85,16 @@
       ["letter_pickup", "vantree_04", 2780, 450, {"title": "Vantree - IV", "text": "The Custodian was a kinder word. Jailer was the honest one."}],
       ["vent", "upper_vent", 3240, 410, {"destination": "ground", "entrance": "ground_vent"}],
       ["item_pickup", "upper_battery", 3770, 470, {"display_name": "Flashlight Battery", "item_id": "battery"}],
-      ["recharge_station", "upper_recharge", 4380, 430],
+      ["recharge_station", "upper_recharge", 4380, 430, {"display_name": "Power station"}],
       ["item_pickup", "bathroom_bottle", 4880, 535, {"display_name": "Glass Bottle", "item_id": "bottle"}],
       ["door", "upper_stairs", 5560, 362, {"destination": "ground", "entrance": "upper_stairs"}],
       ["vent", "vent_to_ground", 6300, 410, {"destination": "ground", "entrance": "ground_vent"}],
-      ["vent", "vent_to_basement", 6750, 410, {"destination": "basement", "entrance": "basement_vent"}]
+      ["vent", "vent_to_basement", 6750, 410, {"destination": "basement", "entrance": "basement_vent"}],
+      ["recharge_station", "uf_01_charge_1", 240, 405, {"display_name": "Power station"}],
+      ["recharge_station", "uf_02_charge_1", 1240, 495, {"display_name": "Power station"}],
+      ["recharge_station", "uf_03_charge_1", 2240, 495, {"display_name": "Power station"}],
+      ["recharge_station", "uf_04_charge_1", 3345, 405, {"display_name": "Power station"}],
+      ["recharge_station", "uf_07_charge_1", 6170, 495, {"display_name": "Power station"}]
     ]
   },
   "basement": {
@@ -110,8 +124,13 @@
       ["key_pickup", "memory_key", 5000, 480, {"sense": "memory", "required_flag": "ritual_seal"}],
       ["item_pickup", "root_bottles", 5650, 475, {"display_name": "Glass Bottles x2", "item_id": "bottle", "item_amount": 2}],
       ["item_pickup", "root_clock", 6050, 475, {"display_name": "Wind-Up Clock", "item_id": "clock"}],
-      ["recharge_station", "basement_recharge", 6240, 430],
-      ["exit_trigger", "ritual_conduit", 6900, 362, {"ending_type": "vantree", "text": "It isn't ready for you yet."}]
+      ["recharge_station", "basement_recharge", 6240, 495, {"display_name": "Power station"}],
+      ["exit_trigger", "ritual_conduit", 6900, 362, {"ending_type": "vantree", "text": "It isn't ready for you yet."}],
+      ["recharge_station", "bs_01_charge_1", 275, 430, {"display_name": "Power station"}],
+      ["recharge_station", "bs_04_charge_1", 1145, 405, {"display_name": "Power station"}],
+      ["recharge_station", "bs_02_charge_1", 2310, 495, {"display_name": "Power station"}],
+      ["recharge_station", "bs_03_charge_1", 3580, 495, {"display_name": "Power station"}],
+      ["recharge_station", "bs_05_charge_1", 4575, 405, {"display_name": "Power station"}]
     ]
   },
   "roots": {
@@ -141,7 +160,10 @@
       ["hiding_spot", "crypt_alcove_03", 4690, 585, {"display_name": "Hide in alcove", "hiding_priority": "medium"}],
       ["hiding_spot", "crypt_alcove_04", 4980, 585, {"display_name": "Hide in alcove", "hiding_priority": "medium"}],
       ["item_pickup", "roots_bottles", 5050, 470, {"display_name": "Glass Bottles x2", "item_id": "bottle", "item_amount": 2}],
-      ["door", "echo_threshold", 5800, 362, {"destination": "echoes", "entrance": "roots_return"}]
+      ["door", "echo_threshold", 5800, 362, {"destination": "echoes", "entrance": "roots_return"}],
+      ["recharge_station", "cr_01_charge_1", 240, 405, {"display_name": "Power station - charge & recover"}],
+      ["recharge_station", "cr_03_charge_1", 2240, 495, {"display_name": "Power station - charge & recover"}],
+      ["recharge_station", "cr_05_charge_1", 4310, 495, {"display_name": "Power station - charge & recover"}]
     ]
   },
   "echoes": {
@@ -166,7 +188,11 @@
       ["letter_pickup", "vantree_13", 3020, 470, {"title": "Vantree - XIII", "text": "When it finally spoke, it used the voice of the next keeper."}],
       ["lore", "first_voice", 3200, 430, {"display_name": "Listen", "speaker": "THE DEPRIVED", "required_flag": "branch_vantree", "text": "Els. You have brought your name home."}],
       ["item_pickup", "echo_clock", 4050, 475, {"display_name": "Wind-Up Clock x3", "item_id": "clock", "item_amount": 3}],
-      ["door", "nexus_descent", 5320, 362, {"destination": "nexus", "entrance": "nexus_gate", "required_flag": "part2_mechanic_3", "text": "The descent waits for three successful resonances."}]
+      ["door", "nexus_descent", 5320, 362, {"destination": "nexus", "entrance": "nexus_gate", "required_flag": "part2_mechanic_3", "text": "The descent waits for three successful resonances."}],
+      ["hiding_spot", "nexus_descent_alcove", 4830, 575, {"display_name": "Hide in descent alcove", "hiding_priority": "low"}],
+      ["lore", "echo_supply_cache", 4580, 420, {"display_name": "Distraction supply cache", "speaker": ""}],
+      ["recharge_station", "ce_02_charge_1", 1375, 405, {"display_name": "Power station - charge & recover"}],
+      ["recharge_station", "ce_05_charge_1", 5235, 590, {"display_name": "Power station - charge & recover"}]
     ]
   },
   "nexus": {
@@ -180,7 +206,11 @@
       ["lore", "nexus_gate", 180, 430, {"display_name": "Sealed Threshold", "speaker": "", "text": "The way back has closed."}],
       ["anchor", "LN-A", 520, 500, {"display_name": "Destroy - Hold E", "ending_type": "severance", "channel_seconds": 20.0}],
       ["anchor", "LN-B", 900, 500, {"display_name": "Seal Els - Hold E", "ending_type": "custodian_rest", "channel_seconds": 20.0}],
-      ["anchor", "LN-C", 1280, 500, {"display_name": "Bind New Vessel - Hold E", "ending_type": "vessel", "channel_seconds": 20.0}]
+      ["anchor", "LN-C", 1280, 500, {"display_name": "Bind New Vessel - Hold E", "ending_type": "vessel", "channel_seconds": 20.0}],
+      ["lore", "nexus_bell", 900, 395, {"display_name": "Ring Ward Bell — 32s protection", "speaker": ""}],
+      ["hiding_spot", "nexus_hide_west", 345, 580, {"display_name": "Hide behind ward screen", "hiding_priority": "low"}],
+      ["hiding_spot", "nexus_hide_east", 1490, 580, {"display_name": "Hide behind ward screen", "hiding_priority": "low"}],
+      ["recharge_station", "ln_center_charge_1", 450, 405, {"display_name": "Power station - charge & recover"}]
     ]
   }
 }

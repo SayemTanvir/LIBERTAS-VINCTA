@@ -4,6 +4,8 @@ const EstateArt := preload("res://scripts/levels/estate_art.gd")
 const ZONES := ["intro", "ground", "upper", "basement", "roots", "echoes", "nexus"]
 var failures: Array[String] = []
 var checks: int = 0
+var charging_tables := 0
+var all_tables := 0
 
 func _ready() -> void:
 	AudioServer.set_bus_mute(AudioServer.get_bus_index("Master"), true)
@@ -36,6 +38,8 @@ func _run() -> void:
 	_check(part_one_letters == 7, "Part I must contain exactly seven Vantree letters")
 	_check(part_two_letters == 6, "Part II must contain letters VIII through XIII")
 	_check(part_one_hides == 5, "Part I hiding table must contain exactly five specified spots")
+	_check(charging_tables == roundi(all_tables * 0.30), "Charging must be limited to approximately 30% of tables")
+	print("TABLE COVERAGE: %d charging / %d tables" % [charging_tables, all_tables])
 	for id in ["GF-01", "GF-10", "UF-01", "UF-07", "BS-01", "BS-09", "CR-01", "CR-06", "CE-01", "CE-05", "LN-CENTER"]:
 		_check(id in seen_rooms, "Required room ID missing: " + id)
 	print("ESTATE ASSETS: %s checks, %s failures; 7 zones, %s room regions, %s catalog textures." % [checks, failures.size(), seen_rooms.size(), art.data.textures.size()])
@@ -92,6 +96,8 @@ func _verify_zone(zone: String, art: RefCounted, seen_rooms: Array[String]) -> D
 			_check(prop.hiding_priority in ["low", "medium", "high"], zone + ": invalid hiding priority: " + id)
 		if prop.kind == "recharge":
 			recharge_count += 1
+			_check(prop.get_node_or_null("Visual/PowerStation") != null, zone + ": power station sprite missing")
+			_check(prop.get_node_or_null("Visual/ChargingBattery") == null, zone + ": obsolete loose battery marker remains")
 		if id == "piano_seal":
 			_check(prop._action_animation() == "piano", "ground: piano must use its dedicated playing/working gesture")
 			_check(prop.action_position_offset == Vector2(-78, -4), "ground: piano action position is misaligned")
@@ -106,6 +112,24 @@ func _verify_zone(zone: String, art: RefCounted, seen_rooms: Array[String]) -> D
 		_check(bench_count > 0, zone + ": no furniture-pack bench rendered")
 	if zone in ["ground", "upper", "basement"]:
 		_check(recharge_count >= 1, zone + ": floor has no recharge station")
+	_check(recharge_count >= 1, zone + ": every floor needs an accessible recovery station")
+	for section in room.layout.rooms:
+		var in_room := 0
+		for prop in room.props.get_children():
+			if prop is BaseInteractable and prop.kind == "recharge" and prop.position.x >= section.start and prop.position.x < section.end:
+				in_room += 1
+		_check(in_room <= 1, str(section.id) + ": at most one charging point per room")
+	charging_tables += recharge_count
+	var zone_art: Dictionary = art.data.zones[zone]
+	all_tables += recharge_count + zone_art.get("plain_tables", []).size()
+	for entry in zone_art.decorations:
+		all_tables += int(entry[0] in ["side_table", "family_table"])
+	for collection in [zone_art.furniture, zone_art.get("interactables", {})]:
+		for id in collection:
+			all_tables += int(collection[id].asset in ["side_table", "family_table"])
+	for entry in zone_art.get("plain_tables", []):
+		var table = room.props.get_node_or_null(str(entry[0]).to_pascal_case() + "Table")
+		_check(table != null and not table is BaseInteractable and table.get_node_or_null("ServiceLabel") == null, zone + ": ordinary table must not offer charging")
 	if zone == "nexus":
 		var anchors := [room.props.get_node("LnA"), room.props.get_node("LnB"), room.props.get_node("LnC")]
 		_check(anchors[2].position.x - anchors[0].position.x <= 1280.0, "Nexus anchors are not simultaneously visible")

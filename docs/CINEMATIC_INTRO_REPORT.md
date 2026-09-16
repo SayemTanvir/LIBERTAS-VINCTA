@@ -1,17 +1,35 @@
 # Hollowmere cinematic intro — 2026-09-15
 
-Fresh Start plays a 22.4-second exterior sequence using all four supplied sheets in
-`assets/BG/11_intro/`, then fades into the existing Els awakening. Continue and
-checkpoint entries bypass the exterior; a new game resets the seen flag.
+Every application launch plays the 22.4-second exterior sequence, then opens the
+main menu. `scenes/intro/startup.tscn` is the project entry scene. Natural completion
+and Skip both return to `front_end.tscn` and remove the cinematic's local audio.
+The intro is independent of save files and playthrough flags. New Game starts Els's
+awakening directly; Continue and returning to the menu do not repeat the exterior.
+
+Launch-flow verification on 2026-09-16: **43 checks, 0 failures** in
+`tests/verify_cinematic_intro.tscn` (`build/startup_intro.log`). Covers natural
+completion, keyboard Skip without accidental menu activation, repeated launch,
+save preservation, New Game awakening, Continue, audio cleanup and viewport fit.
+The earlier verification counts below describe the original in-game integration.
 
 ## Presentation
+
+### HD upgrade, 2026-09-15
+
+The house now uses the generated `05_house_hd.png` (1254 x 1254), replacing
+the approximately 185 x 180 crops described in the original report below.
+Whole-image sampling removes house dissolving/ghosting and preserves square
+proportions. Weather, bats, lightning, audio and the camera approach remain.
+The updated rendered cinematic suite passed **35 checks, 0 failures**, including
+a new 1920 x 1080 capture at `build/intro_full_hd.png`, visually inspected.
+The following source limitations and 34-check results describe the original pass.
 
 - Slow approach with blended house, rain and fog views.
 - Two bat crossings, eight aligned wing poses and seven independent flight phases.
 - Moving rain/mist, vignette and two soft lightning cues with delayed thunder.
 - Story text followed by the LIBERTAS VINCTA title and Degrees of Freedom theme.
 - Wind and title sting on the existing, user-adjustable audio buses.
-- Enter/Space or pointer Skip fades to Awakening. Escape opens the existing pause UI.
+- Enter/Space or pointer Skip fades out the cinematic and opens the main menu.
 - The timeline and local audio respect pause; all cinematic children are removed on exit.
 - The composition scales uniformly and letterboxes on taller viewports.
 

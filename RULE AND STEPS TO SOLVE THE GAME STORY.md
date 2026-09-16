@@ -32,8 +32,11 @@ A successful Part I ending unlocks Part II. Part II reveals why Els's family nam
 | Sigil | `R` | Use Blood Magic or a partial sigil in Part II |
 | Stun Rite | `T` | Vantree branch only; stun the monster at a health cost |
 | Pause/back | `Esc` | Pause, close a letter, or return from a menu |
+| Field guide | `H` | Pause danger and read the controls, costs and solution for your current branch |
 
 The interaction prompt appears when Els is close enough to a usable object. Face the object, move within range, and press `E`.
+
+**28 of 94 tables (29.8%) have power stations**, with a teal machine and cyan CHARGE marker. The other tables cannot recharge. Stations are spread across all seven floors, including the Cold Foyer, Nexus Descent and Convergence; not every room has one, and no room has more than one. Els stands still while charging. Press `E` to charge gradually over 12 seconds; move away to cancel and keep partial charge. Damage interrupts charging. In Part II, these **power stations also heal Els** up to her branch's HP cap, preventing blood-magic costs from permanently blocking the descent. Stations remain reusable.
 
 ## 3. Rules That Decide the Endings
 
@@ -188,13 +191,13 @@ The door to the Nexus opens only after **three successful uses of the current Pa
 
 For the Vantree route, use this exact sequence:
 
-1. Enter `CE-01` and read the one-time branch hint. On Vantree it explains that rubble softens Touch and that the forge can buy twelve seconds of silence.
+1. Enter `CE-01` and read the branch hint. Press `H` any time for the full, pause-safe field guide; the HUD shows costs, cooldowns and resonance progress.
 2. Reach the **Sigil Forge** in `CE-02` and interact once.
 3. The forge unlocks Blood Magic, costs 8% of maximum health, and counts as use 1 of 3.
 4. Press `R` to cast a Blood Sigil. This costs another 8% of maximum health and counts as use 2.
 5. Wait for the 20-second sigil cooldown to end.
 6. Press `R` again. This counts as use 3.
-7. A Blood Sigil suppresses the monster's active senses within a 192-pixel area for 12 seconds.
+7. A Blood Sigil suppresses the monster's senses, including Touch, while it is inside the visible 192-pixel circle for 12 seconds. It does not prevent contact damage. Pause freezes the circle's duration. Recover at a cyan power station if HP is too low to cast.
 8. `T` performs the Stun Rite only if the monster is within 192 pixels. A successful rite costs 20% of maximum health, stuns for 6 seconds, and has a 60-second cooldown. An out-of-range attempt spends nothing. Stun Rite does not count toward the three-use gate.
 9. In `CE-03`, collect Letters XII and XIII if desired.
 10. The Deprived One speaks for the first time: "Els. You have brought your name home."
@@ -214,12 +217,12 @@ LN-A: Destroy       LN-B: Seal Els       LN-C: Bind New Vessel
 To complete an anchor:
 
 1. Decide which ending you want before starting.
-2. Lure the monster away from the chosen anchor.
-3. Use a bottle or clock if the monster can hear, or a Blood Sigil/Stun Rite on the Vantree branch.
+2. Reach the golden **Ward Bell** and press `E`. It binds the monster for **32 seconds**, on every branch, and clears detection.
+3. Use a bottle/clock, circle or Stun Rite if needed to reach the bell. Two hiding screens and one healing/charging power station are available in the arena.
 4. Reach the anchor and hold `E` continuously for 20 seconds.
-5. Do not release `E` after the channel begins.
-6. Detection or damage resets the channel to zero.
-7. Touch is based on floor transmission; crouching and standing still do not make Els undetectable. Move the entity outside the stone transmission radius or suppress it before channeling.
+5. Watch the ritual progress bar and remaining ward time. Hold `E` until the chosen ending appears.
+6. Releasing `E`, moving, detection or damage resets the channel to zero. Pause freezes the ward and ritual timers.
+7. If an attempt breaks, wait for the ward to fade, then ring the bell again. Only **one** completed anchor is required. The other anchors are alternate endings, not extra objectives.
 
 The anchors produce these endings:
 
@@ -255,7 +258,7 @@ Untouched Part II state:
 Untouched Echo gate solution:
 
 1. Reach the Chamber of Echoes.
-2. Keep flashlight charge at 50 or higher so `Q` selects a noise gadget instead of a battery.
+2. Keep flashlight charge at 50 seconds (about 56%) or higher so `Q` selects a noise gadget instead of a battery.
 3. Press `Q` three times to use three bottles/clocks.
 4. Each successful noise-gadget resonance counts toward the gate.
 5. Enter `CE-05` and use the Nexus Descent.
@@ -266,7 +269,7 @@ Untouched Echo gate solution:
 2. Use the Upper Stairs in `GF-09`.
 3. In `UF-02`, press `E` three times at the vanity.
 4. Collect the **Sight Key** beside it.
-5. The monster now sees in a 110-degree cone and can begin a full chase after 0.6 seconds of confirmed vision.
+5. The monster now sees in a 140-degree cone and can begin a full chase after 0.3 seconds of confirmed vision.
 6. Return to the Ground Floor through `UF-06`.
 7. Use the Cellar Stairs at `GF-10`.
 8. In the early Basement, reach the Flooded Cellar at `BS-04`.
@@ -280,7 +283,7 @@ Partial Mercy Part II state:
 - Memory remains dormant.
 - Els has 100 maximum health.
 - Entering `CE-01` unlocks partial sigils.
-- A partial sigil costs 4% of maximum health and counts toward the Echo gate.
+- A partial sigil costs 4% of maximum health (4 HP), blocks Hearing inside its circle for 12 seconds, and counts toward the Echo gate. It does not suppress Sight. Its cooldown is 20 seconds.
 
 Partial Mercy Echo gate solution:
 
@@ -373,7 +376,7 @@ The Loop is intentional. It demonstrates that collecting everything is another f
 | `CE-02` Sigil Forge | Vantree Blood Magic unlock; counts as one mechanic use |
 | `CE-03` Vault of Whispers | Letters XII-XIII and the Deprived One's first spoken line |
 | `CE-04` Sunken Choir | Rubble Touch-evasion lane and three clocks |
-| `CE-05` Nexus Descent | Opens after 3 successful branch-mechanic uses |
+| `CE-05` Nexus Descent | Opens after 3 successful branch-mechanic uses; hiding alcove, one power station and a replenishing distraction cache |
 
 ### Ley-Nexus
 
@@ -422,11 +425,11 @@ Best response: stop creating sound, change direction after the last ping, and cr
 
 ### Stage 2: Sight
 
-- Vision cone: 110 degrees.
-- Lit range: 384 pixels.
-- Shadow range: 128 pixels.
+- Vision cone: 140 degrees; within 110 pixels, uncovered targets are visible in any direction.
+- Lit range: 520 pixels.
+- Shadow range: 260 pixels.
 - An active flashlight increases the monster's effective visual reach by 1.5 times.
-- The monster confirms sight after 0.6 continuous seconds.
+- The monster confirms sight after 0.3 continuous seconds, or 0.12 seconds within 110 pixels. Solid cover and hiding still block Sight.
 - Chase speed: 282 pixels per second, faster than Els's 256-pixel sprint.
 - A lost chase continues for 5-8 seconds before the monster investigates the last seen position.
 
@@ -481,14 +484,14 @@ Sprinting adds more noise. Crouching sharply reduces it. The `GF-08` creaking fl
 - Normal drain: 1 second of charge per second.
 - Sprinting drain: 3 seconds of charge per second.
 - Recharge station: hold still through a 12-second interaction.
-- A battery adds 45 seconds when charge is below 50.
+- A battery adds 45 seconds when charge is below 50 seconds (about 56%).
 - The flashlight makes Els easier to see at Stage 2.
 
 ### Gadgets
 
 Pressing `Q` chooses automatically:
 
-1. If flashlight charge is below 50 and a battery is available, consume a battery.
+1. If flashlight charge is below 50 seconds (about 56%) and a battery is available, consume a battery.
 2. Otherwise, use a bottle if one is available.
 3. If no bottle remains, use a clock.
 
@@ -506,6 +509,8 @@ Press `E` at a hiding place to enter it and `E` again to leave. The flashlight t
 - Capture plays the collapse animation; checkpoint recovery fades in while that animation reverses back to the standing pose. The entity remains inactive until control returns.
 - Checkpoint recovery does not replay the doorway arrival or door-closing animation. The saved door is already closed when Els fades back in, and movement control resumes as soon as the recovery animation completes.
 - Continue from the main menu loads the saved zone, position, inventory, keys, letters, monster stage, health, and Part II state.
+- An unreadable or malformed checkpoint returns to the menu with an explanation and is preserved on disk. Choose New Game explicitly to replace that run.
+- Returning home cancels a pending Loop transition, so the previous run cannot reopen itself afterward.
 - Recharge use and ordinary pickups are safest after a recent transition/key checkpoint.
 
 ## 11. Story Interpretation
@@ -544,7 +549,7 @@ All three Part II endings close with the story's central statement: freedom in H
 - [ ] Choose Descend
 - [ ] Roots: enter the Vantree Altar room for its automatic reveal, then reach Echo Threshold
 - [ ] Echoes: forge once, cast two Blood Sigils, enter Nexus
-- [ ] Nexus: hold `E` for 20 seconds at `LN-A`
+- [ ] Nexus: ring the Ward Bell, then hold `E` for 20 seconds at `LN-A`
 
 ### Untouched plus any Nexus ending
 
@@ -552,7 +557,7 @@ All three Part II endings close with the story's central statement: freedom in H
 - [ ] Ground: test Front Door once, then use it again without taking a key
 - [ ] Descend
 - [ ] Echoes: use three bottle/clock resonances with `Q`
-- [ ] Enter Nexus and channel the chosen anchor
+- [ ] Enter Nexus, ring the Ward Bell, and hold `E` for 20 seconds at the chosen anchor
 
 ### Partial Mercy plus any Nexus ending
 
@@ -561,7 +566,7 @@ All three Part II endings close with the story's central statement: freedom in H
 - [ ] Enter Basement and use Flood Tunnel in `BS-04`
 - [ ] Descend
 - [ ] Echoes: cast three partial sigils with `R`
-- [ ] Enter Nexus and channel the chosen anchor
+- [ ] Enter Nexus, ring the Ward Bell, and hold `E` for 20 seconds at the chosen anchor
 
 ### Loop
 
@@ -601,7 +606,7 @@ The branch mechanic counter is below 3. Use:
 
 ### "The anchor keeps resetting"
 
-Detection, damage, or releasing `E` resets the 20-second channel. Redirect the monster first, wait until the chase/search pressure drops, then hold `E` continuously.
+Ring the Ward Bell first: it binds the Hound for 32 seconds. Choose one anchor and hold `E` for 20 seconds. Detection, damage, movement or releasing `E` resets the channel. If interrupted, ring the bell again after its ward fades. Pausing freezes both timers.
 
 ### "I took all three keys and lost everything"
 

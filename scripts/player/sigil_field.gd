@@ -4,10 +4,18 @@ var radius: float = 192.0
 var lifetime: float = 12.0
 var tint: Color = Color(0.46, 0.11, 0.13, 0.68)
 var age: float = 0.0
+var silences_senses := false
+var partial := false
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_PAUSABLE
 	z_index = -2
+	if silences_senses:
+		add_to_group("silencing_sigil")
 	queue_redraw()
+
+func blocks(sense: String, point: Vector2) -> bool:
+	return age < lifetime and global_position.distance_to(point) <= radius and (not partial or sense == "hearing")
 
 func _process(delta: float) -> void:
 	age += delta

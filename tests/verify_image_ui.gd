@@ -76,7 +76,12 @@ func pointer(menu: Control, index: int, click: bool = false) -> void:
 func sync(menu: Control, index: int, context: String) -> void:
 	check(menu.current_index == index, context + ": selection")
 	check(menu.buttons[index].has_focus(), context + ": focus")
-	check(menu.active_art.texture == menu.state_textures[index], context + ": artwork")
+	if menu.get("native_ui") == true:
+		check(not menu.active_art.visible and not menu.buttons[index].text.is_empty(), context + ": native selected control")
+	elif menu.get("menu_content") != null:
+		check(not menu.active_art.visible and menu.buttons[index].get_theme_stylebox("normal") is StyleBoxEmpty, context + ": transparent native button over scenery")
+	else:
+		check(menu.active_art.texture == menu.state_textures[index], context + ": artwork")
 
 func capture(label: String) -> void:
 	if DisplayServer.get_name() == "headless":
@@ -116,13 +121,29 @@ func _run() -> void:
 	sync(menu, 1, "Echo ignored")
 	await pointer(menu, 3)
 	sync(menu, 3, "Mouse selects Rules")
+	await get_tree().create_timer(0.16).timeout
+	check(is_equal_approx(menu.highlights[3].modulate.a, 1.0), "Hovered button fades to red")
+	await capture("dark_menu_hover")
+	var leave := InputEventMouseMotion.new()
+	leave.position = Vector2(8, 8)
+	leave.global_position = leave.position
+	get_viewport().push_input(leave, true)
+	await get_tree().create_timer(0.16).timeout
+	for highlight in menu.highlights:
+		check(is_zero_approx(highlight.modulate.a), "Pointer exit restores transparent buttons")
+	await capture("dark_menu_neutral")
 	await key(KEY_DOWN)
 	sync(menu, 4, "Keyboard continues after mouse")
+	await pointer(menu, 3)
+	await key(KEY_DOWN)
+	await get_tree().create_timer(0.16).timeout
+	for i in menu.highlights.size():
+		check(is_equal_approx(menu.highlights[i].modulate.a, 1.0 if i == 4 else 0.0), "Keyboard selection owns the highlight with pointer still over another row")
 	await pointer(menu, 2, true)
 	check(frontend.current_id == "settings", "Mouse click opens Settings")
 	var settings: Control = frontend.current
 	sync(settings, 0, "Settings initial row")
-	check(settings.buttons.size() == 7, "Exactly seven settings; no language")
+	check(settings.buttons.size() == 9, "Audio, display, accessibility and Back are available")
 	for i in 3:
 		settings.set_selection(i)
 		var bus: String = ["Master", "Music", "SFX"][i]
@@ -166,7 +187,7 @@ func _run() -> void:
 	sync(menu, 4, "Standard action navigation")
 	await action("ui_accept")
 	check(frontend.current_id == "credits", "Standard accept opens Credits")
-	check(frontend.current.active_art.texture.resource_path.ends_with("credits_final_corrected_back_active.png"), "Corrected credits")
+	check(frontend.current.team_labels[3].text == "Assets / Implementation", "Ifat's full contribution credit is preserved")
 	await capture("credits")
 	await action("ui_cancel")
 	for resolution in [Vector2i(1280, 720), Vector2i(1600, 900), Vector2i(1920, 1080), Vector2i(1024, 768)]:

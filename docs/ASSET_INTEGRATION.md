@@ -105,12 +105,12 @@ Master, Music, Ambience and SFX buses are defined in `default_bus_layout.tres`. 
 
 ## UI and story
 
-Fresh Start now plays the 22.4-second Hollowmere exterior prologue before Awakening.
-All four supplied `assets/BG/11_intro/` sheets are composed by
+Application launch plays the 22.4-second Hollowmere exterior prologue before the main menu. New Game then begins Awakening directly.
+The detailed `assets/BG/11_intro/05_house_hd.png` and supplied effect sheets are composed by
 `scripts/intro/estate_cinematic.gd` and `shaders/intro_estate.gdshader`:
-house approach/dissolves, eight-pose bat flight, lightning and moving rain/mist.
-Sheet labels are cropped out; the house's low-alpha artifacts and weather tile seams
-are masked at runtime. Wind, two delayed thunder cues and a title sting use the
+slow house approach, eight-pose bat flight, lightning and moving rain/mist.
+The complete 1254 x 1254 house texture replaces enlarged contact-sheet frames.
+Effect labels are cropped out and weather seams feathered. Wind, two delayed thunder cues and a title sting use the
 existing audio buses. Enter/Space or the Skip button fades into Awakening; Escape
 pauses the visual timeline and local audio. The composition fits the viewport while
 preserving its aspect ratio. Continue/checkpoint entry bypasses the exterior.

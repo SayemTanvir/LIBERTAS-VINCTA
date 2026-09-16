@@ -56,14 +56,14 @@ func _run() -> void:
 	var before := player.position
 	var table: BaseInteractable = main.room.props.get_node("DiningTableHide")
 	await table.interact(player)
-	await get_tree().create_timer(0.3).timeout
+	await get_tree().create_timer(0.75).timeout
 	check(player.hidden_spot == table and player.sprite.is_visible_in_tree(), "Hiding retains the character sprite")
 	check(is_equal_approx(player.visual.modulate.a, 1.0), "Hidden character is opaque")
 	check(player.position.distance_to(table.position) < 12.0, "Character actually enters under the table")
-	check(player.animation_state == "crouch_idle" and not player.flashlight_enabled, "Hiding uses a crouched pose and no beam")
+	check(player.animation_state == "hide_table_hold" and not player.flashlight_enabled, "Hiding holds the dedicated low pose with no beam")
 	await capture("under_table")
 	player.leave_hiding()
-	await get_tree().create_timer(0.25).timeout
+	await get_tree().create_timer(0.6).timeout
 	check(player.hidden_spot == null and player.position.distance_to(before) < 0.1, "Leaving returns to the safe approach position")
 	check(player.collision_layer == 2 and player.collision_mask == 1, "Leaving restores collision")
 	player.set_physics_process(false)
@@ -71,23 +71,25 @@ func _run() -> void:
 	for direction in [Vector2.RIGHT, Vector2.LEFT, Vector2.UP, Vector2.DOWN]:
 		player.facing = direction
 		player.play_animation("walk")
-		player.sprite.set_frame_and_progress(4, 0.25)
 		player.set_flashlight(true)
-		check(player.animation_state == "walk" and player.sprite.frame == 4, "Flashlight toggle never starts a turning animation")
-		check(player.flashlight_pose.visible and player.get_node_or_null("Visual/HeldFlashlight") == null, "Use supplied holding pose without separate hand prop")
+		check(player.animation_state == "torch_raise" and player.sprite.frame == 0, "Flashlight uses its own raise sequence")
+		player.animation_hold = 0.0
+		player.play_animation("walk")
+		check(str(player.sprite.animation).begins_with("torch_walk_") and not player.flashlight_pose.visible, "Torch walking uses a complete animated body")
 		await capture("light_" + str(direction))
-		var walking_frame: int = player.sprite.frame
 		player.set_flashlight(false)
 		check(not player.flashlight_pose.visible and not player.get_node("FlashlightFloor").visible, "Switch off removes holding pose and disables beam")
 		check(not player.sprite.material.get_shader_parameter("holding_light"), "Switch off restores the normal upper body")
-		check(player.animation_state == "walk" and player.sprite.frame == walking_frame, "Switch off preserves the normal walking animation without restarting it")
+		check(player.animation_state == "torch_lower", "Switch off uses the lowering sequence")
+		player.animation_hold = 0.0
+		player.play_animation("walk")
 		if direction == Vector2.RIGHT:
 			await capture("light_off_walk")
 	player.play_animation("idle")
 	player.set_flashlight(true)
-	check(player.flashlight_pose.visible, "Light on uses holding pose while standing")
+	check(player.animation_state == "torch_raise", "Light on raises the flashlight from standing")
 	player.set_flashlight(false)
-	check(not player.flashlight_pose.visible and player.animation_state == "idle", "Light off restores normal standing pose")
+	check(not player.flashlight_pose.visible and player.animation_state == "torch_lower", "Light off lowers the flashlight from standing")
 	var saved_charge: float = FreedomLedger.flashlight_seconds
 	FreedomLedger.set_flashlight_seconds(0.1)
 	player.set_flashlight(true)
@@ -130,11 +132,14 @@ func _run() -> void:
 	check(enemy.target == point and enemy.path_clock == 0.0 and enemy.facing.x > 0.9, "Restored hearing immediately faces and replans toward a sound")
 	check("1 / 3" in FreedomLedger.freedom_summary() and "hearing" in FreedomLedger.freedom_summary(), "Freedom display communicates the released sense")
 	FreedomLedger.restore_sense("sight")
-	player.position = enemy.position + Vector2(310, 0)
+	# Use the open corridor and a distance between standing and crouching reach.
+	# The old y=600 line now crosses physical dining-room furniture.
+	enemy.position = Vector2(1580, 500)
+	player.position = enemy.position + Vector2(430, 0)
 	enemy.facing = Vector2.RIGHT
 	player.flashlight_enabled = false
 	player.is_crouching = false
-	check(enemy.can_see_player(), "Restored sight detects a standing player in range")
+	check(enemy.can_see_player(), "Restored sight detects a standing player in range: enemy=%s player=%s exposed=%s clear=%s senses=%s" % [enemy.position, player.position, main.room.is_exposed(player.position), enemy.clear_sight(player.position), FreedomLedger.keys_collected])
 	player.is_crouching = true
 	check(not enemy.can_see_player(), "Crouching without a light reduces visual exposure")
 	player.is_crouching = false

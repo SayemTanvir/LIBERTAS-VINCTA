@@ -47,6 +47,8 @@ func _interrupt_for_damage(_amount: float) -> void:
 func available() -> bool:
 	if busy:
 		return false
+	if interaction_id in ["nexus_bell", "echo_supply_cache"]:
+		return true
 	if kind == "puzzle":
 		return not FreedomLedger.flags.get(interaction_id, false)
 	if kind in ["forge", "lore"] and not required_flag.is_empty() and not FreedomLedger.has_requirement(required_flag):
@@ -83,11 +85,26 @@ func interact(player: Node2D) -> void:
 	if not available() or GameManager.state != GameManager.State.PLAYING:
 		return
 	busy = true
+	# Reach the door before playing the key/handle gesture, not after it succeeds.
+	var door_presentation := get_node_or_null("Visual/DoorPresentation")
+	if door_presentation != null and kind in ["locked_door", "door", "exit"]:
+		if not await door_presentation.align_for_interaction(player):
+			busy = false
+			return
 	EventBus.interaction_started.emit(self)
 	if _can_play_action():
 		_prepare_action_pose(player)
 		var duration := action_seconds if kind == "puzzle" else (0.55 if kind in ["item", "tool", "flashlight", "letter"] else 0.8)
+		if kind == "tool":
+			duration = 0.85
+		elif kind == "key":
+			duration = 0.72
+		elif kind == "locked_door":
+			duration = 1.2
 		player.play_action(_action_animation(), duration, kind in ["item", "tool", "flashlight", "letter", "key"])
+		if door_presentation != null and kind in ["locked_door", "door"]:
+			# Key insertion and handle use reach toward the visible left-hand lock.
+			player.sprite.flip_h = door_presentation.LOCK_SIDE < 0.0
 	match kind:
 		"flashlight": _take_flashlight(player)
 		"tool": _take_tools()
@@ -108,11 +125,13 @@ func interact(player: Node2D) -> void:
 	refresh()
 
 func _can_play_action() -> bool:
-	if kind in ["hiding", "lore", "exit"]:
+	if kind in ["hiding", "lore", "exit", "vent"]:
 		return false
 	if kind == "locked_door":
 		return FreedomLedger.flags.get("intro_door_tried", false) and FreedomLedger.flags.get("lockpick_tool", false) and FreedomLedger.flags.get("flashlight", false)
-	if kind == "recharge" and FreedomLedger.flashlight_seconds >= FreedomLedger.MAX_FLASHLIGHT_SECONDS:
+	if kind == "forge" and FreedomLedger.hp <= FreedomLedger.max_hp * 0.08:
+		return false
+	if kind == "recharge" and (not FreedomLedger.flags.get("flashlight", false) or (FreedomLedger.flashlight_seconds >= FreedomLedger.MAX_FLASHLIGHT_SECONDS and (FreedomLedger.current_part == 1 or FreedomLedger.hp >= FreedomLedger.max_hp))):
 		return false
 	if kind == "puzzle" and progress == 0 and consumes_lockpick and int(FreedomLedger.inventory.get("lockpick", 0)) == 0:
 		return false
@@ -124,8 +143,10 @@ func _action_animation() -> String:
 	if not action_animation_override.is_empty():
 		return action_animation_override
 	if kind == "key":
-		return "pickup"
-	if kind in ["item", "tool", "flashlight"]:
+		return "key_pickup"
+	if kind == "tool":
+		return "bag_pickup"
+	if kind in ["item", "flashlight"]:
 		return "collect"
 	if kind == "letter":
 		return "read"
@@ -139,7 +160,9 @@ func _action_animation() -> String:
 		return "channel"
 	if kind in ["locked_door", "puzzle"]:
 		return "unlock"
-	if kind in ["door", "vent"]:
+	if kind == "vent":
+		return "vent_enter"
+	if kind == "door":
 		return "door_open"
 	return "interact"
 
@@ -231,43 +254,72 @@ func _work_puzzle(player: Node2D) -> void:
 		say("The seal gives.")
 
 func _recharge(player: Node2D) -> void:
-	if FreedomLedger.flashlight_seconds >= FreedomLedger.MAX_FLASHLIGHT_SECONDS:
-		say("The battery is already full.")
+	if not FreedomLedger.flags.get("flashlight", false):
+		say("I should pick up my flashlight first.")
 		return
+	if FreedomLedger.flashlight_seconds >= FreedomLedger.MAX_FLASHLIGHT_SECONDS and (FreedomLedger.current_part == 1 or FreedomLedger.hp >= FreedomLedger.max_hp):
+		say("Ready to move on. No charge or recovery needed.")
+		return
+	var started_serial := interrupt_serial
+	var elapsed := 0.0
 	player.control_enabled = false
 	player.velocity = Vector2.ZERO
-	say("Charging...", 1.2)
+	player.set_flashlight(false, false)
+	player.is_crouching = false
+	player.is_sprinting = false
+	player.visual.scale = Vector2.ONE
+	say("The power station restores me. Move to stop." if FreedomLedger.current_part == 2 else "Charging. Move to stop.", 2.0)
 	player.play_action("recharge", 12.0)
-	await get_tree().create_timer(12.0, false).timeout
-	if GameManager.state == GameManager.State.PLAYING:
-		FreedomLedger.set_flashlight_seconds(FreedomLedger.MAX_FLASHLIGHT_SECONDS)
-		player.control_enabled = true
-		player.animation_hold = 0.0
-		say("Full charge.")
+	while elapsed < 12.0:
+		await get_tree().physics_frame
+		if get_tree().paused:
+			continue
+		if GameManager.state != GameManager.State.PLAYING or interrupt_serial != started_serial or Input.get_vector("move_left", "move_right", "move_up", "move_down").length_squared() > 0.01:
+			break
+		var step := minf(get_physics_process_delta_time(), 12.0 - elapsed)
+		elapsed += step
+		FreedomLedger.set_flashlight_seconds(FreedomLedger.flashlight_seconds + FreedomLedger.MAX_FLASHLIGHT_SECONDS * step / 12.0)
+		if FreedomLedger.current_part == 2:
+			FreedomLedger.heal(FreedomLedger.max_hp * step / 12.0)
+		EventBus.anchor_progress.emit("Charging — move to stop", elapsed, 12.0)
+	player.animation_hold = 0.0
+	player.control_enabled = GameManager.state == GameManager.State.PLAYING
+	if player.control_enabled:
+		player.play_animation("idle")
+	EventBus.anchor_progress.emit("", 0.0, 12.0)
+	if elapsed >= 12.0:
+		say("Restored. Time to move.")
 
 func _activate_forge() -> void:
+	if FreedomLedger.hp <= FreedomLedger.max_hp * 0.08:
+		say("Too weak to awaken the forge. Recover at a cyan power station.")
+		return
 	FreedomLedger.flags[interaction_id] = true
 	FreedomLedger.flags["part2_ability_unlocked"] = true
 	FreedomLedger.damage(FreedomLedger.max_hp * 0.08)
 	FreedomLedger.mechanic_uses += 1
 	EventBus.ability_used.emit("forge")
-	if FreedomLedger.part2_seed.get("touch_mutation", false):
-		say("The stone answers through my hands.")
-	else:
-		say("The sigil takes its price.")
+	say("Blood rites awakened. R: silencing circle. T: close-range stun. H: field guide.", 4.0)
 
 func _reveal_lore() -> void:
+	if interaction_id == "nexus_bell":
+		var room = get_tree().get_first_node_in_group("room")
+		if room != null and not room.ring_ward_bell():
+			say("The ward is still holding. Choose an anchor now.")
+		return
+	if interaction_id == "echo_supply_cache":
+		if int(FreedomLedger.inventory.get("bottle", 0)) + int(FreedomLedger.inventory.get("clock", 0)) < 3:
+			FreedomLedger.collect_item("clock", 3)
+			say("Three clocks. Q sets a distraction; each use in Echoes counts toward the descent.", 4.0)
+		else:
+			say("I have enough distractions. Q uses them; H explains the route.")
+		return
 	FreedomLedger.flags[interaction_id] = true
 	if noise_radius > 0.0:
 		EventBus.noise_created.emit(global_position, noise_radius, "GENERIC")
 	var line := text
 	if interaction_id == "mechanic_intro":
-		if FreedomLedger.part2_seed.get("full_gadgets", false):
-			line = "Three echoes from glass or clockwork will wake the descent."
-		elif FreedomLedger.part2_seed.get("hybrid_magic", false):
-			line = "A partial sigil can mute the ward Memory left dormant."
-		else:
-			line = "Stay above the broken floor; feel movement through the stone."
+		line = preload("res://scripts/systems/field_guide.gd").tutorial()
 	say(line, 4.0, speaker)
 
 func _channel_anchor(player: Node2D) -> void:
@@ -284,13 +336,15 @@ func _channel_anchor(player: Node2D) -> void:
 	var elapsed := 0.0
 	while elapsed < channel_seconds:
 		await get_tree().physics_frame
+		if get_tree().paused:
+			continue
 		if interrupt_serial != started_serial or _player_is_detected() or GameManager.state != GameManager.State.PLAYING:
-			player.control_enabled = true
+			player.control_enabled = GameManager.state == GameManager.State.PLAYING
 			player.animation_hold = 0.0
 			EventBus.anchor_progress.emit(interaction_id, 0.0, channel_seconds)
 			say("The pattern broke.")
 			return
-		if not Input.is_action_pressed("interact") and elapsed > 0.2 and not FreedomLedger.flags.get("automation_channel", false):
+		if Input.get_vector("move_left", "move_right", "move_up", "move_down").length_squared() > 0.01 or (not Input.is_action_pressed("interact") and elapsed > 0.2 and not FreedomLedger.flags.get("automation_channel", false)):
 			player.control_enabled = true
 			player.animation_hold = 0.0
 			EventBus.anchor_progress.emit(interaction_id, 0.0, channel_seconds)
@@ -311,6 +365,7 @@ func _player_is_detected() -> bool:
 	return false
 
 func _unlock_intro(player: CharacterBody2D) -> void:
+	var epoch := GameManager.transition_epoch
 	if not FreedomLedger.flags.get("intro_door_tried", false):
 		FreedomLedger.flags["intro_door_tried"] = true
 		EventBus.audio_requested.emit("door_knock")
@@ -324,21 +379,34 @@ func _unlock_intro(player: CharacterBody2D) -> void:
 		player.control_enabled = false
 		EventBus.audio_requested.emit("key_unlock")
 		await get_tree().create_timer(1.2, false).timeout
+		if GameManager.state != GameManager.State.PLAYING or epoch != GameManager.transition_epoch:
+			return
 		EventBus.audio_requested.emit("door_open")
 		EventBus.audio_requested.emit("building_creak")
-		player.get_node("Camera2D").cinematic_focus(global_position + Vector2(200, -70), 2.0)
+		var presentation := get_node_or_null("Visual/DoorPresentation")
+		if presentation != null:
+			# Open at the planted key stance, without a sideways camera pull or restaging.
+			await presentation.animate_open(true)
+		if GameManager.state != GameManager.State.PLAYING or epoch != GameManager.transition_epoch:
+			return
 		say("Hello?", 1.8)
 		await get_tree().create_timer(2.0, false).timeout
+		if GameManager.state != GameManager.State.PLAYING or epoch != GameManager.transition_epoch:
+			return
 		FreedomLedger.flags["intro_complete"] = true
 		await _depart(player)
-		GameManager.travel.call_deferred("ground")
+		if GameManager.state == GameManager.State.PLAYING and epoch == GameManager.transition_epoch:
+			GameManager.travel.call_deferred("ground")
 
 func _travel(player: CharacterBody2D) -> void:
+	var epoch := GameManager.transition_epoch
 	if not FreedomLedger.has_requirement(required_flag):
 		say(text if not text.is_empty() else "The passage is sealed.")
 		return
-	await _depart(player)
-	GameManager.travel.call_deferred(destination, entrance)
+	if not await _depart(player):
+		return
+	if GameManager.state == GameManager.State.PLAYING and epoch == GameManager.transition_epoch and FreedomLedger.hp > 0.0:
+		GameManager.travel.call_deferred(destination, entrance)
 
 func _exit(player: CharacterBody2D) -> void:
 	var candidate := ending_type
@@ -350,15 +418,21 @@ func _exit(player: CharacterBody2D) -> void:
 		candidate = "untouched" if FreedomLedger.current_stage == 0 else ("loop" if FreedomLedger.current_stage == 3 else "")
 	if not candidate.is_empty() and FreedomLedger.eligible(candidate):
 		await _depart(player)
-		EventBus.ending_triggered.emit(candidate)
+		if GameManager.state == GameManager.State.PLAYING:
+			EventBus.ending_triggered.emit(candidate)
 	else:
 		say(text if not text.is_empty() else "This way is still sealed.")
 
-func _depart(player: CharacterBody2D) -> void:
+func _depart(player: CharacterBody2D) -> bool:
+	if kind == "vent":
+		EventBus.audio_requested.emit("building_creak")
+		return await player.traverse_vent(global_position, true)
 	var presentation: Node = get_node_or_null("Visual/DoorPresentation")
 	if presentation != null and presentation.has_method("depart"):
 		await presentation.depart(player)
 	else:
 		EventBus.audio_requested.emit("door_open")
 		await get_tree().create_timer(0.45, false).timeout
-		EventBus.audio_requested.emit("door_close")
+		if GameManager.state == GameManager.State.PLAYING:
+			EventBus.audio_requested.emit("door_close")
+	return GameManager.state == GameManager.State.PLAYING and not player.death_started

@@ -43,6 +43,9 @@ func _process(delta: float) -> void:
 	shake_clock += delta
 	trauma = maxf(0.0, trauma - delta * 1.35)
 	var target := Vector2(player.global_position.x, room_center_y + (player.global_position.y - 480.0) * vertical_tracking)
+	if GameManager.zone == "nexus":
+		target = Vector2(900, room_center_y)
+		zoom = Vector2.ONE * minf(1.0, get_viewport_rect().size.x / 1500.0)
 	if focus_seconds > 0.0:
 		focus_seconds -= delta
 		target = focus

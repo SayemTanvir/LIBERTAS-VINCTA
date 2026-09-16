@@ -1,0 +1,2448 @@
+{
+  "GF-00": {
+    "purpose": "Waiting foyer",
+    "furnishings": [
+      [
+        "sideboard",
+        249,
+        395,
+        144,
+        [
+          [
+            "book",
+            -28,
+            -98,
+            28
+          ],
+          [
+            "vase",
+            34,
+            -98,
+            18
+          ]
+        ]
+      ],
+      [
+        "bookshelf",
+        637,
+        395,
+        110
+      ],
+      [
+        "coat_stand",
+        793,
+        395,
+        48
+      ],
+      [
+        "bench",
+        651,
+        590,
+        148
+      ],
+      [
+        "settee",
+        814,
+        605,
+        156
+      ],
+      [
+        "bench",
+        981,
+        605,
+        148
+      ],
+      [
+        "sideboard",
+        1213,
+        395,
+        100
+      ],
+      [
+        "wood_chair",
+        1276,
+        605,
+        54
+      ],
+      [
+        "bench",
+        1641,
+        590,
+        148
+      ]
+    ],
+    "rugs": [
+      [
+        828,
+        566,
+        270,
+        62,
+        "#392c30"
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1800,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1800,
+          64
+        ]
+      },
+      {
+        "wall": "left",
+        "rect": [
+          0,
+          354,
+          64,
+          280
+        ]
+      },
+      {
+        "wall": "right",
+        "rect": [
+          1736,
+          354,
+          64,
+          280
+        ]
+      }
+    ]
+  },
+  "GF-01": {
+    "purpose": "Formal entrance and waiting area",
+    "furnishings": [
+      [
+        "bench",
+        291,
+        605,
+        148
+      ],
+      [
+        "coat_stand",
+        523,
+        395,
+        48
+      ],
+      [
+        "settee",
+        434,
+        605,
+        156
+      ]
+    ],
+    "rugs": [
+      [
+        331,
+        566,
+        230,
+        62,
+        "#392c30"
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          720,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          720,
+          64
+        ]
+      },
+      {
+        "wall": "left",
+        "rect": [
+          0,
+          354,
+          64,
+          280
+        ]
+      }
+    ]
+  },
+  "GF-02": {
+    "purpose": "Dining and serving",
+    "furnishings": [
+      [
+        "dining_chair",
+        236,
+        605,
+        54
+      ],
+      [
+        "dining_chair",
+        436,
+        605,
+        54
+      ],
+      [
+        "serving_cart",
+        166,
+        590,
+        82
+      ]
+    ],
+    "rugs": [
+      [
+        331,
+        566,
+        230,
+        62,
+        "#392c30"
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          720,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          720,
+          64
+        ]
+      }
+    ]
+  },
+  "GF-03": {
+    "purpose": "Music and listening",
+    "furnishings": [
+      [
+        "wood_chair",
+        286,
+        605,
+        54
+      ],
+      [
+        "bench",
+        431,
+        605,
+        148
+      ],
+      [
+        "settee",
+        184,
+        605,
+        156
+      ]
+    ],
+    "rugs": [
+      [
+        331,
+        566,
+        230,
+        62,
+        "#392c30"
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          720,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          720,
+          64
+        ]
+      }
+    ]
+  },
+  "GF-04": {
+    "purpose": "Pantry and service storage",
+    "furnishings": [
+      [
+        "sideboard",
+        349,
+        395,
+        144,
+        [
+          [
+            "plates",
+            -28,
+            -98,
+            28
+          ],
+          [
+            "vase",
+            34,
+            -98,
+            18
+          ]
+        ]
+      ],
+      [
+        "wine_rack",
+        241,
+        605,
+        94
+      ],
+      [
+        "bottle_crate",
+        361,
+        605,
+        68
+      ],
+      [
+        "bottle_crate",
+        471,
+        590,
+        68
+      ],
+      [
+        "serving_cart",
+        156,
+        605,
+        82
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          720,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          720,
+          64
+        ]
+      }
+    ]
+  },
+  "GF-05": {
+    "purpose": "Quiet passage seating",
+    "furnishings": [
+      [
+        "coat_stand",
+        443,
+        395,
+        48
+      ],
+      [
+        "bench",
+        431,
+        605,
+        148
+      ],
+      [
+        "wood_chair",
+        636,
+        590,
+        54
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          720,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          720,
+          64
+        ]
+      }
+    ]
+  },
+  "GF-06": {
+    "purpose": "Private reading library",
+    "furnishings": [
+      [
+        "bookshelf",
+        367,
+        395,
+        110
+      ],
+      [
+        "wood_chair",
+        356,
+        605,
+        54
+      ],
+      [
+        "settee",
+        254,
+        590,
+        156
+      ],
+      [
+        "bench",
+        121,
+        605,
+        148
+      ]
+    ],
+    "rugs": [
+      [
+        331,
+        566,
+        230,
+        62,
+        "#392c30"
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          720,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          720,
+          64
+        ]
+      }
+    ]
+  },
+  "GF-07": {
+    "purpose": "Coats and waiting",
+    "furnishings": [
+      [
+        "coat_stand",
+        113,
+        395,
+        48
+      ],
+      [
+        "screen",
+        426,
+        395,
+        108
+      ],
+      [
+        "bench",
+        441,
+        590,
+        148
+      ],
+      [
+        "bench",
+        323,
+        605,
+        100
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          720,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          720,
+          64
+        ]
+      }
+    ]
+  },
+  "GF-08": {
+    "purpose": "Display cabinets and gallery seating",
+    "furnishings": [
+      [
+        "bookshelf",
+        277,
+        395,
+        110
+      ],
+      [
+        "bench",
+        431,
+        605,
+        148
+      ],
+      [
+        "wood_chair",
+        636,
+        590,
+        54
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          720,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          720,
+          64
+        ]
+      }
+    ]
+  },
+  "GF-09": {
+    "purpose": "Upper landing",
+    "furnishings": [
+      [
+        "coat_stand",
+        593,
+        395,
+        48
+      ],
+      [
+        "bench",
+        431,
+        605,
+        148
+      ],
+      [
+        "wood_chair",
+        636,
+        590,
+        54
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          720,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          720,
+          64
+        ]
+      }
+    ]
+  },
+  "GF-10": {
+    "purpose": "Cellar service landing",
+    "furnishings": [
+      [
+        "wine_rack",
+        291,
+        395,
+        94
+      ],
+      [
+        "bottle_crate",
+        291,
+        605,
+        68
+      ],
+      [
+        "bench",
+        431,
+        605,
+        148
+      ],
+      [
+        "stock_pot",
+        633,
+        590,
+        48
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          720,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          720,
+          64
+        ]
+      },
+      {
+        "wall": "right",
+        "rect": [
+          656,
+          354,
+          64,
+          280
+        ]
+      }
+    ]
+  },
+  "UF-01": {
+    "purpose": "Portrait viewing gallery",
+    "furnishings": [
+      [
+        "sideboard",
+        119,
+        395,
+        144,
+        [
+          [
+            "book",
+            -28,
+            -98,
+            28
+          ],
+          [
+            "vase",
+            34,
+            -98,
+            18
+          ]
+        ]
+      ],
+      [
+        "bench",
+        281,
+        605,
+        148
+      ],
+      [
+        "bench",
+        431,
+        605,
+        148
+      ],
+      [
+        "bookshelf",
+        567,
+        395,
+        110
+      ],
+      [
+        "wood_chair",
+        686,
+        605,
+        54
+      ],
+      [
+        "settee",
+        884,
+        605,
+        156
+      ]
+    ],
+    "rugs": [
+      [
+        460,
+        566,
+        270,
+        62,
+        "#302e3b"
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1000,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1000,
+          64
+        ]
+      },
+      {
+        "wall": "left",
+        "rect": [
+          0,
+          354,
+          64,
+          280
+        ]
+      }
+    ]
+  },
+  "UF-02": {
+    "purpose": "Private bedchamber",
+    "furnishings": [
+      [
+        "sideboard",
+        569,
+        395,
+        144,
+        [
+          [
+            "book",
+            -28,
+            -98,
+            28
+          ],
+          [
+            "vase",
+            34,
+            -98,
+            18
+          ]
+        ]
+      ],
+      [
+        "screen",
+        356,
+        395,
+        108
+      ],
+      [
+        "settee",
+        554,
+        605,
+        156
+      ],
+      [
+        "wood_chair",
+        673,
+        590,
+        54
+      ],
+      [
+        "wood_chair",
+        846,
+        605,
+        54
+      ]
+    ],
+    "rugs": [
+      [
+        460,
+        566,
+        270,
+        62,
+        "#302e3b"
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1000,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1000,
+          64
+        ]
+      }
+    ]
+  },
+  "UF-03": {
+    "purpose": "Nursery storage and family seating",
+    "furnishings": [
+      [
+        "bookshelf",
+        107,
+        395,
+        110
+      ],
+      [
+        "toy_chest",
+        283,
+        605,
+        100
+      ],
+      [
+        "wood_chair",
+        496,
+        605,
+        54
+      ],
+      [
+        "bench",
+        451,
+        395,
+        148
+      ],
+      [
+        "bed",
+        900,
+        605,
+        100
+      ]
+    ],
+    "rugs": [
+      [
+        460,
+        566,
+        270,
+        62,
+        "#302e3b"
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1000,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1000,
+          64
+        ]
+      }
+    ]
+  },
+  "UF-04": {
+    "purpose": "Linen storage and folding",
+    "furnishings": [
+      [
+        "sideboard",
+        629,
+        395,
+        144,
+        [
+          [
+            "book",
+            -28,
+            -98,
+            28
+          ],
+          [
+            "vase",
+            34,
+            -98,
+            18
+          ]
+        ]
+      ],
+      [
+        "sideboard",
+        899,
+        395,
+        144,
+        [
+          [
+            "book",
+            -28,
+            -98,
+            28
+          ],
+          [
+            "vase",
+            34,
+            -98,
+            18
+          ]
+        ]
+      ],
+      [
+        "serving_cart",
+        496,
+        605,
+        82
+      ],
+      [
+        "sideboard",
+        663,
+        590,
+        100
+      ],
+      [
+        "bench",
+        881,
+        605,
+        148
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1000,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1000,
+          64
+        ]
+      }
+    ]
+  },
+  "UF-05": {
+    "purpose": "Washroom and dressing",
+    "furnishings": [
+      [
+        "wood_chair",
+        396,
+        605,
+        54
+      ],
+      [
+        "bench",
+        601,
+        605,
+        148
+      ],
+      [
+        "wood_chair",
+        903,
+        395,
+        54
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1000,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1000,
+          64
+        ]
+      }
+    ]
+  },
+  "UF-06": {
+    "purpose": "Stair landing and reading seat",
+    "furnishings": [
+      [
+        "bookshelf",
+        697,
+        395,
+        110
+      ],
+      [
+        "coat_stand",
+        433,
+        395,
+        48
+      ],
+      [
+        "bench",
+        571,
+        590,
+        148
+      ],
+      [
+        "settee",
+        884,
+        605,
+        156
+      ],
+      [
+        "wood_chair",
+        686,
+        605,
+        54
+      ]
+    ],
+    "rugs": [
+      [
+        460,
+        566,
+        270,
+        62,
+        "#302e3b"
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1000,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1000,
+          64
+        ]
+      }
+    ]
+  },
+  "UF-07": {
+    "purpose": "Service junction storage",
+    "furnishings": [
+      [
+        "bottle_crate",
+        401,
+        605,
+        68
+      ],
+      [
+        "bottle_crate",
+        603,
+        605,
+        68
+      ],
+      [
+        "bench",
+        881,
+        590,
+        148
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1000,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1000,
+          64
+        ]
+      },
+      {
+        "wall": "right",
+        "rect": [
+          936,
+          354,
+          64,
+          280
+        ]
+      }
+    ]
+  },
+  "BS-01": {
+    "purpose": "Cellar receiving area",
+    "furnishings": [
+      [
+        "sideboard",
+        459,
+        395,
+        144,
+        [
+          [
+            "bottles",
+            -28,
+            -98,
+            28
+          ],
+          [
+            "book",
+            30,
+            -98,
+            28
+          ]
+        ]
+      ],
+      [
+        "wine_rack",
+        271,
+        605,
+        94
+      ],
+      [
+        "bottle_crate",
+        401,
+        605,
+        68
+      ],
+      [
+        "bench",
+        591,
+        395,
+        148
+      ],
+      [
+        "bottle_crate",
+        671,
+        605,
+        68
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          800,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          800,
+          64
+        ]
+      },
+      {
+        "wall": "left",
+        "rect": [
+          0,
+          354,
+          64,
+          280
+        ]
+      }
+    ]
+  },
+  "BS-04": {
+    "purpose": "Damp stores above the flood",
+    "furnishings": [
+      [
+        "wine_shelf",
+        924,
+        395,
+        130
+      ],
+      [
+        "wine_rack",
+        341,
+        605,
+        94
+      ],
+      [
+        "bottle_crate",
+        511,
+        605,
+        68
+      ],
+      [
+        "bottle_crate",
+        1021,
+        395,
+        68
+      ],
+      [
+        "bench",
+        791,
+        605,
+        148
+      ],
+      [
+        "stock_pot",
+        1033,
+        605,
+        48
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1200,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1200,
+          64
+        ]
+      }
+    ]
+  },
+  "BS-02": {
+    "purpose": "Wine storage and bottling",
+    "furnishings": [
+      [
+        "wine_shelf",
+        884,
+        395,
+        130
+      ],
+      [
+        "wine_rack",
+        341,
+        605,
+        94
+      ],
+      [
+        "wine_rack",
+        511,
+        605,
+        94
+      ],
+      [
+        "bottle_crate",
+        621,
+        395,
+        68
+      ],
+      [
+        "bottle_crate",
+        821,
+        605,
+        68
+      ],
+      [
+        "bench",
+        1031,
+        605,
+        148
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1200,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1200,
+          64
+        ]
+      }
+    ]
+  },
+  "BS-03": {
+    "purpose": "Ossuary archive",
+    "furnishings": [
+      [
+        "lectern",
+        96,
+        395,
+        82,
+        [
+          [
+            "book",
+            0,
+            -82,
+            30
+          ]
+        ]
+      ],
+      [
+        "sarcophagus",
+        550,
+        605,
+        146
+      ],
+      [
+        "cat_rubble",
+        722,
+        590,
+        150
+      ],
+      [
+        "bench",
+        951,
+        605,
+        148
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1100,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1100,
+          64
+        ]
+      }
+    ]
+  },
+  "BS-05": {
+    "purpose": "Ritual preparation chamber",
+    "furnishings": [
+      [
+        "lectern",
+        96,
+        395,
+        82,
+        [
+          [
+            "book",
+            0,
+            -82,
+            30
+          ]
+        ]
+      ],
+      [
+        "bookshelf",
+        537,
+        395,
+        110
+      ],
+      [
+        "bench",
+        551,
+        605,
+        148
+      ],
+      [
+        "sarcophagus",
+        830,
+        395,
+        146
+      ],
+      [
+        "cat_rubble",
+        952,
+        605,
+        150
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1100,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1100,
+          64
+        ]
+      }
+    ]
+  },
+  "BS-06": {
+    "purpose": "Root cellar provisions",
+    "furnishings": [
+      [
+        "sideboard",
+        419,
+        395,
+        144,
+        [
+          [
+            "bottles",
+            -28,
+            -98,
+            28
+          ],
+          [
+            "book",
+            30,
+            -98,
+            28
+          ]
+        ]
+      ],
+      [
+        "wine_rack",
+        281,
+        605,
+        94
+      ],
+      [
+        "bottle_crate",
+        431,
+        605,
+        68
+      ],
+      [
+        "bottle_crate",
+        571,
+        590,
+        68
+      ],
+      [
+        "stock_pot",
+        693,
+        605,
+        48
+      ],
+      [
+        "bench",
+        881,
+        605,
+        148
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1000,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1000,
+          64
+        ]
+      }
+    ]
+  },
+  "BS-09": {
+    "purpose": "Threshold shrine",
+    "furnishings": [
+      [
+        "cat_rubble",
+        322,
+        605,
+        150
+      ],
+      [
+        "bench",
+        471,
+        605,
+        148
+      ],
+      [
+        "sarcophagus",
+        190,
+        590,
+        146
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          800,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          800,
+          64
+        ]
+      },
+      {
+        "wall": "right",
+        "rect": [
+          736,
+          354,
+          64,
+          280
+        ]
+      }
+    ]
+  },
+  "CR-01": {
+    "purpose": "Abandoned cathedral entrance",
+    "furnishings": [
+      [
+        "lectern",
+        136,
+        395,
+        82,
+        [
+          [
+            "book",
+            0,
+            -82,
+            30
+          ]
+        ]
+      ],
+      [
+        "bench",
+        331,
+        605,
+        148
+      ],
+      [
+        "bench",
+        501,
+        605,
+        148
+      ],
+      [
+        "cat_rubble",
+        662,
+        395,
+        150
+      ],
+      [
+        "sarcophagus",
+        880,
+        605,
+        146
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1000,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1000,
+          64
+        ]
+      },
+      {
+        "wall": "left",
+        "rect": [
+          0,
+          354,
+          64,
+          280
+        ]
+      }
+    ]
+  },
+  "CR-02": {
+    "purpose": "Flooded nave with surviving pews",
+    "furnishings": [
+      [
+        "bench",
+        121,
+        395,
+        148
+      ],
+      [
+        "bench",
+        281,
+        605,
+        148
+      ],
+      [
+        "bench",
+        431,
+        605,
+        148
+      ],
+      [
+        "lectern",
+        656,
+        395,
+        82,
+        [
+          [
+            "book",
+            0,
+            -82,
+            30
+          ]
+        ]
+      ],
+      [
+        "cat_rubble",
+        652,
+        605,
+        150
+      ],
+      [
+        "sarcophagus",
+        880,
+        605,
+        146
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1000,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1000,
+          64
+        ]
+      }
+    ]
+  },
+  "CR-03": {
+    "purpose": "Cloister remnants",
+    "furnishings": [
+      [
+        "bench",
+        391,
+        395,
+        148
+      ],
+      [
+        "lectern",
+        496,
+        395,
+        82,
+        [
+          [
+            "book",
+            0,
+            -82,
+            30
+          ]
+        ]
+      ],
+      [
+        "cat_rubble",
+        502,
+        605,
+        150
+      ],
+      [
+        "sarcophagus",
+        670,
+        395,
+        146
+      ],
+      [
+        "bench",
+        881,
+        605,
+        148
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1000,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1000,
+          64
+        ]
+      }
+    ]
+  },
+  "CR-04": {
+    "purpose": "Processional altar approach",
+    "furnishings": [
+      [
+        "lectern",
+        146,
+        395,
+        82,
+        [
+          [
+            "book",
+            0,
+            -82,
+            30
+          ]
+        ]
+      ],
+      [
+        "bench",
+        281,
+        605,
+        148
+      ],
+      [
+        "bench",
+        431,
+        605,
+        148
+      ],
+      [
+        "sarcophagus",
+        820,
+        395,
+        146
+      ],
+      [
+        "cat_rubble",
+        652,
+        605,
+        150
+      ],
+      [
+        "bench",
+        881,
+        605,
+        148
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1000,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1000,
+          64
+        ]
+      }
+    ]
+  },
+  "CR-05": {
+    "purpose": "Crypt memorial aisle",
+    "furnishings": [
+      [
+        "lectern",
+        576,
+        395,
+        82,
+        [
+          [
+            "book",
+            0,
+            -82,
+            30
+          ]
+        ]
+      ],
+      [
+        "sarcophagus",
+        530,
+        605,
+        146
+      ],
+      [
+        "sarcophagus",
+        270,
+        605,
+        146
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1200,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1200,
+          64
+        ]
+      }
+    ]
+  },
+  "CR-06": {
+    "purpose": "Echo threshold pews",
+    "furnishings": [
+      [
+        "lectern",
+        116,
+        395,
+        82,
+        [
+          [
+            "book",
+            0,
+            -82,
+            30
+          ]
+        ]
+      ],
+      [
+        "bench",
+        271,
+        605,
+        148
+      ],
+      [
+        "bench",
+        401,
+        605,
+        148
+      ],
+      [
+        "cat_rubble",
+        442,
+        395,
+        150
+      ],
+      [
+        "sarcophagus",
+        140,
+        605,
+        146
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          800,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          800,
+          64
+        ]
+      },
+      {
+        "wall": "right",
+        "rect": [
+          736,
+          354,
+          64,
+          280
+        ]
+      }
+    ]
+  },
+  "CE-01": {
+    "purpose": "Resonance chamber seating",
+    "furnishings": [
+      [
+        "lectern",
+        366,
+        395,
+        82,
+        [
+          [
+            "book",
+            0,
+            -82,
+            30
+          ]
+        ]
+      ],
+      [
+        "bench",
+        311,
+        605,
+        148
+      ],
+      [
+        "bench",
+        471,
+        605,
+        148
+      ],
+      [
+        "cat_rubble",
+        522,
+        395,
+        150
+      ],
+      [
+        "sarcophagus",
+        950,
+        605,
+        146
+      ],
+      [
+        "bench",
+        941,
+        420,
+        148
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1100,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1100,
+          64
+        ]
+      },
+      {
+        "wall": "left",
+        "rect": [
+          0,
+          354,
+          64,
+          280
+        ]
+      }
+    ]
+  },
+  "CE-02": {
+    "purpose": "Sigil workshop",
+    "furnishings": [
+      [
+        "bookshelf",
+        157,
+        395,
+        110
+      ],
+      [
+        "sideboard",
+        439,
+        395,
+        144,
+        [
+          [
+            "book",
+            -28,
+            -98,
+            28
+          ],
+          [
+            "book",
+            30,
+            -98,
+            28
+          ]
+        ]
+      ],
+      [
+        "lectern",
+        686,
+        395,
+        82,
+        [
+          [
+            "book",
+            0,
+            -82,
+            30
+          ]
+        ]
+      ],
+      [
+        "cat_rubble",
+        902,
+        395,
+        150
+      ],
+      [
+        "bench",
+        721,
+        605,
+        148
+      ],
+      [
+        "wine_rack",
+        941,
+        605,
+        94
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1100,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1100,
+          64
+        ]
+      }
+    ]
+  },
+  "CE-03": {
+    "purpose": "Whisper archive",
+    "furnishings": [
+      [
+        "bookshelf",
+        487,
+        395,
+        110
+      ],
+      [
+        "bookshelf",
+        597,
+        395,
+        110
+      ],
+      [
+        "lectern",
+        696,
+        395,
+        82,
+        [
+          [
+            "book",
+            0,
+            -82,
+            30
+          ]
+        ]
+      ],
+      [
+        "sarcophagus",
+        630,
+        590,
+        146
+      ],
+      [
+        "bench",
+        951,
+        605,
+        148
+      ],
+      [
+        "cat_rubble",
+        492,
+        605,
+        150
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1100,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1100,
+          64
+        ]
+      }
+    ]
+  },
+  "CE-04": {
+    "purpose": "Ruined choir stalls",
+    "furnishings": [
+      [
+        "bench",
+        391,
+        395,
+        148
+      ],
+      [
+        "bench",
+        311,
+        605,
+        148
+      ],
+      [
+        "lectern",
+        496,
+        395,
+        82,
+        [
+          [
+            "book",
+            0,
+            -82,
+            30
+          ]
+        ]
+      ],
+      [
+        "bench",
+        621,
+        395,
+        148
+      ],
+      [
+        "cat_rubble",
+        722,
+        605,
+        150
+      ],
+      [
+        "bench",
+        941,
+        420,
+        148
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1100,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1100,
+          64
+        ]
+      }
+    ]
+  },
+  "CE-05": {
+    "purpose": "Final descent antechamber",
+    "furnishings": [
+      [
+        "lectern",
+        76,
+        395,
+        82,
+        [
+          [
+            "book",
+            0,
+            -82,
+            30
+          ]
+        ]
+      ],
+      [
+        "bench",
+        230,
+        605,
+        148
+      ],
+      [
+        "cat_rubble",
+        640,
+        605,
+        150
+      ],
+      [
+        "sarcophagus",
+        730,
+        395,
+        146
+      ],
+      [
+        "bench",
+        961,
+        605,
+        148
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1100,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1100,
+          64
+        ]
+      },
+      {
+        "wall": "right",
+        "rect": [
+          1036,
+          354,
+          64,
+          280
+        ]
+      }
+    ]
+  },
+  "LN-CENTER": {
+    "purpose": "Convergence perimeter memorials",
+    "furnishings": [
+      [
+        "sarcophagus",
+        200,
+        590,
+        146
+      ],
+      [
+        "lectern",
+        346,
+        395,
+        82,
+        [
+          [
+            "book",
+            0,
+            -82,
+            30
+          ]
+        ]
+      ],
+      [
+        "bench",
+        651,
+        605,
+        148
+      ],
+      [
+        "cat_rubble",
+        772,
+        395,
+        150
+      ],
+      [
+        "sarcophagus",
+        1030,
+        605,
+        146
+      ],
+      [
+        "lectern",
+        1176,
+        395,
+        82,
+        [
+          [
+            "book",
+            0,
+            -82,
+            30
+          ]
+        ]
+      ],
+      [
+        "bench",
+        1411,
+        395,
+        148
+      ],
+      [
+        "cat_rubble",
+        1622,
+        605,
+        150
+      ]
+    ],
+    "facing_zones": [
+      {
+        "wall": "back",
+        "rect": [
+          0,
+          354,
+          1800,
+          81
+        ]
+      },
+      {
+        "wall": "front",
+        "rect": [
+          0,
+          570,
+          1800,
+          64
+        ]
+      },
+      {
+        "wall": "left",
+        "rect": [
+          0,
+          354,
+          64,
+          280
+        ]
+      },
+      {
+        "wall": "right",
+        "rect": [
+          1736,
+          354,
+          64,
+          280
+        ]
+      }
+    ]
+  }
+}

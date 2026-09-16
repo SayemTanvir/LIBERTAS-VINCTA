@@ -84,10 +84,10 @@ func _run() -> void:
 	enemy.facing = Vector2.LEFT
 	enemy.position = Vector2(750, 500)
 	player.position = Vector2(500, 500)
-	enemy._update_vision(0.3)
-	_check(enemy.state != enemy.State.CHASE, "Sight confirmed in less than 0.6 seconds")
-	enemy._update_vision(0.31)
-	_check(enemy.state == enemy.State.CHASE, "Sight did not confirm after 0.6 seconds")
+	enemy._update_vision(0.15)
+	_check(enemy.state != enemy.State.CHASE, "Distant sight should require a short confirmation")
+	enemy._update_vision(0.16)
+	_check(enemy.state == enemy.State.CHASE, "Sight did not confirm after 0.3 seconds")
 	FreedomLedger.record_hiding_use("dining_table_hide")
 	FreedomLedger.restore_sense("memory")
 	_check(enemy.state == enemy.State.PREDICT_HUNT, "Key 3 did not immediately activate PREDICT_HUNT")
@@ -157,7 +157,8 @@ func _check_branch_abilities(player: CharacterBody2D, enemy: CharacterBody2D) ->
 	var hp_before := FreedomLedger.hp
 	_check(player.use_sigil(), "Blood Sigil could not cast")
 	_check(is_equal_approx(FreedomLedger.hp, hp_before - FreedomLedger.max_hp * 0.08), "Blood Sigil HP cost is not 8 percent")
-	_check(player.sigil_cooldown == 20.0 and int(FreedomLedger.flags.sigil_until) > Time.get_ticks_msec(), "Blood Sigil timing is incorrect")
+	var field = get_tree().get_first_node_in_group("silencing_sigil")
+	_check(player.sigil_cooldown == 20.0 and field != null and field.lifetime == 12.0, "Blood Sigil timing is incorrect")
 	player.stun_cooldown = 0.0
 	enemy.position = player.position + Vector2(500, 0)
 	hp_before = FreedomLedger.hp

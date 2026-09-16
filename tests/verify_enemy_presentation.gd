@@ -53,9 +53,11 @@ func _run() -> void:
 	enemy._play_visual("walk")
 	sprite.set_frame_and_progress(3, 0.5)
 	enemy.facing = Vector2.RIGHT
+	enemy._update_visual_facing(Vector2.RIGHT, 0.2)
 	enemy._play_visual("walk")
 	check(not sprite.flip_h and sprite.frame == 3 and is_equal_approx(sprite.frame_progress, 0.5), "Turning restarts the gait")
 	enemy.facing = Vector2.LEFT
+	enemy._update_visual_facing(Vector2.LEFT, 0.2)
 	enemy._play_visual("walk")
 	check(sprite.flip_h, "Left-facing movement is not mirrored")
 	enemy.facing = Vector2.UP

@@ -20,9 +20,9 @@ enum State {
 @export var sight_chase_speed: float = 282.0
 @export var true_form_speed: float = 238.0
 @export var hearing_scale: float = 740.0
-@export var vision_range: float = 384.0
-@export var shadow_vision_range: float = 128.0
-@export var field_of_view: float = 110.0
+@export var vision_range: float = 520.0
+@export var shadow_vision_range: float = 260.0
+@export var field_of_view: float = 140.0
 @export var flashlight_range_multiplier: float = 1.5
 @export var catch_distance: float = 32.0
 @export var audio_hunt_seconds: float = 10.0
@@ -50,7 +50,8 @@ var sight_confirm: float = 0.0
 var patrol_index: int = 0
 var recent_hides: Array[String] = []
 var memory_points: Array[Vector2] = []
-var noise_pings: Array[int] = []
+var noise_pings: Array[float] = []
+var hearing_time := 0.0
 var witnessed_hide: String = ""
 var route_clock: float = 0.0
 var stalled_time: float = 0.0
@@ -60,6 +61,14 @@ var stun_seconds: float = 0.0
 var detection_active: bool = false
 var _attack_seconds: float = 0.0
 var _visual_speed: float = 0.0
+var _turn_clock := 0.0
+var _locomotion_grace := 0.0
+var _attack_elapsed := 0.0
+var _strike_pending := false
+var _strike_damage := 0.0
+var _strike_reach := 0.0
+var _strike_hide := ""
+var _voice_cooldown := 0.0
 
 @onready var sprite: AnimatedSprite2D = $Visual/AnimatedSprite2D
 
@@ -102,10 +111,14 @@ func change_state(next: State) -> void:
 			state_limit = ambush_seconds
 	var searching := state in [State.INVESTIGATE, State.HUNT_AUDIO, State.INVESTIGATE_LAST_SEEN, State.PREDICT_HUNT, State.AMBUSH]
 	EventBus.tension_changed.emit("CHASE" if state == State.CHASE else ("SEARCHING" if searching else "CALM"))
+	if _voice_cooldown > 0.0:
+		return
 	if state in [State.HUNT_AUDIO, State.CHASE]:
 		EventBus.audio_requested.emit("monster_growl")
+		_voice_cooldown = 1.8
 	elif searching:
 		EventBus.audio_requested.emit("monster_search")
+		_voice_cooldown = 2.8
 
 func _patrol_state() -> State:
 	if _stage() == 0:
@@ -122,14 +135,10 @@ func _has_sense(sense: String) -> bool:
 	return active and not _sense_blocked(sense)
 
 func _sense_blocked(sense: String) -> bool:
-	if Time.get_ticks_msec() >= int(FreedomLedger.flags.get("sigil_until", 0)):
-		return false
-	var sigil := Vector2(float(FreedomLedger.flags.get("sigil_x", -99999.0)), float(FreedomLedger.flags.get("sigil_y", -99999.0)))
-	if global_position.distance_to(sigil) > 192.0:
-		return false
-	if FreedomLedger.part2_seed.get("hybrid_magic", false):
-		return sense in FreedomLedger.part2_seed.get("dormant_senses", [])
-	return true
+	for field in get_tree().get_nodes_in_group("silencing_sigil"):
+		if field.blocks(sense, global_position):
+			return true
+	return false
 
 func _restored(sense: String) -> void:
 	if sense == "memory":
@@ -145,10 +154,17 @@ func _restored(sense: String) -> void:
 		change_state(_patrol_state())
 
 func _physics_process(delta: float) -> void:
+	if not is_instance_valid(player):
+		player = get_tree().get_first_node_in_group("player")
+	if not is_instance_valid(room):
+		room = get_tree().get_first_node_in_group("room")
 	if not is_instance_valid(player) or not is_instance_valid(room) or GameManager.state != GameManager.State.PLAYING:
 		velocity = Vector2.ZERO
 		return
+	hearing_time += delta
 	if room.has_method("threat_active_at") and not room.threat_active_at(player.global_position):
+		_strike_pending = false
+		_attack_seconds = 0.0
 		detection_active = false
 		if state != _patrol_state():
 			change_state(_patrol_state())
@@ -156,14 +172,14 @@ func _physics_process(delta: float) -> void:
 		_move(delta)
 		return
 	hit_cooldown = maxf(0.0, hit_cooldown - delta)
+	_voice_cooldown = maxf(0.0, _voice_cooldown - delta)
 	if stun_seconds > 0.0:
 		stun_seconds -= delta
 		velocity = Vector2.ZERO
 		_play_visual("stagger")
 		return
 	if _attack_seconds > 0.0:
-		_attack_seconds = maxf(0.0, _attack_seconds - delta)
-		velocity = Vector2.ZERO
+		_update_attack(delta)
 		return
 	state_clock += delta
 	route_clock -= delta
@@ -188,7 +204,8 @@ func _update_vision(delta: float) -> void:
 			memory_points.append(last_seen)
 			if memory_points.size() > 5:
 				memory_points.pop_front()
-		if sight_confirm >= 0.6 and state != State.CHASE:
+		var confirm_time := 0.12 if global_position.distance_to(player.global_position) < 110.0 else 0.3
+		if sight_confirm >= confirm_time and state != State.CHASE:
 			_begin_detection()
 			change_state(State.CHASE)
 	else:
@@ -198,10 +215,15 @@ func _detect_touch() -> void:
 	if FreedomLedger.current_part != 2 or not FreedomLedger.part2_seed.get("touch_mutation", false) or _sense_blocked("touch"):
 		return
 	var transmission: float = room.vibration_transmission_at(player.global_position)
-	if global_position.distance_to(player.global_position) <= transmission and state not in [State.CHASE, State.HUNT_AUDIO]:
+	if global_position.distance_to(player.global_position) <= transmission:
 		target = player.global_position
-		_begin_detection()
-		change_state(State.HUNT_AUDIO)
+		last_seen = target
+		lost_sight = 0.0
+		if state == State.HUNT_AUDIO:
+			state_clock = 0.0
+		elif state != State.CHASE:
+			_begin_detection()
+			change_state(State.HUNT_AUDIO)
 
 func _update_state(delta: float) -> void:
 	match state:
@@ -267,35 +289,74 @@ func _choose_patrol_target() -> void:
 
 func _move(delta: float) -> void:
 	path_clock -= delta
-	if path_clock <= 0.0:
-		path_clock = minf(path_refresh_seconds, 0.12) if state in [State.CHASE, State.HUNT_AUDIO, State.PREDICT_HUNT] else path_refresh_seconds
-		path = room.find_path(global_position, target)
-	while not path.is_empty() and global_position.distance_to(path[0]) < 14.0:
-		path.remove_at(0)
 	var direction := Vector2.ZERO
-	if not path.is_empty():
-		direction = global_position.direction_to(path[0])
-	elif global_position.distance_to(target) > 25.0 and clear_sight(target):
+	# Follow an unobstructed target directly, rather than snapping back to our grid cell.
+	if global_position.distance_to(target) > 4.0 and _clear_motion_to(target):
 		direction = global_position.direction_to(target)
+		path.clear()
+	else:
+		if path_clock <= 0.0:
+			path_clock = minf(path_refresh_seconds, 0.14) if state in [State.CHASE, State.HUNT_AUDIO] else path_refresh_seconds
+			path = room.find_path(global_position, target)
+		while not path.is_empty() and global_position.distance_to(path[0]) < 10.0:
+			path.remove_at(0)
+		# Skip grid centers only when the complete body can reach the next waypoint.
+		while path.size() > 1 and _clear_motion_to(path[1]):
+			path.remove_at(0)
+		if not path.is_empty():
+			direction = global_position.direction_to(path[0])
 	var speed := _move_speed()
-	velocity = Vector2(direction.x, direction.y * 0.7) * speed
+	# Slow depth travel without bending the swept, collision-safe direction.
+	var desired_speed := speed * lerpf(1.0, 0.7, absf(direction.y))
+	var response := 1900.0 if state in [State.CHASE, State.HUNT_AUDIO] else 1000.0
+	# Accelerate along the swept route; never blend a corner into a wall.
+	velocity = direction * move_toward(velocity.length(), desired_speed, response * delta)
+	if velocity.length() * delta > global_position.distance_to(target) and _clear_motion_to(target):
+		velocity = (target - global_position) / maxf(delta, 0.001)
 	var before := global_position
 	move_and_slide()
+	var movement := global_position - before
 	if direction.length_squared() > 0.01:
-		facing = direction
+		if movement.length() > 0.15:
+			facing = movement.normalized()
 		stalled_time = stalled_time + delta if global_position.distance_to(before) < 0.15 else 0.0
 	else:
 		stalled_time = 0.0
-	if stalled_time > 1.5:
-		target = room.reachable_fallback(global_position)
+	if stalled_time > 0.75:
 		path_clock = 0.0
 		stalled_time = 0.0
-		change_state(State.INVESTIGATE)
+		if state not in [State.CHASE, State.HUNT_AUDIO, State.PREDICT_HUNT]:
+			target = room.reachable_fallback(global_position)
 	var animation := "idle"
-	_visual_speed = global_position.distance_to(before) / maxf(delta, 0.001)
-	if global_position.distance_to(before) > 0.01:
+	_visual_speed = lerpf(_visual_speed, movement.length() / maxf(delta, 0.001), 1.0 - exp(-10.0 * delta))
+	_locomotion_grace = 0.12 if movement.length() > 0.05 else maxf(0.0, _locomotion_grace - delta)
+	_update_visual_facing(movement, delta)
+	if _locomotion_grace > 0.0:
 		animation = "run" if state == State.CHASE or speed >= audio_hunt_speed else "walk"
 	_play_visual(animation)
+
+func _update_visual_facing(movement: Vector2, delta: float) -> void:
+	if absf(facing.x) > 0.3 and (facing.x < 0.0) != sprite.flip_h and movement.length() > 0.1:
+		_turn_clock += delta
+		if _turn_clock >= (0.07 if state in [State.CHASE, State.HUNT_AUDIO] else 0.16):
+			sprite.flip_h = facing.x < 0.0
+			_turn_clock = 0.0
+	else:
+		_turn_clock = 0.0
+
+func _clear_motion_to(point: Vector2) -> bool:
+	var collision: CollisionShape2D = $CollisionShape2D
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = collision.shape
+	query.transform = collision.global_transform
+	query.motion = point - global_position
+	query.collision_mask = 1
+	query.exclude = [get_rid()]
+	query.margin = 0.1
+	if not get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty():
+		return false
+	var result := get_world_2d().direct_space_state.cast_motion(query)
+	return result.size() == 2 and result[0] >= 0.999
 
 func _move_speed() -> float:
 	if FreedomLedger.current_part == 2 and FreedomLedger.part2_seed.get("touch_mutation", false) and state == State.HUNT_AUDIO:
@@ -311,34 +372,69 @@ func _move_speed() -> float:
 	return patrol_speed
 
 func _resolve_contact() -> void:
+	if GameManager.state != GameManager.State.PLAYING or player.death_started:
+		return
 	if global_position.distance_to(player.global_position) >= catch_distance or hit_cooldown > 0.0:
 		return
 	if player.hidden_spot != null and player.hidden_spot.interaction_id != witnessed_hide:
 		return
 	if not clear_sight(player.global_position):
 		return
-	if _stage() == 0:
+	if _stage() == 0 and not FreedomLedger.part2_seed.get("touch_mutation", false):
 		hit_cooldown = 2.0
 		player.play_action("stagger", 0.7)
 		EventBus.noise_created.emit(player.global_position, 320.0, "GENERIC")
 		velocity = -facing * blind_speed
 		return
+	_queue_strike(contact_damage, catch_distance + 30.0, witnessed_hide)
+
+func _queue_strike(amount: float, reach: float, hide_id: String = "") -> void:
+	if _attack_seconds > 0.0 or hit_cooldown > 0.0 or stun_seconds > 0.0:
+		return
+	hit_cooldown = 1.1
+	_strike_damage = amount
+	_strike_reach = reach
+	_strike_hide = hide_id
+	_strike_pending = true
+	_attack_elapsed = 0.0
+	_attack()
+
+func _update_attack(delta: float) -> void:
+	velocity = Vector2.ZERO
+	_attack_seconds = maxf(0.0, _attack_seconds - delta)
+	_attack_elapsed += delta
+	# Frame 3 is the forward snap of the existing seven-frame attack clip.
+	var contact_time := 3.0 / maxf(1.0, sprite.sprite_frames.get_animation_speed("attack"))
+	if _strike_pending and _attack_elapsed >= contact_time:
+		_strike_pending = false
+		_commit_strike()
+
+func _commit_strike() -> void:
+	if not is_instance_valid(player) or player.death_started or GameManager.state != GameManager.State.PLAYING or stun_seconds > 0.0:
+		return
+	if global_position.distance_to(player.global_position) > _strike_reach or not clear_sight(player.global_position):
+		return
+	if player.hidden_spot != null and player.hidden_spot.interaction_id != _strike_hide:
+		return
+	# The attack has committed its direction. Running past it can evade the jaws.
+	var offset: Vector2 = player.global_position - global_position
+	if offset.length() > 8.0 and facing.dot(offset.normalized()) < 0.15:
+		return
 	if FreedomLedger.current_part == 2:
-		hit_cooldown = 1.1
-		_attack()
-		player.take_hit(contact_damage)
+		player.take_hit(_strike_damage)
 	else:
 		EventBus.player_caught.emit()
 
 func _hear(point: Vector2, intensity: float, surface: String) -> void:
-	if not _has_sense("hearing") or state == State.CHASE or GameManager.state != GameManager.State.PLAYING:
+	if not is_instance_valid(player) or not is_instance_valid(room):
+		return
+	if stun_seconds > 0.0 or _attack_seconds > 0.0 or not _has_sense("hearing") or state == State.CHASE or GameManager.state != GameManager.State.PLAYING:
 		return
 	var radius := intensity if intensity > 10.0 else intensity * hearing_scale
 	if global_position.distance_to(point) > radius:
 		return
-	var now := Time.get_ticks_msec()
-	noise_pings = noise_pings.filter(func(stamp: int): return now - stamp <= 6000)
-	noise_pings.append(now)
+	noise_pings = noise_pings.filter(func(stamp: float): return hearing_time - stamp <= 6.0)
+	noise_pings.append(hearing_time)
 	target = point
 	path_clock = 0.0
 	if global_position.distance_squared_to(point) > 1.0:
@@ -364,6 +460,8 @@ func clear_sight(point: Vector2) -> bool:
 	return get_world_2d().direct_space_state.intersect_ray(query).is_empty()
 
 func can_see_player() -> bool:
+	if not is_instance_valid(player) or not is_instance_valid(room):
+		return false
 	if not _has_sense("sight") or player.hidden_spot != null:
 		return false
 	var offset: Vector2 = player.global_position - global_position
@@ -374,11 +472,15 @@ func can_see_player() -> bool:
 		reach *= flashlight_range_multiplier
 	if offset.length() > reach:
 		return false
-	if offset.length() > 50.0 and facing.dot(offset.normalized()) < cos(deg_to_rad(field_of_view * 0.5)):
+	# Close uncovered movement is visible in darkness, even just outside the cone.
+	var tracking := state == State.CHASE and lost_sight < 1.2
+	if offset.length() > 110.0 and not tracking and facing.dot(offset.normalized()) < cos(deg_to_rad(field_of_view * 0.5)):
 		return false
 	return clear_sight(player.global_position)
 
 func _hidden(id: String) -> void:
+	if not is_instance_valid(player) or not is_instance_valid(room):
+		return
 	var observed := _has_sense("sight") and sight_confirm > 0.0 and clear_sight(player.global_position)
 	if observed:
 		witnessed_hide = id
@@ -415,6 +517,8 @@ func _hide_score(spot: BaseInteractable) -> int:
 	return priority * 10
 
 func _predict_exit() -> bool:
+	if not is_instance_valid(player) or not is_instance_valid(room):
+		return false
 	var exits: Array[Vector2] = room.known_exit_positions()
 	if exits.is_empty():
 		return false
@@ -434,24 +538,24 @@ func _predict_exit() -> bool:
 
 func _check_remembered_hide() -> void:
 	if player.hidden_spot != null and global_position.distance_to(player.hidden_spot.global_position) < 45.0 and clear_sight(player.hidden_spot.global_position):
-		if FreedomLedger.current_part == 2:
-			_attack()
-			player.take_hit(remembered_hide_damage)
-		else:
-			EventBus.player_caught.emit()
+		_queue_strike(remembered_hide_damage, 68.0, player.hidden_spot.interaction_id)
 
 func stun(seconds: float) -> void:
 	stun_seconds = maxf(stun_seconds, seconds)
+	detection_active = false
+	sight_confirm = 0.0
+	witnessed_hide = ""
+	change_state(_patrol_state())
 	_attack_seconds = 0.0
+	_strike_pending = false
+	_attack_elapsed = 0.0
 	velocity = Vector2.ZERO
 	_play_visual("stagger")
 
 func _play_visual(animation: String) -> void:
 	_apply_base_appearance()
 	sprite.rotation = 0.0
-	# Supplied art is a side profile. Keep the last horizontal facing on vertical travel.
-	if absf(facing.x) > 0.12:
-		sprite.flip_h = facing.x < 0.0
+	# Movement turns have a short hold in _move, so tiny path corrections do not flip art.
 	var requested := "sniff" if animation == "idle" and state in [State.INVESTIGATE, State.INVESTIGATE_LAST_SEEN, State.AMBUSH] else animation
 	var has_art := sprite.sprite_frames.has_animation(requested)
 	if has_art:
@@ -481,8 +585,12 @@ func _apply_base_appearance() -> void:
 
 func _attack() -> void:
 	velocity = Vector2.ZERO
+	if _attack_seconds > 0.0:
+		return
 	if is_instance_valid(player):
 		facing = global_position.direction_to(player.global_position)
+		if absf(facing.x) > 0.3:
+			sprite.flip_h = facing.x < 0.0
 	if _attack_seconds <= 0.0:
 		sprite.play("attack")
 		sprite.set_frame_and_progress(0, 0.0)

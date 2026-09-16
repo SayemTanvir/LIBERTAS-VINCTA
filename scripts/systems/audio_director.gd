@@ -133,6 +133,7 @@ var _rng := RandomNumberGenerator.new()
 var _ambient_timer: float = 0.0
 var _ambient_interval: float = 0.0
 var _last_scream_sample: AudioStream = null
+var _death_audio_epoch := -1
 var _last_growl_sample: AudioStream = null
 var _last_monster_step: AudioStream = null
 var _last_distant_sample: AudioStream = null
@@ -291,6 +292,9 @@ func _play_key_sting(sense: String) -> void:
 		play_cue("stinger")
 
 func _on_player_caught() -> void:
+	if _death_audio_epoch == GameManager.transition_epoch:
+		return
+	_death_audio_epoch = GameManager.transition_epoch
 	play_cue("jumpscare")
 	play_cue("player_scream")
 	play_cue("monster_growl3")

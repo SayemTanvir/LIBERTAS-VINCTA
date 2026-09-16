@@ -37,6 +37,10 @@ var hiding_return_position := Vector2.ZERO
 var hiding_transition: Tween
 var hiding_transition_active := false
 var flashlight_pose_key := ""
+var ability_feedback_cooldown := 0.0
+var death_started := false
+var hurt_cooldown := 0.0
+var hiding_action := "hide_wall"
 
 @onready var visual: Node2D = $Visual
 @onready var sprite: AnimatedSprite2D = $Visual/AnimatedSprite2D
@@ -66,11 +70,13 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func _physics_process(delta: float) -> void:
+	hurt_cooldown = maxf(0.0, hurt_cooldown - delta)
 	animation_hold = maxf(0.0, animation_hold - delta)
 	breath_cooldown = maxf(0.0, breath_cooldown - delta)
 	sigil_cooldown = maxf(0.0, sigil_cooldown - delta)
 	stun_cooldown = maxf(0.0, stun_cooldown - delta)
 	touch_evasion_cooldown = maxf(0.0, touch_evasion_cooldown - delta)
+	ability_feedback_cooldown = maxf(0.0, ability_feedback_cooldown - delta)
 	_update_flashlight_charge(delta)
 	_update_breath(delta)
 	target_interactable = null
@@ -138,7 +144,7 @@ func _update_flashlight_charge(delta: float) -> void:
 	var drain := 3.0 if is_sprinting else 1.0
 	FreedomLedger.set_flashlight_seconds(FreedomLedger.flashlight_seconds - delta * drain)
 	if FreedomLedger.flashlight_seconds <= 0.0:
-		set_flashlight(false)
+		set_flashlight(false, false)
 
 func _update_breath(delta: float) -> void:
 	var wants_breath := Input.is_action_pressed("hold_breath") and breath_cooldown <= 0.0 and control_enabled and GameManager.state == GameManager.State.PLAYING
@@ -166,11 +172,14 @@ func _find_interactable() -> void:
 					target_interactable = candidate
 
 func set_flashlight(enabled: bool, present_action: bool = true) -> void:
+	var changed := flashlight_enabled != (enabled and FreedomLedger.flashlight_seconds > 0.0)
 	flashlight_enabled = enabled and FreedomLedger.flashlight_seconds > 0.0
 	$FlashlightFloor.visible = flashlight_enabled
 	EventBus.flashlight_changed.emit(flashlight_enabled)
-	if present_action:
+	if present_action and changed:
 		EventBus.audio_requested.emit("flashlight")
+		if not death_started and hidden_spot == null:
+			play_action("torch_raise" if flashlight_enabled else "torch_lower", 0.42, true)
 	_update_flashlight_presentation()
 
 func use_gadget() -> bool:
@@ -181,6 +190,7 @@ func use_gadget() -> bool:
 		return true
 	var gadget := "bottle" if int(FreedomLedger.inventory.get("bottle", 0)) > 0 else "clock"
 	if not FreedomLedger.consume_item(gadget):
+		_ability_feedback("No usable gadget. Find bottles or clocks; batteries work below 50 seconds of charge.")
 		return false
 	play_action("interact", 0.55, true)
 	var point := global_position + facing * (260.0 if gadget == "bottle" else 180.0)
@@ -205,33 +215,42 @@ func _register_touch_evasion() -> void:
 		EventBus.ability_used.emit("touch_evasion")
 
 func use_sigil() -> bool:
-	if GameManager.zone not in ["echoes", "nexus"] or not FreedomLedger.flags.get("part2_ability_unlocked", false) or sigil_cooldown > 0.0:
+	if not (FreedomLedger.part2_seed.get("blood_magic", false) or FreedomLedger.part2_seed.get("hybrid_magic", false)):
+		_ability_feedback("This path uses bottles and clocks. Press Q; H opens the guide.")
+		return false
+	if GameManager.zone not in ["echoes", "nexus"] or not FreedomLedger.flags.get("part2_ability_unlocked", false):
+		_ability_feedback("My rites are sealed. Find the Sigil Forge in Echoes. [H] Guide")
+		return false
+	if sigil_cooldown > 0.0:
+		_ability_feedback("The circle needs %d more seconds." % ceili(sigil_cooldown))
 		return false
 	var cost := FreedomLedger.max_hp * (0.04 if FreedomLedger.part2_seed.get("hybrid_magic", false) else 0.08)
 	if FreedomLedger.hp <= cost:
+		_ability_feedback("Too weak to cast. Recover at a cyan power station.")
 		return false
 	FreedomLedger.damage(cost)
-	FreedomLedger.mechanic_uses += 1
-	FreedomLedger.flags["sigil_until"] = Time.get_ticks_msec() + 12000
-	FreedomLedger.flags["sigil_x"] = global_position.x
-	FreedomLedger.flags["sigil_y"] = global_position.y
+	if GameManager.zone == "echoes":
+		FreedomLedger.mechanic_uses += 1
 	sigil_cooldown = 20.0
 	play_action("interact", 0.65, true)
-	_spawn_sigil(192.0, 12.0, Color(0.46, 0.11, 0.13, 0.68))
+	_spawn_sigil(192.0, 12.0, Color(0.46, 0.11, 0.13, 0.68), true)
 	EventBus.ability_used.emit("blood_sigil")
 	return true
 
 func use_stun() -> bool:
 	if not FreedomLedger.part2_seed.get("blood_magic", false) or not FreedomLedger.flags.get("part2_ability_unlocked", false) or stun_cooldown > 0.0:
+		_ability_feedback("Stun Rite needs awakened blood rites and a ready cooldown. [H] Guide")
 		return false
 	var targets: Array[Node] = []
 	for enemy in get_tree().get_nodes_in_group("enemy"):
 		if global_position.distance_to(enemy.global_position) <= 192.0 and enemy.has_method("stun"):
 			targets.append(enemy)
 	if targets.is_empty():
+		_ability_feedback("The Hound is too far away for the Stun Rite.")
 		return false
 	var cost := FreedomLedger.max_hp * 0.20
 	if FreedomLedger.hp <= cost:
+		_ability_feedback("Too weak for the rite. Recover at a cyan power station.")
 		return false
 	FreedomLedger.damage(cost)
 	stun_cooldown = 60.0
@@ -242,7 +261,12 @@ func use_stun() -> bool:
 	EventBus.ability_used.emit("blood_stun")
 	return true
 
-func _spawn_sigil(radius: float, lifetime: float, color: Color) -> void:
+func _ability_feedback(line: String) -> void:
+	if ability_feedback_cooldown <= 0.0:
+		EventBus.subtitle_requested.emit("ELS", line, 2.5)
+		ability_feedback_cooldown = 2.5
+
+func _spawn_sigil(radius: float, lifetime: float, color: Color, silencing := false) -> void:
 	var effect := Node2D.new()
 	effect.name = "SigilField"
 	effect.add_to_group("transient_effect")
@@ -250,8 +274,10 @@ func _spawn_sigil(radius: float, lifetime: float, color: Color) -> void:
 	effect.radius = radius
 	effect.lifetime = lifetime
 	effect.tint = color
+	effect.silences_senses = silencing
+	effect.partial = bool(FreedomLedger.part2_seed.get("hybrid_magic", false))
+	get_parent().add_child(effect)
 	effect.global_position = global_position
-	get_tree().current_scene.add_child(effect)
 
 func enter_hiding(spot: Node2D) -> void:
 	if hidden_spot != null or hiding_transition_active:
@@ -266,14 +292,21 @@ func enter_hiding(spot: Node2D) -> void:
 	visual.modulate.a = 1.0
 	visual.scale = Vector2.ONE
 	facing = Vector2.RIGHT if global_position.x <= spot.global_position.x else Vector2.LEFT
-	play_animation("crouch_idle")
+	var shelter_name := (str(spot.interaction_id) + " " + str(spot.display_name)).to_lower()
+	hiding_action = "hide_table" if "table" in shelter_name or "bed" in shelter_name or "toy" in shelter_name else "hide_wall"
+	var entry_seconds := 0.68 if hiding_action == "hide_table" else 0.48
+	play_action(hiding_action, entry_seconds)
 	collision_layer = 0
 	collision_mask = 0
 	hiding_transition_active = true
 	hiding_transition = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	var shelter_offset := Vector2(0, 8) if spot.interaction_id == "dining_table_hide" else Vector2(0, -2)
-	hiding_transition.tween_property(self, "global_position", spot.global_position + shelter_offset, 0.22)
-	hiding_transition.tween_callback(func(): hiding_transition_active = false)
+	# Place the low hold inside the table footprint so its front legs occlude Els.
+	var shelter_offset := Vector2(0, -4) if spot.interaction_id == "dining_table_hide" else Vector2(0, -2)
+	hiding_transition.tween_property(self, "global_position", spot.global_position + shelter_offset, entry_seconds)
+	hiding_transition.tween_callback(func():
+		hiding_transition_active = false
+		animation_hold = 0.0
+		play_animation(hiding_action + "_hold"))
 	EventBus.player_hidden.emit(spot.interaction_id)
 
 func leave_hiding() -> void:
@@ -285,26 +318,64 @@ func leave_hiding() -> void:
 	if hiding_transition != null and hiding_transition.is_valid():
 		hiding_transition.kill()
 	hiding_transition_active = true
+	var exit_seconds := 0.52 if hiding_action == "hide_table" else 0.38
+	play_action(hiding_action + "_exit", exit_seconds)
 	hiding_transition = create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	hiding_transition.tween_property(self, "global_position", hiding_return_position, 0.18)
+	hiding_transition.tween_property(self, "global_position", hiding_return_position, exit_seconds)
 	hiding_transition.tween_callback(func():
 		collision_layer = 2
 		collision_mask = 1
 		hiding_transition_active = false
+		animation_hold = 0.0
 		is_crouching = Input.is_action_pressed("crouch")
 		play_animation("crouch_idle" if is_crouching else "idle"))
 	EventBus.player_left_hiding.emit(id)
 
+func traverse_vent(point: Vector2, entering: bool) -> bool:
+	var epoch := GameManager.transition_epoch
+	var start_hp: float = FreedomLedger.hp
+	control_enabled = false
+	velocity = Vector2.ZERO
+	set_flashlight(false, false)
+	facing = Vector2.UP if entering else Vector2.DOWN
+	play_action("vent_enter" if entering else "vent_exit", 0.82)
+	visual.modulate.a = 1.0 if entering else 0.0
+	var travel := create_tween().set_parallel(true).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	# A short crawl into/out of the opening, with a planted low silhouette.
+	travel.tween_property(self, "global_position", point + Vector2(0, 8 if entering else 56), 0.82)
+	travel.tween_property(visual, "modulate:a", 0.0 if entering else 1.0, 0.26).set_delay(0.56 if entering else 0.0)
+	while travel.is_running():
+		await get_tree().process_frame
+		if get_tree().paused:
+			continue
+		if death_started or epoch != GameManager.transition_epoch or FreedomLedger.hp < start_hp or GameManager.state not in [GameManager.State.PLAYING, GameManager.State.INTRO]:
+			travel.kill()
+			visual.modulate.a = 1.0
+			if not death_started and GameManager.state == GameManager.State.PLAYING:
+				control_enabled = true
+			return false
+	if not entering:
+		animation_hold = 0.0
+		play_animation("idle")
+		control_enabled = true
+	return true
+
 func take_hit(amount: float = 25.0) -> void:
+	if death_started or GameManager.state != GameManager.State.PLAYING or hurt_cooldown > 0.0:
+		return
+	hurt_cooldown = 0.9
 	if hidden_spot != null:
 		leave_hiding()
 	if FreedomLedger.damage(amount):
 		EventBus.player_caught.emit()
 	else:
-		EventBus.audio_requested.emit("player_scream")
-		play_action("damage", 0.55)
+		# Nonfatal hits are a short flinch, not the death scream/collapse presentation.
+		play_action("hurt", 0.35, true)
 
 func _caught() -> void:
+	if death_started:
+		return
+	death_started = true
 	if hiding_transition != null and hiding_transition.is_valid():
 		hiding_transition.kill()
 	if hidden_spot != null or hiding_transition_active:
@@ -321,6 +392,8 @@ func _caught() -> void:
 	play_animation("death")
 
 func play_respawn() -> void:
+	death_started = false
+	hurt_cooldown = 0.0
 	control_enabled = false
 	velocity = Vector2.ZERO
 	visual.scale.y = 1.0
@@ -372,9 +445,11 @@ func play_action(animation: String, seconds: float = 1.0, allow_movement: bool =
 func play_animation(animation: String) -> void:
 	animation_state = animation
 	sprite.speed_scale = 1.0
-	var direction := CharacterAnimation.direction_name(facing)
-	sprite.flip_h = animation == "unlock" and direction in ["w", "e"]
-	var has_art := CharacterAnimation.play(sprite, animation, facing)
+	sprite.flip_h = false
+	var clip_action := animation
+	if flashlight_enabled and hidden_spot == null and not is_crouching and animation in ["idle", "walk", "run"]:
+		clip_action = "torch_" + animation
+	var has_art := CharacterAnimation.play(sprite, clip_action, facing)
 	sprite.visible = has_art
 	$Visual/PlaceholderVisual.visible = not has_art
 	_sync_pose_geometry()
@@ -382,23 +457,27 @@ func play_animation(animation: String) -> void:
 
 func _sync_pose_geometry() -> void:
 	var texture := sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
-	var crouch_art := texture.get_width() > 256.0
-	sprite.scale = Vector2.ONE * (0.2 if crouch_art else 0.4)
-	sprite.offset = Vector2(0, -192 if crouch_art else -96)
+	var generated := texture.has_meta("action_scale")
+	var crouch_art := not generated and texture.get_width() > 256.0
+	sprite.scale = Vector2.ONE * float(texture.get_meta("action_scale")) if generated else Vector2.ONE * (0.2 if crouch_art else 0.4)
+	sprite.offset = texture.get_meta("action_offset") if generated else Vector2(0, -192 if crouch_art else -96)
 	(sprite.material as ShaderMaterial).set_shader_parameter("crouch_art", crouch_art)
+	(sprite.material as ShaderMaterial).set_shader_parameter("action_art", generated)
 
 func _update_flashlight_presentation() -> void:
 	$FlashlightFloor.rotation = facing.angle()
-	var has_flashlight: bool = bool(FreedomLedger.flags.get("flashlight", false))
-	var holding := has_flashlight and flashlight_enabled and hidden_spot == null and not is_crouching and animation_state in ["idle", "walk", "run"]
-	flashlight_pose.visible = holding
-	(sprite.material as ShaderMaterial).set_shader_parameter("holding_light", holding)
-	if holding:
-		var direction := CharacterAnimation.direction_name(facing)
-		var key := direction + str(flashlight_enabled)
-		if key != flashlight_pose_key:
-			flashlight_pose.texture = PlayerPoses.flashlight_pose(direction, flashlight_enabled)
-			flashlight_pose_key = key
+	# Dedicated action art already includes the torch. Original walking frames
+	# need the existing held-light upper body while retaining their animated legs.
+	var texture := sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
+	var use_held_pose := flashlight_enabled and hidden_spot == null and not is_crouching and animation_state in ["idle", "walk", "run"] and not texture.has_meta("action_scale")
+	flashlight_pose.visible = use_held_pose
+	if use_held_pose:
+		flashlight_pose.texture = PlayerPoses.flashlight_pose(CharacterAnimation.direction_name(facing), true)
+	(sprite.material as ShaderMaterial).set_shader_parameter("holding_light", use_held_pose)
+	var raising := animation_state == "torch_raise" and animation_hold > 0.0
+	$FlashlightFloor.visible = flashlight_enabled and hidden_spot == null and (not raising or sprite.frame >= 3)
+	var sway := sin(presentation_clock * (12.0 if is_sprinting else 7.0)) * 0.018 if get_real_velocity().length() > 5.0 else 0.0
+	$FlashlightFloor.rotation += sway
 
 func _update_body_presentation(delta: float) -> void:
 	if GameManager.state != GameManager.State.PLAYING or not control_enabled:
@@ -410,6 +489,10 @@ func _update_body_presentation(delta: float) -> void:
 	visual.scale.x = lerpf(visual.scale.x, 1.0, response)
 
 func speech_anchor() -> Vector2:
+	var texture := sprite.sprite_frames.get_frame_texture(sprite.animation, sprite.frame)
+	if texture.has_meta("action_scale"):
+		# Follow the actual head height while kneeling, crawling or lifting an item.
+		return Vector2(0, (sprite.offset.y - texture.get_height() * 0.5) * sprite.scale.y - 8.0)
 	return Vector2(0, -46 if is_crouching or hidden_spot != null else -78)
 
 func _draw() -> void:

@@ -3,8 +3,11 @@ extends RefCounted
 const ART_DATA := "res://data/estate_art.json"
 const PickupMarker := preload("res://scripts/interactables/pickup_marker.gd")
 const DoorPresentation := preload("res://scripts/interactables/door_presentation.gd")
+const PowerStationVisual := preload("res://scripts/interactables/power_station_visual.gd")
 var data: Dictionary
 var textures: Dictionary = {}
+var facing_entries: Array[Dictionary] = []
+var facing_zones: Array[Dictionary] = []
 
 func _init() -> void:
 	data = JSON.parse_string(FileAccess.get_file_as_string(ART_DATA))
@@ -17,6 +20,10 @@ func texture_for(key: String) -> Texture2D:
 	if not path.begins_with("res://"):
 		path = str(data.asset_root) + path
 	var source: Texture2D = load(path)
+	if spec.get("mask_background", false):
+		var r: Array = spec.region
+		textures[key] = preload("res://scripts/levels/furniture_cutout.gd").texture(source, Rect2i(r[0], r[1], r[2], r[3]), spec.get("mask_seeds", []))
+		return textures[key]
 	var atlas := AtlasTexture.new()
 	atlas.atlas = source
 	if spec.has("region"):
@@ -76,6 +83,8 @@ func dress(room: Node2D) -> void:
 		body.add_child(visual)
 		_furnish(visual, zone.furniture[node_name], tint)
 		visual.scale = Vector2.ONE * float(data.furniture_scale)
+		var size: Array = zone.furniture[node_name].footprint
+		bind_facing(room, body, visual, Rect2(-float(size[0]) * 0.5, -float(size[1]), size[0], size[1]))
 		if str(zone.furniture[node_name].asset) == "bench":
 			visual.rotation_degrees = float(data.bench_rotation_degrees)
 	for id in zone.get("interactables", {}):
@@ -101,6 +110,7 @@ func dress(room: Node2D) -> void:
 			var size := Vector2(spec.footprint[0], spec.footprint[1])
 			# Leave the interaction origin in front of the body for the player's ray test.
 			room._wall(str(id).to_pascal_case() + "Footprint", Rect2(prop.position - Vector2(size.x * 0.5, size.y + 8), size))
+			bind_facing(room, prop, visual, Rect2(-size.x * 0.5, -size.y - 8, size.x, size.y))
 	for child in room.props.get_children():
 		if child is BaseInteractable:
 			if child.kind in ["key", "letter", "flashlight", "tool", "item"]:
@@ -109,6 +119,22 @@ func dress(room: Node2D) -> void:
 				_dress_passage(child, zone.passage_labels.get(child.interaction_id, "Passage"))
 			elif child.get_node("Visual/Sprite2D").texture == null:
 				_dress_generic_interactable(child, tint)
+			if child.kind == "recharge":
+				_service_marker(child, "CHARGE + REST" if room.zone_id in ["roots", "echoes", "nexus"] else "CHARGE", Color("86d1d3"))
+				room._wall(child.name + "Footprint", Rect2(child.position - Vector2(29, 27), Vector2(58, 19)))
+			elif child.kind == "anchor":
+				var titles := {"LN-A": "SEVERANCE\nFree the captive", "LN-B": "CUSTODIAN'S REST\nEls takes the burden", "LN-C": "VESSEL\nTransfer the prison"}
+				_service_marker(child, titles.get(child.interaction_id, "ANCHOR"), Color("dfc287"), -120.0)
+			elif child.interaction_id == "nexus_bell":
+				_service_marker(child, "WARD BELL\nBind the Hound for 32s", Color("eac775"), -105.0)
+	# Former charging tables remain ordinary furniture with no E target or marker.
+	for entry in zone.get("plain_tables", []):
+		var table := Node2D.new()
+		table.name = str(entry[0]).to_pascal_case() + "Table"
+		table.position = Vector2(entry[1], entry[2])
+		room.props.add_child(table)
+		_furnish(table, {"asset": "side_table", "width": 72.0}, tint)
+		room._wall(table.name + "Footprint", Rect2(table.position - Vector2(29, 27), Vector2(58, 23)))
 	var decoration_index := 0
 	for entry in zone.decorations:
 		var prop := Node2D.new()
@@ -127,7 +153,13 @@ func dress(room: Node2D) -> void:
 			var dimensions: Array = data.decoration_footprints[str(entry[0])]
 			var footprint := Vector2(dimensions[0], dimensions[1])
 			room._wall("WallFurniture" + str(decoration_index), Rect2(prop.position - Vector2(footprint.x * 0.5, footprint.y), footprint))
+			bind_facing(room, prop, prop, Rect2(Vector2(-footprint.x * 0.5, -footprint.y) / prop.scale, footprint / prop.scale))
 		decoration_index += 1
+	preload("res://scripts/levels/room_dressing.gd").dress(room, self, tint)
+	var orientation := preload("res://scripts/levels/furniture_facing.gd").new()
+	orientation.name = "FurnitureFacing"
+	room.add_child(orientation)
+	orientation.configure(room, self)
 	for light_spec in zone.get("ceiling_lights", []):
 		for room_spec in room.layout.rooms:
 			if str(room_spec.id) == str(light_spec.room):
@@ -202,25 +234,65 @@ func _dress_generic_interactable(prop: BaseInteractable, tint: Color) -> void:
 		"anchor": ["nexus_anchor", 120.0]
 	}
 	var spec: Array = mapping.get(prop.kind, ["book", 42.0])
+	if prop.interaction_id == "nexus_bell":
+		spec = ["ritual_stone", 80.0]
 	visual.get_node("PlaceholderVisual").hide()
 	_furnish(visual, {"asset": spec[0], "width": spec[1]}, tint, sprite)
+	if prop.interaction_id == "nexus_bell":
+		var bell := Polygon2D.new()
+		bell.name = "BrassBell"
+		bell.color = Color("c39a4f")
+		bell.polygon = PackedVector2Array([Vector2(-21, -44), Vector2(-15, -50), Vector2(-12, -70), Vector2(-5, -78), Vector2(5, -78), Vector2(12, -70), Vector2(15, -50), Vector2(21, -44)])
+		visual.add_child(bell)
+		var clapper := Polygon2D.new()
+		clapper.color = Color("f4d69b")
+		clapper.polygon = PackedVector2Array([Vector2(-4, -42), Vector2(4, -42), Vector2(0, -36)])
+		visual.add_child(clapper)
+
+func _service_marker(prop: BaseInteractable, caption: String, color: Color, height := -98.0) -> void:
+	var label := Label.new()
+	label.name = "ServiceLabel"
+	label.text = caption
+	label.position = Vector2(-115, height)
+	label.size = Vector2(230, 40)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 12)
+	label.add_theme_color_override("font_color", color)
+	label.add_theme_color_override("font_shadow_color", Color.BLACK)
+	label.add_theme_constant_override("shadow_offset_y", 2)
+	prop.add_child(label)
+	if prop.kind == "recharge":
+		var machine := PowerStationVisual.new()
+		machine.name = "PowerStation"
+		machine.station = prop
+		machine.position = Vector2(0, -42)
+		prop.get_node("Visual").add_child(machine)
+		var glow := Line2D.new()
+		glow.name = "ChargeIndicator"
+		glow.default_color = color
+		glow.width = 2.0
+		glow.points = PackedVector2Array([Vector2(-18, -4), Vector2(18, -4)])
+		prop.get_node("Visual").add_child(glow)
 
 func _dress_passage(prop: BaseInteractable, caption: String) -> void:
 	var visual: Node2D = prop.get_node("Visual")
 	var sprite: Sprite2D = visual.get_node("Sprite2D")
-	_set_sprite(sprite, "estate_door", 80.0, Vector2.ZERO, Color("#bbc6bf"))
+	# The Music Room lock must be within the standing character's hand reach.
+	var width := 60.0 if prop.kind == "locked_door" else 80.0
+	_set_sprite(sprite, "estate_door", width, Vector2.ZERO, Color("#bbc6bf"))
 	visual.get_node("PlaceholderVisual").hide()
 	var door_height := sprite.texture.get_height() * sprite.scale.y
 	var darkness := Polygon2D.new()
 	darkness.name = "DoorVoid"
 	darkness.color = Color("#050808")
-	darkness.polygon = PackedVector2Array([Vector2(-27, -door_height + 8), Vector2(27, -door_height + 8), Vector2(27, -4), Vector2(-27, -4)])
+	var opening := width * 27.0 / 80.0
+	darkness.polygon = PackedVector2Array([Vector2(-opening, -door_height + 8), Vector2(opening, -door_height + 8), Vector2(opening, -4), Vector2(-opening, -4)])
 	darkness.z_index = -2
 	visual.add_child(darkness)
 	visual.move_child(darkness, 0)
 	var open_frame := Sprite2D.new()
 	open_frame.name = "OpenStairs" if "stairs" in prop.interaction_id else "OpenDoorFrame"
-	_set_sprite(open_frame, "stair_door", 80.0, Vector2.ZERO, Color("#aeb9b3"))
+	_set_sprite(open_frame, "stair_door", width, Vector2.ZERO, Color("#aeb9b3"))
 	open_frame.z_index = -1 if "stairs" in prop.interaction_id else -2
 	darkness.z_index = -2 if "stairs" in prop.interaction_id else -1
 	visual.add_child(open_frame)
@@ -243,7 +315,8 @@ func _dress_passage(prop: BaseInteractable, caption: String) -> void:
 	presentation.configure(sprite, plaque)
 
 func _furnish(parent: Node2D, spec: Dictionary, tint: Color, sprite: Sprite2D = null) -> void:
-	if str(spec.asset) == "settee":
+	parent.set_meta("furniture_spec", spec.duplicate(true))
+	if str(spec.asset) == "settee" and not data.textures.settee.get("mask_background", false):
 		# Follow the booth's solid plinth instead of a detached oval floor shadow.
 		var shadow := Polygon2D.new()
 		shadow.name = "ContactShadow"
@@ -265,8 +338,24 @@ func _furnish(parent: Node2D, spec: Dictionary, tint: Color, sprite: Sprite2D = 
 	for detail in spec.get("details", []):
 		var accent := Sprite2D.new()
 		accent.name = str(detail[0]).to_pascal_case()
+		accent.set_meta("furniture_detail", true)
 		parent.add_child(accent)
 		_set_sprite(accent, str(detail[0]), float(detail[3]), Vector2(detail[1], detail[2]), tint)
+
+func bind_facing(room: Node2D, anchor: Node2D, visual: Node2D, footprint: Rect2) -> void:
+	var spec: Dictionary = visual.get_meta("furniture_spec", {})
+	# Explicit opt-in excludes rugs, lights, art, round tables and loose details.
+	if not data.get("furniture_facing", {}).has(str(spec.get("asset", ""))):
+		return
+	var sprite: Sprite2D = visual.get_node("Sprite2D")
+	var details: Array[Dictionary] = []
+	for child in visual.get_children():
+		if child is Sprite2D and child.has_meta("furniture_detail"):
+			details.append({"node": child, "position": child.position})
+	var transform := room.global_transform.affine_inverse() * anchor.global_transform
+	facing_entries.append({"anchor": anchor, "visual": visual, "footprint": footprint,
+		"original_footprint": transform * footprint, "sprite_position": sprite.position,
+		"tint": sprite.self_modulate, "details": details})
 
 func _set_sprite(sprite: Sprite2D, key: String, width: float, foot: Vector2, tint: Color) -> void:
 	sprite.texture = texture_for(key)
@@ -284,7 +373,7 @@ func _shadow(parent: Node2D, width: float) -> void:
 	var points := PackedVector2Array()
 	for i in 16:
 		var angle := TAU * float(i) / 16.0
-		points.append(Vector2(cos(angle) * width * 0.44, sin(angle) * width * 0.085 - 4))
+		points.append(Vector2(cos(angle) * width * 0.46, sin(angle) * width * 0.025 - 1.5))
 	shadow.polygon = points
 	parent.add_child(shadow)
 	parent.move_child(shadow, 0)
@@ -342,4 +431,12 @@ func dress_surfaces(room: Node2D) -> void:
 		backdrop.get_node("LinenShadowLane").color = Color(0.12, 0.15, 0.17, 0.46)
 		_tile_band(backdrop, "tile_floor", Rect2(2700, 550, 3600, 74), Vector2(116, 74), Color(0.28, 0.25, 0.31, 0.28))
 		for x in [2650, 4300, 5950]:
-			backdrop.get_node("Moonlight" + str(x)).color = Color(0.62, 0.69, 0.70, 0.17)
+			backdrop.get_node("Moonlight" + str(x)).hide()
+			var light := ColorRect.new()
+			light.position = Vector2(x, 355)
+			light.size = Vector2(650, 180)
+			light.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			var material := ShaderMaterial.new()
+			material.shader = preload("res://shaders/floor_moonlight.gdshader")
+			light.material = material
+			backdrop.add_child(light)

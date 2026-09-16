@@ -4,11 +4,15 @@ extends Control
 @export_range(0.5, 15.0) var display_seconds: float = 5.0
 @export var ambience: AudioStream
 var failed: bool = false
+var presentation: Control
+var loading_clock: float = 0.0
+var indicator: Control
 @onready var curtain: ColorRect = $Curtain
 @onready var message: Control = $MessageBubble
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_build_presentation()
 	message.show_text("", "Entering Hollowmere...")
 	if DisplayServer.get_name() == "headless":
 		_enter_game.call_deferred()
@@ -26,6 +30,39 @@ func _ready() -> void:
 	# Submit opaque black before synchronous resource preparation/instantiation.
 	await RenderingServer.frame_post_draw
 	_enter_game.call_deferred()
+
+func _build_presentation() -> void:
+	var style := preload("res://scripts/ui/ui_style.gd")
+	presentation = Control.new()
+	presentation.size = Vector2(1280, 720)
+	presentation.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(presentation)
+	move_child(presentation, get_child_count() - 2)
+	var brand := style.label(presentation, "LIBERTAS VINCTA", Rect2(140, 240, 1000, 66), 42, style.PAPER, true)
+	brand.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var chapter := style.label(presentation, "PART II  /  DEGREES OF FREEDOM" if FreedomLedger.current_part == 2 else "PART I  /  HOLLOWMERE ESTATE", Rect2(140, 328, 1000, 32), 12, style.BRASS)
+	chapter.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	style.rule(presentation, Rect2(440, 385, 400, 1))
+	indicator = Control.new()
+	indicator.position = Vector2(640, 428)
+	indicator.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	presentation.add_child(indicator)
+	indicator.draw.connect(func():
+		var glow := 0.55 + sin(loading_clock * 2.0) * 0.25
+		indicator.draw_polyline(PackedVector2Array([Vector2(0, -10), Vector2(6, 0), Vector2(0, 10), Vector2(-6, 0), Vector2(0, -10)]), Color(style.BRASS, glow), 1.5, true)
+		indicator.draw_circle(Vector2.ZERO, 2.0, style.PAPER, true, -1, true))
+	resized.connect(_layout_presentation)
+	_layout_presentation()
+
+func _layout_presentation() -> void:
+	var factor := minf(size.x / 1280.0, size.y / 720.0)
+	presentation.scale = Vector2.ONE * factor
+	presentation.position = (size - presentation.size * factor) * 0.5
+
+func _process(delta: float) -> void:
+	loading_clock += delta
+	if indicator != null:
+		indicator.queue_redraw()
 
 func _enter_game() -> void:
 	# Avoid the threaded dependency wait that left this screen stuck.

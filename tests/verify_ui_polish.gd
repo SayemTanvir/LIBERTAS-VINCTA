@@ -41,7 +41,7 @@ func _run() -> void:
 	settings.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	await get_tree().process_frame
 	for value in [0.0, 0.5, 1.0]:
-		var point: Vector2 = settings.design.get_global_transform() * Vector2(802 + 196 * value, 329)
+		var point: Vector2 = settings.buttons[0].get_global_transform() * Vector2(228 + 192 * value, 26)
 		var motion := InputEventMouseMotion.new()
 		motion.position = point
 		motion.global_position = point

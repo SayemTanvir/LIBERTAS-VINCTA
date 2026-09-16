@@ -1,4 +1,6 @@
 extends CanvasLayer
+const FieldGuide := preload("res://scripts/systems/field_guide.gd")
+const UIStyle := preload("res://scripts/ui/ui_style.gd")
 ## Runtime status, reading, pause, transition, and ending presentation.
 
 @export var ui_theme: Theme = preload("res://themes/libertas_ui_theme.tres")
@@ -21,6 +23,10 @@ var anchor_status: Label
 var fade: ColorRect
 var pulse: ColorRect
 var atmosphere_overlay: ColorRect
+var objective_label: Label
+var ability_label: Label
+var activity_meter: ProgressBar
+var survival_panel: PanelContainer
 
 var subtitle_queue: Array[Dictionary] = []
 var subtitle_time: float = 0.0
@@ -40,12 +46,28 @@ func _ready() -> void:
 	root.theme = ui_theme
 	add_child(root)
 	_build_peripheral()
-	senses = make_label("", 16)
-	senses.position = Vector2(28, 22)
+	survival_panel = preload("res://scripts/ui/survival_panel.gd").new()
+	root.add_child(survival_panel)
+	senses = make_label("", 10)
+	senses.position = Vector2(40, 150)
 	root.add_child(senses)
+	senses.reparent(survival_panel.get_child(0), false)
+	senses.position = Vector2(14, 101)
+	senses.size = Vector2(316, 15)
+	senses.add_theme_font_size_override("font_size", 9)
+	senses.add_theme_color_override("font_color", Color("aaa79e"))
+	senses.clip_text = true
 	vitals = make_label("", 15)
 	vitals.position = Vector2(28, 50)
 	root.add_child(vitals)
+	objective_label = make_label("", 15)
+	objective_label.position = Vector2(28, 183)
+	objective_label.size = Vector2(880, 40)
+	root.add_child(objective_label)
+	ability_label = make_label("", 15)
+	ability_label.position = Vector2(28, 209)
+	ability_label.add_theme_color_override("font_color", Color("a7ceca"))
+	root.add_child(ability_label)
 	room_name = make_label("", 15)
 	room_name.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
 	room_name.offset_left = -330
@@ -55,7 +77,9 @@ func _ready() -> void:
 	room_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	room_name.add_theme_color_override("font_color", Color("c5b58f"))
 	root.add_child(room_name)
-	prompt = make_label("[E]", 19)
+	prompt = make_label("[E]", 16)
+	prompt.add_theme_color_override("font_color", UIStyle.PAPER)
+	prompt.add_theme_stylebox_override("normal", UIStyle.panel(Color(0.025, 0.035, 0.046, 0.94), UIStyle.RULE, 12))
 	root.add_child(prompt)
 	bubble = preload("res://scenes/ui/message_bubble.tscn").instantiate()
 	root.add_child(bubble)
@@ -66,13 +90,30 @@ func _ready() -> void:
 	active_message = bubble
 	subtitle = bubble.text_label
 	anchor_status = make_label("", 17)
-	anchor_status.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
-	anchor_status.offset_left = -160
-	anchor_status.offset_right = 160
-	anchor_status.offset_top = 72
-	anchor_status.offset_bottom = 100
+	anchor_status.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	anchor_status.offset_left = -350
+	anchor_status.offset_right = 350
+	anchor_status.offset_top = -94
+	anchor_status.offset_bottom = -67
 	anchor_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	root.add_child(anchor_status)
+	activity_meter = ProgressBar.new()
+	activity_meter.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	activity_meter.offset_left = -160
+	activity_meter.offset_right = 160
+	activity_meter.offset_top = -60
+	activity_meter.offset_bottom = -53
+	activity_meter.show_percentage = false
+	activity_meter.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = Color("b6cfc2")
+	activity_meter.add_theme_stylebox_override("fill", fill)
+	var track := StyleBoxFlat.new()
+	track.bg_color = Color("272e31")
+	activity_meter.add_theme_stylebox_override("background", track)
+	activity_meter.size.y = 7
+	activity_meter.hide()
+	root.add_child(activity_meter)
 	pulse = ColorRect.new()
 	pulse.color = Color(0.45, 0.52, 0.56, 0.0)
 	pulse.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -107,10 +148,13 @@ func _ready() -> void:
 	EventBus.anchor_cleansed.connect(_anchor_cleansed)
 
 func _caught_fade() -> void:
+	anchor_status.text = ""
+	activity_meter.hide()
 	create_tween().tween_property(fade, "color:a", 1.0, 1.0)
 
 func _anchor_cleansed(_id: String, _total: int) -> void:
 	anchor_status.text = ""
+	activity_meter.hide()
 
 func _build_peripheral() -> void:
 	atmosphere_overlay = ColorRect.new()
@@ -137,11 +181,13 @@ func _process(delta: float) -> void:
 	var message_visible := not subtitle.text.is_empty() and (SessionSettings.subtitles_enabled or acknowledged_message) and not reader.visible and not pause_menu.visible and not game_over.visible and not chapter_complete.visible
 	bubble.visible = active_message == bubble and message_visible
 	narration.visible = active_message == narration and message_visible
-	var playing_hud := GameManager.zone != "intro" and GameManager.state != GameManager.State.ENDING
+	var playing_hud := GameManager.zone != "intro" and GameManager.state != GameManager.State.ENDING and not reader.visible and not pause_menu.visible and not game_over.visible
 	senses.visible = playing_hud
-	vitals.visible = playing_hud
+	vitals.visible = false
+	survival_panel.visible = playing_hud
+	survival_panel.update_values(delta)
 	room_name.visible = playing_hud
-	senses.text = FreedomLedger.freedom_summary()
+	senses.text = FreedomLedger.freedom_summary().replace("Degrees of freedom: ", "Freedom: ").replace(" bonds released", " bonds").replace("  |  [H] Field guide", "")
 	vitals.text = "Charge %02d  |  HP %03d  |  Batteries %d  ·  Bottles %d  ·  Clocks %d" % [
 		ceili(FreedomLedger.flashlight_seconds), ceili(FreedomLedger.hp),
 		int(FreedomLedger.inventory.get("battery", 0)), int(FreedomLedger.inventory.get("bottle", 0)), int(FreedomLedger.inventory.get("clock", 0))]
@@ -158,6 +204,11 @@ func _process(delta: float) -> void:
 				room_reveal.tween_property(room_name, "modulate:a", 1.0, 0.5)
 				break
 	var player = get_tree().get_first_node_in_group("player")
+	objective_label.visible = FreedomLedger.current_part == 2 and playing_hud
+	ability_label.visible = objective_label.visible
+	if objective_label.visible and player != null:
+		objective_label.text = FieldGuide.objective(room)
+		ability_label.text = FieldGuide.ability_status(player)
 	prompt.visible = false
 	var strain := 0.0
 	if player != null:
@@ -200,9 +251,27 @@ func _process(delta: float) -> void:
 		show_ending()
 
 func _layout_for_viewport() -> void:
-	var narrow := root.size.x < 900.0
-	room_name.offset_top = 78.0 if narrow else 22.0
+	var narrow := root.size.x < 1100.0
+	survival_panel.scale = Vector2.ONE * minf(1.0, (root.size.x - 36.0) / survival_panel.PANEL_SIZE.x)
+	var panel_bottom := survival_panel.position.y + survival_panel.size.y * survival_panel.scale.y
+	objective_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	ability_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var width := minf(580.0, root.size.x - 56.0) if narrow else minf(520.0, root.size.x - 560.0)
+	var caption_below := root.size.x < 720.0
+	objective_label.position = Vector2(18 if narrow else root.size.x - width - 28, panel_bottom + (46.0 if caption_below else 14.0) if narrow else 63.0)
+	objective_label.size = Vector2(width, 1)
+	ability_label.position = Vector2(objective_label.position.x, objective_label.position.y + objective_label.get_minimum_size().y + 12)
+	ability_label.size = Vector2(width, 1)
+	room_name.offset_top = panel_bottom + 10.0 if caption_below else 18.0
 	room_name.offset_bottom = room_name.offset_top + 24.0
+	# Narration and a live charge/ritual indicator occupy separate rows.
+	var bottom := 94.0
+	if narration.visible:
+		bottom = maxf(bottom, root.size.y - narration.design.get_global_rect().position.y + 48.0)
+	anchor_status.offset_top = -bottom
+	anchor_status.offset_bottom = -bottom + 27
+	activity_meter.offset_top = -bottom + 34
+	activity_meter.offset_bottom = -bottom + 41
 
 func status(sense: String) -> String:
 	return "restored" if sense in FreedomLedger.keys_collected else "sealed"
@@ -237,12 +306,24 @@ func _detection_impact(_source: Node) -> void:
 	create_tween().tween_property(pulse, "color:a", 0.0, 0.42)
 
 func _anchor_progress(id: String, seconds: float, required: float) -> void:
-	anchor_status.text = "%s  %02d / %02d" % [id, floori(seconds), floori(required)] if seconds > 0.0 else ""
+	var label: String = {"LN-A": "Severance — hold E", "LN-B": "Custodian's Rest — hold E", "LN-C": "Vessel — hold E"}.get(id, id)
+	anchor_status.text = "%s  %02d / %02ds" % [label, floori(seconds), ceili(required)] if seconds > 0.0 else ""
+	activity_meter.visible = seconds > 0.0
+	activity_meter.value = seconds / maxf(required, 0.01) * 100.0
+	if id.begins_with("Charging"):
+		var percent := FreedomLedger.flashlight_seconds / FreedomLedger.MAX_FLASHLIGHT_SECONDS * 100.0
+		anchor_status.text = "CHARGING  %d%%   /   Move to cancel" % floori(percent)
+		activity_meter.value = percent
 
 func _input(event: InputEvent) -> void:
 	if reader.visible or pause_menu.visible or game_over.visible or chapter_complete.visible:
 		return
 	if event.is_echo():
+		return
+	if event is InputEventKey and event.pressed and (event.physical_keycode == KEY_H or event.keycode == KEY_H) and GameManager.state == GameManager.State.PLAYING:
+		get_viewport().set_input_as_handled()
+		GameManager.block_ui_input()
+		show_letter("Els' Field Guide", FieldGuide.guide_text())
 		return
 	if event.is_action_pressed("inventory") and GameManager.state == GameManager.State.PLAYING:
 		get_viewport().set_input_as_handled()
@@ -315,6 +396,7 @@ func show_game_over() -> void:
 	game_over.process_mode = Node.PROCESS_MODE_INHERIT
 	game_over.show()
 	game_over.set_selection(0, false)
+	game_over.focus_default()
 
 func _result_action(id: String) -> void:
 	if result_busy:

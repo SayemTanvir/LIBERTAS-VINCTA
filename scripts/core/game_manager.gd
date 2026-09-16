@@ -13,6 +13,9 @@ var arrival_pending: bool = false
 var respawn_pending: bool = false
 var save_path: String = SAVE_PATH
 var ui_input_until_frame: int = -1
+var transition_epoch := 0
+var checkpoint_error := ""
+const FLOOR_LAYOUT := preload("res://data/estate_layout.json")
 
 func block_ui_input() -> void:
 	# GUI consumption does not clear Input.is_action_just_pressed in player physics.
@@ -27,6 +30,8 @@ func _ready() -> void:
 	EventBus.ending_triggered.connect(finish)
 
 func new_game() -> void:
+	checkpoint_error = ""
+	transition_epoch += 1
 	get_tree().paused = false
 	if FileAccess.file_exists(save_path):
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
@@ -42,6 +47,7 @@ func new_game() -> void:
 	_load_game_scene()
 
 func go_home() -> void:
+	transition_epoch += 1
 	get_tree().paused = false
 	checkpoint.clear()
 	zone = "intro"
@@ -67,17 +73,18 @@ func has_save() -> bool:
 	return FileAccess.file_exists(save_path)
 
 func continue_game() -> void:
+	transition_epoch += 1
 	if not has_save():
 		new_game()
 		return
 	var data = JSON.parse_string(FileAccess.get_file_as_string(save_path))
-	if not data is Dictionary or not data.has("ledger"):
-		new_game()
+	if not checkpoint_is_valid(data):
+		checkpoint_error = "Checkpoint could not be read. It has been kept; choose New Game to start again."
+		go_home()
 		return
-	var saved_position = data.get("position", [])
-	if not saved_position is Array or saved_position.size() < 2:
-		new_game()
-		return
+	checkpoint_error = ""
+	get_tree().paused = false
+	var saved_position: Array = data.position
 	FreedomLedger.restore_snapshot(data.ledger)
 	zone = str(data.get("zone", "ground"))
 	var p: Array = saved_position
@@ -89,7 +96,30 @@ func continue_game() -> void:
 	state = State.PLAYING
 	_load_game_scene()
 
+func checkpoint_is_valid(data: Variant) -> bool:
+	if not data is Dictionary or not FreedomLedger.snapshot_is_valid(data.get("ledger")):
+		return false
+	var saved_zone: Variant = data.get("zone", "ground")
+	if not saved_zone is String or not FLOOR_LAYOUT.data.has(saved_zone):
+		return false
+	var point: Variant = data.get("position")
+	if not point is Array or point.size() != 2:
+		return false
+	for coordinate in point:
+		if not (coordinate is int or coordinate is float) or not is_finite(float(coordinate)):
+			return false
+	if float(point[0]) < 0.0 or float(point[0]) > float(FLOOR_LAYOUT.data[saved_zone].width) or float(point[1]) < 354.0 or float(point[1]) > 634.0:
+		return false
+	var part := int(data.ledger.get("current_part", 1))
+	if (saved_zone in ["roots", "echoes", "nexus"]) != (part == 2):
+		return false
+	return float(data.ledger.get("hp", 100.0)) > 0.0
+
 func travel(destination: String, entrance: String = "start") -> void:
+	# Death wins even when an old vent/door callback is already deferred.
+	if state != State.PLAYING or FreedomLedger.hp <= 0.0:
+		return
+	transition_epoch += 1
 	get_tree().paused = false
 	zone = destination
 	entry = entrance
@@ -99,6 +129,7 @@ func travel(destination: String, entrance: String = "start") -> void:
 	get_tree().change_scene_to_file("res://scenes/main/main.tscn")
 
 func restart_checkpoint() -> void:
+	transition_epoch += 1
 	get_tree().paused = false
 	if checkpoint.is_empty():
 		new_game()
@@ -116,9 +147,11 @@ func caught() -> void:
 	if state != State.PLAYING:
 		return
 	state = State.CAUGHT
+	transition_epoch += 1
+	var epoch := transition_epoch
 	EventBus.audio_requested.emit("monster_breathing")
 	await get_tree().create_timer(1.2, false).timeout
-	if state != State.CAUGHT:
+	if state != State.CAUGHT or epoch != transition_epoch:
 		return
 	var hud := get_tree().get_first_node_in_group("hud")
 	if hud != null:
@@ -153,6 +186,8 @@ func continue_to_part_two() -> void:
 	get_tree().change_scene_to_file("res://scenes/main/main.tscn")
 
 func _trigger_loop() -> void:
+	transition_epoch += 1
+	var epoch := transition_epoch
 	state = State.INTRO
 	FreedomLedger.reset_for_loop()
 	EventBus.loop_started.emit(FreedomLedger.loop_counter)
@@ -163,6 +198,8 @@ func _trigger_loop() -> void:
 	arrival_pending = false
 	respawn_pending = false
 	await get_tree().create_timer(0.35, false).timeout
+	if epoch != transition_epoch or state != State.INTRO:
+		return
 	state = State.PLAYING
 	get_tree().change_scene_to_file("res://scenes/main/main.tscn")
 

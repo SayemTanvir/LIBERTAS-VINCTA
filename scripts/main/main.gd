@@ -11,6 +11,7 @@ func _ready() -> void:
 	var player := $Entities/Player
 	# Recovery always wins over arrival so a stale passage flag cannot replay a door.
 	var recovering := GameManager.respawn_pending
+	var continuing := GameManager.entry == "checkpoint" and not recovering and not GameManager.checkpoint.is_empty()
 	var arriving := not recovering and GameManager.arrival_pending and GameManager.zone != "intro"
 	var loop_waking := bool(FreedomLedger.flags.get("loop_wake", false))
 	GameManager.arrival_pending = false
@@ -18,7 +19,7 @@ func _ready() -> void:
 	var spawn: Vector2 = room.get_node("Markers/ReturnSpawn" if GameManager.entry == "end" else "Markers/PlayerSpawn").global_position
 	if arrival_door != null:
 		spawn = arrival_door.global_position + Vector2(0, 8)
-	if recovering and not GameManager.checkpoint.is_empty():
+	if (recovering or continuing) and not GameManager.checkpoint.is_empty():
 		spawn = GameManager.checkpoint.position
 		_close_passages_immediately()
 	player.global_position = spawn
@@ -28,12 +29,12 @@ func _ready() -> void:
 	camera.limit_top = 0
 	camera.limit_bottom = 800
 	camera.snap_to_player()
-	if GameManager.zone == "intro":
+	if GameManager.zone == "intro" and not continuing and not recovering:
 		$Awakening.begin(player, $UI)
 	else:
 		GameManager.state = GameManager.State.INTRO if arrival_door != null or recovering or loop_waking else GameManager.State.PLAYING
 		player.control_enabled = arrival_door == null and not recovering and not loop_waking
-		if arrival_door == null and not recovering and not loop_waking:
+		if arrival_door == null and not recovering and not continuing and not loop_waking:
 			GameManager.save_checkpoint(spawn)
 		if FreedomLedger.flags.get("flashlight", false):
 			player.set_flashlight(false, false)
@@ -43,7 +44,10 @@ func _ready() -> void:
 			enemy_spawn.x = spawn.x + 850.0 if spawn.x < room.room_width - 1000 else spawn.x - 850.0
 			enemy_spawn = room.grid.get_point_position(room.nearest_cell(enemy_spawn))
 		enemy.position = enemy_spawn
-		$Entities.add_child(enemy)
+		if GameManager.zone != "intro":
+			$Entities.add_child(enemy)
+		else:
+			enemy.free()
 		if arrival_door != null:
 			_finish_arrival.call_deferred(player, arrival_door)
 		elif recovering:
@@ -76,7 +80,10 @@ func _passage_for_entry() -> BaseInteractable:
 
 func _finish_arrival(player: CharacterBody2D, door: BaseInteractable) -> void:
 	var presentation: Node = door.get_node_or_null("Visual/DoorPresentation")
-	if presentation != null:
+	if door.kind == "vent":
+		if not await player.traverse_vent(door.global_position, false):
+			return
+	elif presentation != null:
 		await presentation.arrive(player)
 	else:
 		player.global_position = door.global_position + Vector2(0, 56)

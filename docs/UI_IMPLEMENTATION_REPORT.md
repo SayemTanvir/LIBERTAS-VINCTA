@@ -1,6 +1,39 @@
 # UI integration report
 
-Implemented and verified with the installed Godot 4.7.2 stable executable. All artwork is sourced from the existing `assets/BG` PNGs. No source image was generated, edited, recolored, resized, or replaced. `build/ui_*.png` files are ignored runtime verification screenshots, not game assets.
+## Compact status panel — 2026-09-16
+
+The health/battery/inventory panel is now 344 × 118 instead of 464 × 150,
+reducing its footprint by about 42%. It uses a softer translucent background,
+rounded corners, a restrained border, four-pixel meters and compact inventory
+rows. Exact health, charge percentage and item counts remain visible. The freedom
+summary is shortened to fit, and nearby objective/room text follows the panel's
+actual height on narrow layouts.
+
+Validation: `verify_native_ui` passed **1,235 checks with 0 failures**, including
+18 rendered captures. Inspected `build/native_ui_hud_1280.png` and
+`build/native_ui_hud_800.png`; log: `build/compact_hud_ui.log`.
+
+## Current interface — 2026-09-16
+
+The [whole-game native UI refresh](NATIVE_UI_REPORT.md) supersedes the older
+parchment menu mappings below. Settings, help, credits, pause and outcomes now
+share the main menu's dark estate style with native controls. Inventory uses item
+cards; letters and the field guide use a wide, dark reading view. The latest pass
+completed 2,197 checks with zero failures and captured 18 review images.
+
+The remaining sections record the earlier artwork integration and provenance.
+
+Implemented and verified with the installed Godot 4.7.2 stable executable. The initial UI used supplied `assets/BG` PNGs; the main menu now uses the generated scenery described below. `build/ui_*.png` files are ignored runtime verification screenshots, not game assets. Later gameplay/HUD changes are documented in `SURVIVAL_POLISH_REPORT.md`.
+
+## Main menu refresh — 2026-09-16
+
+- Background: `assets/ui/menu/hollowmere_dark_menu.png`, generated using the built-in imagegen tool. The complete prompt is in its adjacent README.
+- Presentation refinement: tracked serif title, small estate emblem, italic story tagline, restrained brass dividers and spaced sans-serif actions. New Game and Continue have stronger visual priority. Transparent buttons use an oxblood gradient with a fine red edge, sliding text and a selection arrow; brief option descriptions fade in beneath the menu. Hitboxes stay stationary during animation.
+- Title and all six actions are native controls directly over the scenery. There is no menu panel or idle button backing. Hover and keyboard/controller selection fade to red over 0.12 seconds; pointer exit restores transparency. Keyboard navigation owns the highlight even when the pointer rests over another row.
+- Background uses uniform cover scaling; controls use a separate safe layout to remain visible from 4:3 to ultrawide. Pause and other pages retain their existing artwork and navigation.
+- Rendered checks: `verify_home_widescreen` covers five resolutions and all six selection states. `verify_image_ui` exercises real pointer, keyboard and gamepad events, transparent idle states, red hover, mixed input, settings, pause, results and gameplay transitions.
+- Initial dark-menu validation: **705 checks, 0 failures** (100 widescreen + 605 UI flow). Logs: `build/dark_menu_final_layout.log` and `build/dark_menu_final_ui.log`. Inspected neutral/hover captures and final 1080p and 4:3 layouts.
+- Refined presentation validation: **705 checks, 0 failures** (100 widescreen + 605 UI flow), recorded in `build/menu_refinement_layout.log` and `build/menu_refinement_ui.log`. Final 1080p, 4:3 and transparent idle captures inspected.
 
 ## Files and reusable components
 
@@ -18,7 +51,7 @@ All paths below are relative to `assets/BG`.
 
 | Screen | Supplied PNGs |
 | --- | --- |
-| Main menu | `03_Main_Menu/states/main_menu_{start,continue,settings,rules,credits,exit}_active.png` |
+| Main menu | `../ui/menu/hollowmere_dark_menu.png` with native title and buttons |
 | Settings | `04_Settings/states/settings_{master_volume,music,sfx,resolution,fullscreen,screen_shake,back}_active.png` |
 | Rules | `05_Rules/rules_screen_back_active.png` |
 | Controls | `06_Controls/controls_screen_back_active.png` |

@@ -3,7 +3,7 @@ extends "res://scripts/ui/menu_navigation.gd"
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	setup_navigation($PageContent)
-	var menu = add_page("menu", preload("res://scenes/ui/main_menu.tscn"), true)
+	var menu = add_page("menu", preload("res://scenes/ui/pause_page.tscn"))
 	menu.selected.connect(select)
 	menu.back_requested.connect(back)
 	for id in ["settings", "rules", "controls"]:

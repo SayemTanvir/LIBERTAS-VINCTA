@@ -68,7 +68,7 @@ func _start_campaign() -> bool:
 	if not await _wait_zone("intro"):
 		return false
 	var tool: BaseInteractable = main.room.props.get_node("LockpickTool")
-	_check(tool._action_animation() == "collect", "Tool pouch must use the ordinary-item collection clip")
+	_check(tool._action_animation() == "bag_pickup", "Tool pouch uses its dedicated lift-and-stow animation")
 	await _use("IntroExit")
 	await _use("Flashlight")
 	await _use("LockpickTool")
@@ -85,10 +85,17 @@ func _visit_roots_story() -> void:
 	for x in [1500.0, 2500.0, 3550.0, 4600.0, 5550.0]:
 		player.position = Vector2(x, 500)
 		await get_tree().physics_frame
+		# Room entry is tracked in _process; 20x speed can run many physics ticks first.
+		await get_tree().process_frame
+		await get_tree().process_frame
 	player.position = Vector2(2500, 500)
 	await get_tree().physics_frame
+	await get_tree().process_frame
+	await get_tree().process_frame
 	player.position = Vector2(3550, 500)
 	await get_tree().physics_frame
+	await get_tree().process_frame
+	await get_tree().process_frame
 	EventBus.subtitle_requested.disconnect(listener)
 	_check(carving_lines == ["Custodian. Jailer. Vantree. Els Vantree - the final carving bears a date centuries old."], "CR-04 reveal was missing, changed, or repeated")
 	_check(not main.room.props.get_node("VantreeAltar").available(), "Automatic CR-04 reveal can be replayed manually")

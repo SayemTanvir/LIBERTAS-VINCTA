@@ -10,6 +10,7 @@ const EstateAtmosphere := preload("res://scripts/levels/estate_atmosphere.gd")
 var room_width: float = 7200.0
 var layout: Dictionary
 var blockers: Array[Rect2] = []
+var furnishing_rugs: Array[Rect2] = []
 var grid := AStarGrid2D.new()
 var noise_rings: Array[Dictionary] = []
 var geometry: Node2D
@@ -18,6 +19,7 @@ var markers: Node2D
 var estate_art: RefCounted
 var current_room_id: String = ""
 var ambient_false_noise_clock: float = 14.0
+var ward_seconds := 0.0
 
 func _ready() -> void:
 	add_to_group("room")
@@ -254,6 +256,9 @@ func threat_active_at(point: Vector2) -> bool:
 	return point.x >= 3000.0 or FreedomLedger.flags.get("visited_CR-03", false)
 
 func surface_at(point: Vector2) -> String:
+	for rug in furnishing_rugs:
+		if rug.has_point(point):
+			return "CARPET"
 	for region in layout.get("surface_regions", []):
 		if point.x >= float(region[0]) and point.x < float(region[1]):
 			return str(region[2])
@@ -277,6 +282,8 @@ func _noise(point: Vector2, intensity: float, _surface: String) -> void:
 		noise_rings.append({"point": point, "radius": intensity if intensity > 10.0 else intensity * 740.0, "life": 0.6})
 
 func _process(delta: float) -> void:
+	if GameManager.state == GameManager.State.PLAYING:
+		ward_seconds = maxf(0.0, ward_seconds - delta)
 	_update_room_tracking()
 	_update_ambient_hazards(delta)
 	if debug_noise:
@@ -337,11 +344,24 @@ func _enter_room(id: String) -> void:
 			FreedomLedger.flags["finale_started"] = true
 
 func _mechanic_intro_line() -> String:
-	if FreedomLedger.part2_seed.get("full_gadgets", false):
-		return "Three echoes from glass or clockwork will wake the descent."
-	if FreedomLedger.part2_seed.get("hybrid_magic", false):
-		return "A partial sigil can mute the ward Memory left dormant."
-	return "Rubble softens Touch. The forge can buy twelve seconds of silence."
+	return preload("res://scripts/systems/field_guide.gd").tutorial()
+
+func ring_ward_bell() -> bool:
+	if zone_id != "nexus" or ward_seconds > 0.0:
+		return false
+	ward_seconds = 32.0
+	for enemy in get_tree().get_nodes_in_group("enemy"):
+		enemy.stun(ward_seconds)
+	var ward := preload("res://scripts/player/sigil_field.gd").new()
+	ward.position = Vector2(900, 500)
+	ward.scale = Vector2(1.0, 0.16)
+	ward.radius = 800.0
+	ward.lifetime = ward_seconds
+	ward.tint = Color(0.35, 0.85, 0.83, 0.85)
+	add_child(ward)
+	EventBus.audio_requested.emit("stinger")
+	EventBus.subtitle_requested.emit("ELS", "The bell binds it for 32 seconds. One anchor. One choice. Hold E for twenty.", 4.0)
+	return true
 
 func _story_once(beat: String, speaker: String, line: String, cue: String = "") -> void:
 	var flag := "story_" + beat

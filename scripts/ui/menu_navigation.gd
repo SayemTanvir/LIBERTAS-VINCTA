@@ -13,7 +13,7 @@ func setup_navigation(host: Control) -> void:
 
 func add_page(id: String, packed: PackedScene, pause_context: bool = false) -> Control:
 	var page: Control = packed.instantiate()
-	if id == "menu":
+	if id == "menu" and page.get("pause_context") != null:
 		page.pause_context = pause_context
 	page.hide()
 	page.process_mode = Node.PROCESS_MODE_DISABLED
