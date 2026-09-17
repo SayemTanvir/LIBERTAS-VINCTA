@@ -23,7 +23,7 @@ func _ready() -> void:
 	theme = preload("res://themes/libertas_ui_theme.tres")
 	mouse_filter = Control.MOUSE_FILTER_STOP
 	var dim := ColorRect.new()
-	dim.color = Color(0.015, 0.022, 0.031, 0.94)
+	dim.color = Color(0.015, 0.022, 0.031, 0.0)
 	dim.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(dim)
 	dim.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
