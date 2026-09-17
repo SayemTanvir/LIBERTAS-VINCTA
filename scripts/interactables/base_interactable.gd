@@ -7,6 +7,7 @@ extends Node2D
 @export var title: String = ""
 @export var display_name: String = ""
 @export_multiline var text: String = ""
+var letter_metadata: Dictionary = {}
 @export var speaker: String = "ELS"
 @export var sense: String = ""
 @export var item_id: String = ""
@@ -289,7 +290,10 @@ func _read_letter() -> void:
 		EventBus.audio_requested.emit("astonishment")
 		var hud = get_tree().get_first_node_in_group("hud")
 		if hud != null:
-			var display_text := LetterTextResolver.resolve_text(interaction_id, {"title": title, "text": text})
+			var metadata := letter_metadata.duplicate(true)
+			metadata["title"] = title
+			metadata["text"] = text
+			var display_text := LetterTextResolver.resolve_text(interaction_id, metadata)
 			hud.show_letter(title, display_text)
 
 func _assemble_nameplate(player: Node2D) -> void:

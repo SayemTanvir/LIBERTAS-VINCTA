@@ -32,6 +32,7 @@ func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	position = Vector2(18, 16)
 	size = PANEL_SIZE
+	scale = Vector2(1.08, 1.08)
 	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	var backing := TextureRect.new()
 	backing.name = "WeatheredMetal"

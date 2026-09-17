@@ -59,6 +59,8 @@ func _ready() -> void:
 				if key in ["action_position_offset", "action_facing"] and value is Array and value.size() >= 2:
 					value = Vector2(float(value[0]), float(value[1]))
 				prop.set(key, value)
+			if prop.get("kind") == "letter":
+				prop.letter_metadata = spec[4].duplicate(true)
 		props.add_child(prop)
 		if prop.get("kind") == "vent":
 			var vent_label := preload("res://scripts/interactables/vent_label.gd").new()

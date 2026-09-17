@@ -3,18 +3,19 @@ extends Node
 ## Letters are hidden in furniture and revealed one at a time.
 ## Collecting letter N unlocks letter N+1 in its container.
 
-var current_unlocked_index: int = 1  ## Letter I is active from game start
+var part1_unlocked_index: int = 1
+var part2_unlocked_index: int = 1
+var current_unlocked_index: int = 1
 const KEY_SENSES := ["hearing", "sight", "memory"]
 const KEY_REQUIREMENTS := ["piano_seal", "vanity_seal", "ritual_seal"]
 
 ## Returns true if the given letter ID is the currently active (discoverable) letter.
 func is_currently_active(letter_id: String) -> bool:
-	var index := _parse_index(letter_id)
-	return index == current_unlocked_index
+	return _letter_sequence_index(letter_id) == _active_index()
 
 func is_letter_revealed(letter_id: String) -> bool:
-	var index := _parse_index(letter_id)
-	return index > 0 and index == current_unlocked_index
+	var index := _letter_sequence_index(letter_id)
+	return index > 0 and index == _active_index()
 
 func is_next_key(sense: String) -> bool:
 	var next_index := FreedomLedger.keys_collected.size()
@@ -28,7 +29,27 @@ func is_key_revealed(sense: String) -> bool:
 
 ## Advance to the next letter in the sequence after collecting the current one.
 func advance() -> void:
-	current_unlocked_index += 1
+	if FreedomLedger.current_part == 2:
+		part2_unlocked_index += 1
+		current_unlocked_index = 7 + part2_unlocked_index
+	else:
+		part1_unlocked_index += 1
+		current_unlocked_index = part1_unlocked_index
+
+func begin_part_two() -> void:
+	part2_unlocked_index = 1
+	current_unlocked_index = 8
+
+func _active_index() -> int:
+	if FreedomLedger.current_part == 2:
+		return part2_unlocked_index
+	return part1_unlocked_index
+
+func _letter_sequence_index(id: String) -> int:
+	var index := _parse_index(id)
+	if FreedomLedger.current_part == 2:
+		return index - 7 if index >= 8 else -1
+	return index if index >= 1 and index <= 7 else -1
 
 ## Parse the numeric index from a letter ID like "vantree_01" -> 1.
 func _parse_index(id: String) -> int:
@@ -39,12 +60,20 @@ func _parse_index(id: String) -> int:
 
 ## Reset for new game or loop.
 func reset() -> void:
+	part1_unlocked_index = 1
+	part2_unlocked_index = 1
 	current_unlocked_index = 1
 
 ## Checkpoint save support.
 func snapshot() -> Dictionary:
-	return {"current_unlocked_index": current_unlocked_index}
+	return {
+		"current_unlocked_index": current_unlocked_index,
+		"part1_unlocked_index": part1_unlocked_index,
+		"part2_unlocked_index": part2_unlocked_index
+	}
 
 ## Checkpoint restore support.
 func restore_snapshot(data: Dictionary) -> void:
-	current_unlocked_index = clampi(int(data.get("current_unlocked_index", 1)), 1, 14)
+	part1_unlocked_index = clampi(int(data.get("part1_unlocked_index", data.get("current_unlocked_index", 1))), 1, 8)
+	part2_unlocked_index = clampi(int(data.get("part2_unlocked_index", 1)), 1, 7)
+	current_unlocked_index = 8 if FreedomLedger.current_part == 2 else part1_unlocked_index

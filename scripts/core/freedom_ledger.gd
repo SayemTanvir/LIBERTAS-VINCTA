@@ -217,6 +217,8 @@ func begin_part_two(part_one_ending: String) -> void:
 	ending_type = part_one_ending
 	part2_seed = _build_part2_seed(part_one_ending)
 	current_part = 2
+	if Engine.has_singleton("CollectibleManager") or get_node_or_null("/root/CollectibleManager") != null:
+		get_node("/root/CollectibleManager").begin_part_two()
 	anchors_cleansed.clear()
 	mechanic_uses = 0
 	flags["part1_complete"] = true
@@ -365,6 +367,8 @@ func restore_snapshot(data: Dictionary) -> void:
 	if current_part == 2:
 		# Branch effects are derived from the ending, not unchecked serialized flags.
 		part2_seed = _build_part2_seed(str(part2_seed.part1_ending))
+		if Engine.has_singleton("CollectibleManager") or get_node_or_null("/root/CollectibleManager") != null:
+			get_node("/root/CollectibleManager").begin_part_two()
 	if data.has("flashlight_charge"):
 		flashlight_charge = clampf(float(data["flashlight_charge"]), 0.0, MAX_CHARGE)
 	elif data.has("flashlight_seconds"):
