@@ -46,12 +46,12 @@ func prop(id: String) -> BaseInteractable:
 			return child
 	return null
 
-func use(id: String) -> void:
+func use(id: String, close_reader: bool = true) -> void:
 	var target := prop(id)
 	player.position = target.position + Vector2(0, 30)
 	await get_tree().physics_frame
 	await target.interact(player)
-	if GameManager.state == GameManager.State.READING:
+	if close_reader and GameManager.state == GameManager.State.READING:
 		main.get_node("UI").close_modal()
 
 func _run() -> void:
@@ -109,8 +109,12 @@ func _run() -> void:
 	check(enemy.nexus_defeated and FreedomLedger.inventory.power == 0 and FreedomLedger.inventory.knife == 1, "Destroy kills Hound and consumes only Power")
 	check(prop("nexus_ending_door").visible and FreedomLedger.eligible("destroy"), "Destroy door and ending unlocked")
 	check(not prop("LN-B").available() and not room.place_power(player), "Resolution prevents a second ending")
-	await use("nexus_ending_door")
+	await use("nexus_ending_door", false)
 	check(GameManager.ending == "destroy", "Destroy door ends the game")
+	check(GameManager.state == GameManager.State.READING and main.get_node("UI").reader.visible, "Destroy door shows the winning letter before leaving")
+	main.get_node("UI").close_modal()
+	await get_tree().process_frame
+	check(GameManager.state == GameManager.State.MENU, "Closing the winning letter returns to the main menu")
 	# Test full length holds and each interruption using the real interaction coroutine.
 	await setup("partial_mercy")
 	Engine.time_scale = 8.0

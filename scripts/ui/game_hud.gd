@@ -474,8 +474,6 @@ func _result_action(id: String) -> void:
 				GameManager.new_game.call_deferred()
 
 func show_ending() -> void:
-	if GameManager.ending in ["destroy", "flee"]:
-		return
 	if GameManager.ending in ["severance", "custodian_rest", "vessel"]:
 		get_tree().paused = true
 		var sequence := preload("res://scripts/ui/ending_sequence.gd").new()

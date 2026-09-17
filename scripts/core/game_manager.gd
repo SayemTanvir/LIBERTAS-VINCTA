@@ -188,8 +188,6 @@ func finish(kind: String) -> void:
 	ending = kind
 	FreedomLedger.ending_type = kind
 	state = State.ENDING
-	if kind in ["destroy", "flee"]:
-		finish_flee_to_menu.call_deferred()
 
 func continue_to_part_two() -> void:
 	if ending not in ["untouched", "vantree", "partial_mercy"]:
