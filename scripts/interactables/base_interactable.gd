@@ -29,6 +29,8 @@ var busy: bool = false
 var progress: int = 0
 var interrupt_serial: int = 0
 
+const STATION_CHARGE_RATE_PER_SEC := 1.4
+
 func _ready() -> void:
 	add_to_group("interactable")
 	if kind == "item" and item_id == "battery":
@@ -36,14 +38,27 @@ func _ready() -> void:
 	$Visual/PlaceholderVisual.visible = $Visual/Sprite2D.texture == null
 	EventBus.player_detected.connect(_interrupt_for_detection)
 	EventBus.player_hurt.connect(_interrupt_for_damage)
+	EventBus.seal_completed.connect(_on_seal_completed)
 	if kind == "puzzle":
 		progress = clampi(int(FreedomLedger.flags.get(interaction_id + "_steps", 0)), 0, puzzle_steps)
+	if kind == "key":
+		if not FreedomLedger.has_requirement(required_flag):
+			modulate.a = 0.0
 	if interaction_id == "scratched_nameplate":
 		$Visual.hide()
 		var fragments := preload("res://scripts/interactables/nameplate_fragments.gd").new()
 		fragments.name = "NameplateFragments"
 		add_child(fragments)
 	refresh()
+
+func _on_seal_completed(seal_id: String) -> void:
+	if kind == "key" and (seal_id == required_flag or FreedomLedger.has_requirement(required_flag)):
+		modulate.a = 0.0
+		visible = true
+		var tween := create_tween()
+		tween.tween_property(self, "modulate:a", 1.0, 1.5)
+		EventBus.audio_requested.emit("key_grab")
+		say("The seal gives.", 1.5)
 
 func _interrupt_for_detection(_source: Node) -> void:
 	interrupt_serial += 1
@@ -149,7 +164,7 @@ func _can_play_action() -> bool:
 		return FreedomLedger.flags.get("intro_door_tried", false) and FreedomLedger.flags.get("lockpick_tool", false) and FreedomLedger.flags.get("flashlight", false)
 	if kind == "forge" and FreedomLedger.hp <= FreedomLedger.max_hp * 0.08:
 		return false
-	if kind == "recharge" and (not FreedomLedger.flags.get("flashlight", false) or (FreedomLedger.flashlight_seconds >= FreedomLedger.MAX_FLASHLIGHT_SECONDS and (FreedomLedger.current_part == 1 or FreedomLedger.hp >= FreedomLedger.max_hp))):
+	if kind == "recharge" and (not FreedomLedger.flags.get("flashlight", false) or (FreedomLedger.flashlight_charge >= FreedomLedger.MAX_CHARGE and (FreedomLedger.current_part == 1 or FreedomLedger.hp >= FreedomLedger.max_hp))):
 		return false
 	if kind == "recharge" and FreedomLedger.battery_percentages().is_empty() and (FreedomLedger.current_part == 1 or FreedomLedger.hp >= FreedomLedger.max_hp):
 		return false
@@ -204,7 +219,7 @@ func interaction_points() -> PackedVector2Array:
 func _take_flashlight(player: Node2D) -> void:
 	FreedomLedger.flags[interaction_id] = true
 	visible = false
-	FreedomLedger.set_flashlight_seconds(FreedomLedger.MAX_FLASHLIGHT_SECONDS)
+	FreedomLedger.set_flashlight_charge(FreedomLedger.MAX_CHARGE)
 	player.set_flashlight(true, false)
 	say("Mine...", 1.8)
 	say("How did it get over there?", 2.6)
@@ -221,12 +236,17 @@ func _take_item() -> void:
 	FreedomLedger.collect_item(item_id, item_amount)
 
 func _read_letter() -> void:
+	if not interaction_id.is_empty() and not CollectibleManager.is_currently_active(interaction_id) and interaction_id not in FreedomLedger.letter_ids:
+		say("Nothing readable here right now.")
+		return
 	if FreedomLedger.collect_letter(interaction_id):
 		visible = false
+		CollectibleManager.advance()
 		EventBus.audio_requested.emit("astonishment")
 		var hud = get_tree().get_first_node_in_group("hud")
 		if hud != null:
-			hud.show_letter(title, text)
+			var display_text := LetterTextResolver.resolve_text(interaction_id, {"title": title, "text": text})
+			hud.show_letter(title, display_text)
 
 func _assemble_nameplate(player: Node2D) -> void:
 	var hud = get_tree().get_first_node_in_group("hud")
@@ -294,13 +314,14 @@ func _work_puzzle(player: Node2D) -> void:
 	EventBus.noise_created.emit(global_position, 300.0, "GENERIC")
 	if progress >= puzzle_steps:
 		FreedomLedger.flags[interaction_id] = true
+		EventBus.seal_completed.emit(interaction_id)
 		say({"piano_seal": "A lock hidden in a piano. There's a key inside.", "vanity_seal": "The vanity's compartment is open.", "ritual_seal": "The stone has split along the seal."}.get(interaction_id, "The seal gives."))
 
 func _recharge(player: Node2D) -> void:
 	if not FreedomLedger.flags.get("flashlight", false):
 		say("I should pick up my flashlight first.")
 		return
-	if FreedomLedger.flashlight_seconds >= FreedomLedger.MAX_FLASHLIGHT_SECONDS and (FreedomLedger.current_part == 1 or FreedomLedger.hp >= FreedomLedger.max_hp):
+	if FreedomLedger.flashlight_charge >= FreedomLedger.MAX_CHARGE and (FreedomLedger.current_part == 1 or FreedomLedger.hp >= FreedomLedger.max_hp):
 		say("Ready to move on. No charge or recovery needed.")
 		return
 	var started_serial := interrupt_serial
@@ -325,11 +346,11 @@ func _recharge(player: Node2D) -> void:
 			break
 		var step := minf(get_physics_process_delta_time(), 12.0 - elapsed)
 		elapsed += step
-		FreedomLedger.recharge_from_batteries(FreedomLedger.MAX_FLASHLIGHT_SECONDS * step / 12.0)
+		FreedomLedger.recharge_from_batteries(STATION_CHARGE_RATE_PER_SEC * step)
 		if FreedomLedger.current_part == 2:
 			FreedomLedger.heal(FreedomLedger.max_hp * step / 12.0)
 		EventBus.anchor_progress.emit("Charging — move to stop", elapsed, 12.0)
-		var charge_done := FreedomLedger.flashlight_seconds >= FreedomLedger.MAX_FLASHLIGHT_SECONDS or FreedomLedger.battery_percentages().is_empty()
+		var charge_done := FreedomLedger.flashlight_charge >= FreedomLedger.MAX_CHARGE or FreedomLedger.battery_percentages().is_empty()
 		if charge_done and (FreedomLedger.current_part == 1 or FreedomLedger.hp >= FreedomLedger.max_hp):
 			break
 	player.animation_hold = 0.0

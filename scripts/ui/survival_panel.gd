@@ -167,7 +167,7 @@ func update_values(delta: float) -> void:
 	var running := not get_tree().paused and GameManager.state == GameManager.State.PLAYING
 	var step := delta if running else 0.0
 	visual_clock += step
-	var charge := clampf(FreedomLedger.flashlight_seconds / FreedomLedger.MAX_FLASHLIGHT_SECONDS * 100.0, 0, 100)
+	var charge := clampf(FreedomLedger.flashlight_charge, 0, 100)
 	var health := clampf(FreedomLedger.hp / maxf(FreedomLedger.max_hp, 1.0) * 100.0, 0, 100)
 	var snap := not initialized or not is_visible_in_tree()
 	if snap:

@@ -180,7 +180,7 @@ func _process(delta: float) -> void:
 	survival_panel.update_values(delta)
 	room_name.visible = playing_hud
 	vitals.text = "Charge %02d  |  HP %03d  |  Batteries %d  ·  Bottles %d  ·  Clocks %d" % [
-		ceili(FreedomLedger.flashlight_seconds), ceili(FreedomLedger.hp),
+		ceili(FreedomLedger.flashlight_charge), ceili(FreedomLedger.hp),
 		int(FreedomLedger.inventory.get("battery", 0)), int(FreedomLedger.inventory.get("bottle", 0)), int(FreedomLedger.inventory.get("clock", 0))]
 	var room = get_tree().get_first_node_in_group("room")
 	if room != null and room.current_room_id != displayed_room_id:
@@ -323,7 +323,7 @@ func _anchor_progress(id: String, seconds: float, required: float) -> void:
 	activity_meter.visible = seconds > 0.0
 	activity_meter.value = seconds / maxf(required, 0.01) * 100.0
 	if id.begins_with("Charging"):
-		var percent := FreedomLedger.flashlight_seconds / FreedomLedger.MAX_FLASHLIGHT_SECONDS * 100.0
+		var percent := FreedomLedger.flashlight_charge
 		anchor_status.text = "CHARGING  %d%%   /   Move to cancel" % floori(percent)
 		activity_meter.value = percent
 

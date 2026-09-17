@@ -2,8 +2,10 @@ extends Node
 ## Persistent game-state authority for both parts of LIBERTAS VINCTA.
 
 const SENSES := ["hearing", "sight", "memory"]
+const MAX_CHARGE := 100.0
 const MAX_FLASHLIGHT_SECONDS := 90.0
 const BASE_MAX_HP := 100.0
+const CELL_CHARGE := 50.0
 const CELL_SECONDS := 45.0
 
 var keys_collected: Array[String] = []
@@ -18,7 +20,7 @@ var ending_type: String = ""
 var part2_seed: Dictionary = {}
 var current_part: int = 1
 var entity_stage: int = 0
-var flashlight_seconds: float = MAX_FLASHLIGHT_SECONDS
+var flashlight_charge: float = MAX_CHARGE
 var max_hp: float = BASE_MAX_HP
 var hp: float = BASE_MAX_HP
 var mechanic_uses: int = 0
@@ -55,11 +57,13 @@ func reset() -> void:
 	part2_seed.clear()
 	current_part = 1
 	entity_stage = 0
-	flashlight_seconds = MAX_FLASHLIGHT_SECONDS
+	flashlight_charge = MAX_CHARGE
 	max_hp = BASE_MAX_HP
 	hp = max_hp
 	mechanic_uses = 0
 	anchors_cleansed.clear()
+	if Engine.has_singleton("CollectibleManager") or get_node_or_null("/root/CollectibleManager") != null:
+		get_node("/root/CollectibleManager").reset()
 	_emit_status()
 
 func reset_for_loop() -> void:
@@ -82,11 +86,13 @@ func reset_for_loop() -> void:
 	part2_seed.clear()
 	current_part = 1
 	entity_stage = 0
-	flashlight_seconds = MAX_FLASHLIGHT_SECONDS
+	flashlight_charge = MAX_CHARGE
 	max_hp = BASE_MAX_HP
 	hp = max_hp
 	mechanic_uses = 0
 	anchors_cleansed.clear()
+	if Engine.has_singleton("CollectibleManager") or get_node_or_null("/root/CollectibleManager") != null:
+		get_node("/root/CollectibleManager").reset()
 	_emit_status()
 
 func restore_sense(sense: String) -> bool:
@@ -144,31 +150,39 @@ func battery_percentages() -> Array[float]:
 	_sync_batteries()
 	return battery_charges.duplicate()
 
-func recharge_from_batteries(seconds: float) -> float:
-	if not is_finite(seconds) or seconds <= 0.0:
+func recharge_from_batteries(charge_amount: float) -> float:
+	if not is_finite(charge_amount) or charge_amount <= 0.0:
 		return 0.0
 	_sync_batteries()
-	var wanted := minf(seconds, MAX_FLASHLIGHT_SECONDS - flashlight_seconds)
+	var wanted := minf(charge_amount, MAX_CHARGE - flashlight_charge)
 	var transferred := 0.0
 	while wanted > 0.00001 and not battery_charges.is_empty():
-		var used := minf(wanted, battery_charges[0] * CELL_SECONDS / 100.0)
-		battery_charges[0] = maxf(0.0, battery_charges[0] - used / CELL_SECONDS * 100.0)
+		var cell_available := battery_charges[0] * CELL_CHARGE / 100.0
+		var used := minf(wanted, cell_available)
+		battery_charges[0] = maxf(0.0, battery_charges[0] - used / CELL_CHARGE * 100.0)
 		transferred += used
 		wanted -= used
 		if battery_charges[0] < 0.0001:
 			battery_charges.pop_front()
 	inventory["battery"] = battery_charges.size()
 	if transferred > 0.0:
-		set_flashlight_seconds(flashlight_seconds + transferred)
+		set_flashlight_charge(flashlight_charge + transferred)
 		EventBus.inventory_changed.emit("battery", battery_charges.size())
 	return transferred
 
 func record_hiding_use(id: String) -> void:
 	hiding_usage[id] = int(hiding_usage.get(id, 0)) + 1
 
+var flashlight_seconds: float:
+	get: return flashlight_charge * 0.9
+	set(val): set_flashlight_charge(val / 0.9)
+
+func set_flashlight_charge(value: float) -> void:
+	flashlight_charge = clampf(value, 0.0, MAX_CHARGE)
+	EventBus.battery_changed.emit(flashlight_charge, MAX_CHARGE)
+
 func set_flashlight_seconds(value: float) -> void:
-	flashlight_seconds = clampf(value, 0.0, MAX_FLASHLIGHT_SECONDS)
-	EventBus.battery_changed.emit(flashlight_seconds, MAX_FLASHLIGHT_SECONDS)
+	set_flashlight_charge(value / 0.9)
 
 func damage(amount: float) -> bool:
 	if not is_finite(amount) or amount <= 0.0:
@@ -269,7 +283,7 @@ func snapshot() -> Dictionary:
 		"loop_counter": loop_counter, "part2_seed": part2_seed.duplicate(true),
 		"flags": flags.duplicate(true), "inventory": inventory.duplicate(true),
 		"hiding_usage": hiding_usage.duplicate(true), "detections": detections,
-		"current_part": current_part, "flashlight_seconds": flashlight_seconds,
+		"current_part": current_part, "flashlight_charge": flashlight_charge,
 		"max_hp": max_hp, "hp": hp, "mechanic_uses": mechanic_uses,
 		"anchors": anchors_cleansed.duplicate()
 	}
@@ -305,7 +319,7 @@ func snapshot_is_valid(data: Variant) -> bool:
 	for key in data.get("flags", {}):
 		if str(key).ends_with("_steps") and not _finite_number(data.flags[key]):
 			return false
-	for key in ["entity_stage", "loop_counter", "detections", "current_part", "flashlight_seconds", "max_hp", "hp", "mechanic_uses"]:
+	for key in ["entity_stage", "loop_counter", "detections", "current_part", "flashlight_charge", "flashlight_seconds", "max_hp", "hp", "mechanic_uses"]:
 		if data.has(key) and not _finite_number(data[key]):
 			return false
 	for key in ["loop_counter", "detections", "mechanic_uses"]:
@@ -351,7 +365,12 @@ func restore_snapshot(data: Dictionary) -> void:
 	if current_part == 2:
 		# Branch effects are derived from the ending, not unchecked serialized flags.
 		part2_seed = _build_part2_seed(str(part2_seed.part1_ending))
-	flashlight_seconds = clampf(float(data.get("flashlight_seconds", MAX_FLASHLIGHT_SECONDS)), 0.0, MAX_FLASHLIGHT_SECONDS)
+	if data.has("flashlight_charge"):
+		flashlight_charge = clampf(float(data["flashlight_charge"]), 0.0, MAX_CHARGE)
+	elif data.has("flashlight_seconds"):
+		flashlight_charge = clampf(float(data["flashlight_seconds"]) / 0.9, 0.0, MAX_CHARGE)
+	else:
+		flashlight_charge = MAX_CHARGE
 	max_hp = BASE_MAX_HP * (0.8 if current_part == 2 and part2_seed.get("blood_magic", false) else 1.0)
 	hp = clampf(float(data.get("hp", max_hp)), 0.0, max_hp)
 	mechanic_uses = maxi(0, int(data.get("mechanic_uses", 0)))
@@ -359,5 +378,5 @@ func restore_snapshot(data: Dictionary) -> void:
 	_emit_status()
 
 func _emit_status() -> void:
-	EventBus.battery_changed.emit(flashlight_seconds, MAX_FLASHLIGHT_SECONDS)
+	EventBus.battery_changed.emit(flashlight_charge, MAX_CHARGE)
 	EventBus.health_changed.emit(hp, max_hp)

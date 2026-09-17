@@ -1,6 +1,5 @@
 extends "res://scripts/ui/image_state_menu.gd"
 @export var pause_context: bool = false
-@export var cinematic_stream: VideoStream
 var menu_content: Control
 var highlights: Array[ColorRect] = []
 var button_spacing: Array[StyleBoxEmpty] = []
@@ -9,9 +8,7 @@ var selection_caption: Label
 var caption_index := -1
 var atmosphere_clock := 0.0
 var reveal: Tween
-var video_background: VideoStreamPlayer
 const BACKGROUND := "res://assets/ui/menu/libertas_vincta_menu_background.png"
-const VIDEO_BACKGROUND := "res://assets/ui/menu/PROJECT_Create_a_cinematic_ani.ogv"
 const INTRO_FONT := preload("res://assets/fonts/horroroid/horroroid.ttf")
 
 func _ready() -> void:
@@ -55,7 +52,6 @@ func _build_home() -> void:
 		items.append({"id": ids[i], "rect": Rect2(874, rows[i], 316, 44), "texture": null})
 	build(background, items, false)
 	cover_background(background)
-	_setup_video_background()
 	active_art.hide()
 	artwork.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	var atmosphere := ShaderMaterial.new()
@@ -146,31 +142,6 @@ func _label(text: String, at: Vector2, font_size: int, color: Color) -> Label:
 	menu_content.add_child(label)
 	return label
 
-func _setup_video_background() -> void:
-	var stream := cinematic_stream if cinematic_stream != null else load(VIDEO_BACKGROUND) as VideoStream
-	if stream == null:
-		push_warning("Main menu cinematic could not be loaded; using the static background: " + VIDEO_BACKGROUND)
-		return
-	artwork.hide()
-	video_background = VideoStreamPlayer.new()
-	video_background.name = "CinematicBackground"
-	video_background.stream = stream
-	video_background.autoplay = true
-	video_background.loop = true
-	video_background.volume_db = -80.0
-	video_background.expand = true
-	video_background.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	video_background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(video_background)
-	move_child(video_background, 1)
-	var readability := ColorRect.new()
-	readability.name = "CinematicReadability"
-	readability.color = Color(0.0, 0.0, 0.0, 0.28)
-	readability.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	readability.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	add_child(readability)
-	move_child(readability, 2)
-
 func _tracked_font(base: Font, tracking: int) -> FontVariation:
 	var font := FontVariation.new()
 	font.base_font = base
@@ -207,8 +178,6 @@ func focus_default() -> void:
 	reveal.tween_property(menu_content, "modulate:a", 1.0, 0.45).set_trans(Tween.TRANS_SINE)
 
 func _process(delta: float) -> void:
-	if video_background != null:
-		video_background.paused = not is_visible_in_tree()
 	if pause_context or not is_visible_in_tree():
 		return
 	atmosphere_clock += delta

@@ -1,7 +1,6 @@
 extends CharacterBody2D
 
-const ZOMBIE_DIRECTIONS := ["0", "045", "090", "135", "180", "225", "270", "315"]
-const ZombieFootOffsets := preload("res://scripts/enemy/zombie_foot_offsets.gd")
+const HOUND_CLIPS := preload("res://assets/sprites/blood_hound/clips.json")
 
 enum State {
 	WANDER_BLIND,
@@ -15,17 +14,19 @@ enum State {
 	AMBUSH
 }
 
-@export var blind_speed: float = 115.0
-@export var patrol_speed: float = 142.0
-@export var audio_hunt_speed: float = 216.0
-@export var sight_chase_speed: float = 282.0
-@export var true_form_speed: float = 238.0
+const SPEED_MULTIPLIER := 0.99
+
+@export var blind_speed: float = 113.85
+@export var patrol_speed: float = 140.58
+@export var audio_hunt_speed: float = 213.84
+@export var sight_chase_speed: float = 279.18
+@export var true_form_speed: float = 235.62
 @export var hearing_scale: float = 740.0
 @export var vision_range: float = 520.0
 @export var shadow_vision_range: float = 260.0
 @export var field_of_view: float = 140.0
 @export var flashlight_range_multiplier: float = 1.5
-@export var catch_distance: float = 44.0
+@export var catch_distance: float = 32.0
 @export var audio_hunt_seconds: float = 10.0
 @export var path_refresh_seconds: float = 0.28
 @export_range(0.0, 1.0) var ambush_chance: float = 0.55
@@ -70,6 +71,10 @@ var _strike_damage := 0.0
 var _strike_reach := 0.0
 var _strike_hide := ""
 var _voice_cooldown := 0.0
+var is_distracted: bool = false
+var distraction_target: Vector2 = Vector2.ZERO
+var distraction_arrived: bool = false
+var distraction_stay_timer: float = 0.0
 
 @onready var sprite: AnimatedSprite2D = $Visual/AnimatedSprite2D
 
@@ -86,11 +91,18 @@ func _ready() -> void:
 	EventBus.player_caught.connect(_attack)
 	ambush_clock = ambush_interval
 	sprite.frame_changed.connect(_on_visual_frame_changed)
+	sprite.animation_changed.connect(_sync_frame_mask)
 	_play_visual("idle")
 	change_state(_patrol_state())
 	_observe_debug()
 
 func change_state(next: State) -> void:
+	if is_distracted and next != State.INVESTIGATE:
+		next = State.INVESTIGATE
+	if next != State.INVESTIGATE and is_distracted:
+		is_distracted = false
+		distraction_arrived = false
+		distraction_stay_timer = 0.0
 	state = next
 	state_clock = 0.0
 	path_clock = 0.0
@@ -98,7 +110,7 @@ func change_state(next: State) -> void:
 		State.WANDER_BLIND:
 			state_limit = randf_range(8.0, 15.0)
 		State.INVESTIGATE:
-			state_limit = 4.0
+			state_limit = 20.0 if is_distracted else 4.0
 		State.HUNT_AUDIO:
 			state_limit = audio_hunt_seconds
 		State.CHASE:
@@ -194,6 +206,10 @@ func _physics_process(delta: float) -> void:
 	_observe_debug()
 
 func _update_vision(delta: float) -> void:
+	if is_distracted:
+		target = distraction_target if distraction_target != Vector2.ZERO else target
+		sight_confirm = 0.0
+		return
 	var sees := can_see_player()
 	if sees:
 		sight_confirm += delta
@@ -241,12 +257,37 @@ func _update_state(delta: float) -> void:
 				if randf() <= ambush_chance:
 					_predict_exit()
 		State.INVESTIGATE:
-			if global_position.distance_to(target) < 36.0:
-				velocity = Vector2.ZERO
-				if state_clock >= state_limit:
+			if is_distracted:
+				if not distraction_arrived:
+					if global_position.distance_to(distraction_target) < 40.0:
+						distraction_arrived = true
+						distraction_stay_timer = 5.0
+						velocity = Vector2.ZERO
+					elif state_clock > 5.0:
+						# Distraction is no longer valid after the short 5s window.
+						is_distracted = false
+						distraction_arrived = false
+						distraction_stay_timer = 0.0
+						change_state(_patrol_state())
+				else:
+					velocity = Vector2.ZERO
+					distraction_stay_timer = maxf(0.0, distraction_stay_timer - delta)
+					if distraction_stay_timer <= 0.0:
+						is_distracted = false
+						distraction_arrived = false
+						distraction_stay_timer = 0.0
+						distraction_target = Vector2.ZERO
+						change_state(_patrol_state())
+			else:
+				if global_position.distance_to(target) < 36.0:
+					velocity = Vector2.ZERO
+					var distraction_near := get_tree().get_nodes_in_group("distraction_object").any(func(d): return is_instance_valid(d) and d.global_position.distance_to(global_position) < 80.0)
+					if not distraction_near and state_clock > 1.2:
+						change_state(_patrol_state())
+					elif state_clock >= state_limit:
+						change_state(_patrol_state())
+				elif state_clock > 10.0:
 					change_state(_patrol_state())
-			elif state_clock > 10.0:
-				change_state(_patrol_state())
 		State.HUNT_AUDIO:
 			if state_clock >= state_limit:
 				detection_active = false
@@ -288,6 +329,11 @@ func _choose_patrol_target() -> void:
 	target = room.clamp_point(Vector2(anchor + spread, 440.0 if patrol_index % 2 == 0 else 570.0))
 
 func _move(delta: float) -> void:
+	if is_distracted and distraction_arrived:
+		velocity = Vector2.ZERO
+		move_and_slide()
+		_play_visual("sniff")
+		return
 	path_clock -= delta
 	var direction := Vector2.ZERO
 	# Follow an unobstructed target directly, rather than snapping back to our grid cell.
@@ -298,9 +344,7 @@ func _move(delta: float) -> void:
 		if path_clock <= 0.0:
 			path_clock = minf(path_refresh_seconds, 0.14) if state in [State.CHASE, State.HUNT_AUDIO] else path_refresh_seconds
 			path = room.find_path(global_position, target)
-		# Increase pop radius to 28.0 (half diagonal of 40px cell) to prevent the monster
-		# from twitching/turning backwards to hit a cell center it just left.
-		while not path.is_empty() and global_position.distance_to(path[0]) < 28.0:
+		while not path.is_empty() and global_position.distance_to(path[0]) < 10.0:
 			path.remove_at(0)
 		# Skip grid centers only when the complete body can reach the next waypoint.
 		while path.size() > 1 and _clear_motion_to(path[1]):
@@ -337,11 +381,14 @@ func _move(delta: float) -> void:
 		animation = "run" if state == State.CHASE or speed >= audio_hunt_speed else "walk"
 	_play_visual(animation)
 
-func _update_visual_facing(_movement: Vector2, _delta: float) -> void:
-	# The supplied zombie contains independent cardinal and diagonal views. Its
-	# animation name is switched in _play_visual, so a left turn never mirrors
-	# the one-sided attack or a body detail from the opposite side.
-	_turn_clock = 0.0
+func _update_visual_facing(movement: Vector2, delta: float) -> void:
+	if absf(facing.x) > 0.3 and (facing.x < 0.0) != sprite.flip_h and movement.length() > 0.1:
+		_turn_clock += delta
+		if _turn_clock >= (0.07 if state in [State.CHASE, State.HUNT_AUDIO] else 0.16):
+			sprite.flip_h = facing.x < 0.0
+			_turn_clock = 0.0
+	else:
+		_turn_clock = 0.0
 
 func _clear_motion_to(point: Vector2) -> bool:
 	var collision: CollisionShape2D = $CollisionShape2D
@@ -360,6 +407,8 @@ func _clear_motion_to(point: Vector2) -> bool:
 func _move_speed() -> float:
 	if FreedomLedger.current_part == 2 and FreedomLedger.part2_seed.get("touch_mutation", false) and state == State.HUNT_AUDIO:
 		return true_form_speed
+	if is_distracted and not distraction_arrived:
+		return audio_hunt_speed
 	if _stage() == 0:
 		return blind_speed
 	if state == State.CHASE:
@@ -405,11 +454,8 @@ func _update_attack(delta: float) -> void:
 	velocity = Vector2.ZERO
 	_attack_seconds = maxf(0.0, _attack_seconds - delta)
 	_attack_elapsed += delta
-	# Commit early in the swipe so entering the close radius cannot be escaped by
-	# moving on the last frame before impact.
-	var frame_count := sprite.sprite_frames.get_frame_count(sprite.animation)
-	var impact_frame := maxi(1, roundi(frame_count * 0.25))
-	var contact_time := float(impact_frame) / maxf(1.0, sprite.sprite_frames.get_animation_speed(sprite.animation))
+	# Frame 3 is the forward snap of the existing seven-frame attack clip.
+	var contact_time := 3.0 / maxf(1.0, sprite.sprite_frames.get_animation_speed("attack"))
 	if _strike_pending and _attack_elapsed >= contact_time:
 		_strike_pending = false
 		_commit_strike()
@@ -421,15 +467,48 @@ func _commit_strike() -> void:
 		return
 	if player.hidden_spot != null and player.hidden_spot.interaction_id != _strike_hide:
 		return
+	# The attack has committed its direction. Running past it can evade the jaws.
+	var offset: Vector2 = player.global_position - global_position
+	if offset.length() > 8.0 and facing.dot(offset.normalized()) < 0.15:
+		return
 	if FreedomLedger.current_part == 2:
 		player.take_hit(_strike_damage)
 	else:
 		EventBus.player_caught.emit()
 
+func _is_distraction_noise(point: Vector2, surface: String) -> bool:
+	if surface == "CLOCK":
+		return true
+	for obj in get_tree().get_nodes_in_group("distraction_object"):
+		if is_instance_valid(obj) and obj.global_position.distance_to(point) < 60.0:
+			return true
+	return false
+
 func _hear(point: Vector2, intensity: float, surface: String) -> void:
 	if not is_instance_valid(player) or not is_instance_valid(room):
 		return
-	if stun_seconds > 0.0 or _attack_seconds > 0.0 or not _has_sense("hearing") or state == State.CHASE or GameManager.state != GameManager.State.PLAYING:
+	if stun_seconds > 0.0 or _attack_seconds > 0.0 or GameManager.state != GameManager.State.PLAYING:
+		return
+	var is_distraction := _is_distraction_noise(point, surface)
+	if is_distracted:
+		if is_distraction:
+			# Fresh distraction wins immediately; reject stale bottle/clock memory.
+			is_distracted = true
+			distraction_target = point
+			distraction_arrived = false
+			distraction_stay_timer = 0.0
+			sight_confirm = 0.0
+			lost_sight = 999.0
+			detection_active = false
+			change_state(State.INVESTIGATE)
+			state_limit = 20.0
+			return
+		# While a distraction is active, ignore ordinary movement and noise.
+		target = distraction_target if distraction_target != Vector2.ZERO else target
+		return
+	if not _has_sense("hearing") and not (is_distraction and state == State.CHASE):
+		return
+	if state == State.CHASE and not is_distraction:
 		return
 	var radius := intensity if intensity > 10.0 else intensity * hearing_scale
 	if global_position.distance_to(point) > radius:
@@ -440,6 +519,17 @@ func _hear(point: Vector2, intensity: float, surface: String) -> void:
 	path_clock = 0.0
 	if global_position.distance_squared_to(point) > 1.0:
 		facing = global_position.direction_to(point)
+	if is_distraction:
+		is_distracted = true
+		distraction_target = point
+		distraction_arrived = false
+		distraction_stay_timer = 0.0
+		sight_confirm = 0.0
+		lost_sight = 999.0
+		detection_active = false
+		change_state(State.INVESTIGATE)
+		state_limit = 20.0
+		return
 	if state == State.HUNT_AUDIO:
 		state_clock = 0.0
 		return
@@ -546,6 +636,9 @@ func stun(seconds: float) -> void:
 	detection_active = false
 	sight_confirm = 0.0
 	witnessed_hide = ""
+	is_distracted = false
+	distraction_arrived = false
+	distraction_stay_timer = 0.0
 	change_state(_patrol_state())
 	_attack_seconds = 0.0
 	_strike_pending = false
@@ -556,44 +649,33 @@ func stun(seconds: float) -> void:
 func _play_visual(animation: String) -> void:
 	_apply_base_appearance()
 	sprite.rotation = 0.0
-	var base := "sniff" if animation == "idle" and state in [State.INVESTIGATE, State.INVESTIGATE_LAST_SEEN, State.AMBUSH] else animation
-	var requested := _zombie_animation(base)
+	# Movement turns have a short hold in _move, so tiny path corrections do not flip art.
+	var requested := "sniff" if animation == "idle" and state in [State.INVESTIGATE, State.INVESTIGATE_LAST_SEEN, State.AMBUSH] else animation
 	var has_art := sprite.sprite_frames.has_animation(requested)
 	if has_art:
 		if sprite.animation != requested:
-			var previous_frame := sprite.frame
-			var previous_progress := sprite.frame_progress
 			sprite.play(requested)
-			if base in ["walk", "run"]:
-				sprite.set_frame_and_progress(mini(previous_frame, sprite.sprite_frames.get_frame_count(requested) - 1), previous_progress)
-		sprite.speed_scale = clampf(_visual_speed / (sight_chase_speed if base == "run" else patrol_speed), 0.4, 1.6) if base in ["walk", "run"] else 1.0
-		_sync_zombie_footing()
+		sprite.speed_scale = clampf(_visual_speed / (sight_chase_speed if requested == "run" else patrol_speed), 0.4, 1.6) if requested in ["walk", "run"] else 1.0
+		_sync_frame_mask()
 	sprite.visible = has_art
 	$Visual/PlaceholderVisual.visible = not has_art
 
-func _zombie_animation(base: String) -> String:
-	var asset_degrees := fposmod(rad_to_deg(facing.angle()) + 90.0, 360.0)
-	var direction_index: int = roundi(asset_degrees / 45.0) % ZOMBIE_DIRECTIONS.size()
-	return base + "_" + ZOMBIE_DIRECTIONS[direction_index]
+func _sync_frame_mask() -> void:
+	var ids: Array = HOUND_CLIPS.data.get(str(sprite.animation), [])
+	if not ids.is_empty():
+		(sprite.material as ShaderMaterial).set_shader_parameter("clip_id", float(ids[mini(sprite.frame, ids.size() - 1)]))
 
 func _on_visual_frame_changed() -> void:
-	_sync_zombie_footing()
-	# Heel contacts keep the supplied walk/run sheets synchronized with audio.
-	var is_walk := str(sprite.animation).begins_with("walk_")
-	var is_run := str(sprite.animation).begins_with("run_")
-	if (is_walk and sprite.frame in [0, 10]) or (is_run and sprite.frame in [0, 8]):
-		if _visual_speed > 1.0 and GameManager.state == GameManager.State.PLAYING:
-			EventBus.audio_requested.emit("monster_footstep")
+	_sync_frame_mask()
+	# Paw contacts drive sound, so faster playback and turns stay in step.
+	if sprite.animation in [&"walk", &"run"] and sprite.frame in [0, 4] and _visual_speed > 1.0 and GameManager.state == GameManager.State.PLAYING:
+		EventBus.audio_requested.emit("monster_footstep")
 
 func _apply_base_appearance() -> void:
 	var true_form: bool = _stage() >= 3 or (FreedomLedger.current_part == 2 and bool(FreedomLedger.part2_seed.get("touch_mutation", false)))
-	# The smaller zombie better matches Els while retaining the previous threat read.
-	sprite.scale = Vector2.ONE * (0.711 if true_form else 0.63)
-	$Visual/Shadow.scale = Vector2.ONE * (1.017 if true_form else 0.9)
+	sprite.scale = Vector2.ONE * (0.79 if true_form else 0.70)
+	$Visual/Shadow.scale = Vector2.ONE * (1.13 if true_form else 1.0)
 	sprite.modulate = Color(0.88, 0.76, 0.76) if true_form else Color.WHITE
-
-func _sync_zombie_footing() -> void:
-	sprite.offset = Vector2(0.0, ZombieFootOffsets.offset_y(sprite.animation, sprite.frame))
 
 func _attack() -> void:
 	velocity = Vector2.ZERO
@@ -601,9 +683,13 @@ func _attack() -> void:
 		return
 	if is_instance_valid(player):
 		facing = global_position.direction_to(player.global_position)
+		if absf(facing.x) > 0.3:
+			sprite.flip_h = facing.x < 0.0
+	if _attack_seconds <= 0.0:
+		sprite.play("attack")
+		sprite.set_frame_and_progress(0, 0.0)
+	_attack_seconds = float(sprite.sprite_frames.get_frame_count("attack")) / sprite.sprite_frames.get_animation_speed("attack")
 	_play_visual("attack")
-	sprite.set_frame_and_progress(0, 0.0)
-	_attack_seconds = float(sprite.sprite_frames.get_frame_count(sprite.animation)) / sprite.sprite_frames.get_animation_speed(sprite.animation)
 
 func _observe_debug() -> void:
 	$DebugState.visible = debug_detection

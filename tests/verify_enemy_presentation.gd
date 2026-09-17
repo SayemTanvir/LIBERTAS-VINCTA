@@ -2,7 +2,6 @@ extends Node2D
 
 const ENEMY := preload("res://scenes/enemy/deprived_one.tscn")
 const PLAYER := preload("res://scenes/player/player.tscn")
-const ZOMBIE_FEET := preload("res://scripts/enemy/zombie_foot_offsets.gd")
 var checks := 0
 var failures := 0
 
@@ -38,49 +37,43 @@ func _run() -> void:
 	enemy.position = Vector2(950, 590)
 	enemy.set_physics_process(false)
 	var sprite: AnimatedSprite2D = enemy.sprite
-	check(sprite.sprite_frames.resource_path.ends_with("new_zombie_frames.tres"), "Main enemy does not use the new zombie artwork")
+	check(sprite.sprite_frames.resource_path.ends_with("blood_hound_frames.tres"), "Main enemy still uses old artwork")
 	check(enemy.get_node("CollisionShape2D").shape.size == Vector2(24, 14), "Foot collision changed")
-	check(is_equal_approx(sprite.scale.x, 0.63) and is_equal_approx(sprite.scale.y, 0.63), "Zombie is not reduced by ten percent")
 	for action in ["idle", "walk", "sniff", "run", "attack", "stagger"]:
-		enemy.facing = Vector2.DOWN
 		enemy._play_visual(action)
-		var animation: StringName = sprite.animation
-		check(str(animation).begins_with(action + "_"), action + " does not select a directional zombie animation")
-		var count: int = sprite.sprite_frames.get_frame_count(animation)
+		var count: int = sprite.sprite_frames.get_frame_count(action)
 		check(count >= 4, action + " is missing its supplied poses")
 		for frame in count:
 			sprite.set_frame_and_progress(frame, 0.0)
-			check(is_equal_approx(sprite.offset.y, ZOMBIE_FEET.offset_y(animation, frame)), action + " frame is not grounded to the floor")
-			var atlas: AtlasTexture = sprite.sprite_frames.get_frame_texture(animation, frame)
-			check(atlas.get_size() == Vector2(256, 256), action + " changes canvas size")
-			check(atlas.atlas.resource_path.begins_with("res://assets/sprites/new_zombie/transparent/"), action + " does not use a transparent zombie sheet")
-			if frame == 0:
-				check(atlas.atlas.get_image().get_pixel(0, 0).a < 0.01, action + " retains the magenta sheet background")
+			var atlas: AtlasTexture = sprite.sprite_frames.get_frame_texture(action, frame)
+			check(atlas.get_size() == Vector2(360, 224), action + " changes canvas size")
+			check(float(sprite.material.get_shader_parameter("clip_id")) == float(enemy.HOUND_CLIPS.data[action][frame]), action + " has a stale mask")
+			check(atlas.atlas.resource_path.begins_with("res://assets/BG/02_Enemy/"), action + " does not use the supplied source")
 	enemy.facing = Vector2.LEFT
 	enemy._play_visual("walk")
 	sprite.set_frame_and_progress(3, 0.5)
 	enemy.facing = Vector2.RIGHT
 	enemy._update_visual_facing(Vector2.RIGHT, 0.2)
 	enemy._play_visual("walk")
-	check(sprite.animation == &"walk_090" and sprite.frame == 3 and is_equal_approx(sprite.frame_progress, 0.5), "Turning restarts the gait")
+	check(not sprite.flip_h and sprite.frame == 3 and is_equal_approx(sprite.frame_progress, 0.5), "Turning restarts the gait")
 	enemy.facing = Vector2.LEFT
 	enemy._update_visual_facing(Vector2.LEFT, 0.2)
 	enemy._play_visual("walk")
-	check(sprite.animation == &"walk_270", "Left-facing movement does not use the supplied west view")
+	check(sprite.flip_h, "Left-facing movement is not mirrored")
 	enemy.facing = Vector2.UP
 	enemy._play_visual("walk")
-	check(sprite.animation == &"walk_0", "Upward movement does not use the supplied north view")
+	check(sprite.flip_h, "Vertical movement flips direction unexpectedly")
 	enemy._visual_speed = enemy.patrol_speed
 	enemy._play_visual("walk")
 	check(is_equal_approx(sprite.speed_scale, 1.0), "Walk rate is not synchronized with movement")
 	enemy._attack()
-	check(str(sprite.animation).begins_with("attack_") and enemy._attack_seconds > 0.0 and not sprite.sprite_frames.get_animation_loop(sprite.animation), "Attack is not a held one-shot")
+	check(sprite.animation == &"attack" and enemy._attack_seconds > 0.0 and not sprite.sprite_frames.get_animation_loop("attack"), "Attack is not a held one-shot")
 	enemy.stun(2.0)
-	check(str(sprite.animation).begins_with("stagger_") and enemy._attack_seconds == 0.0, "Stun does not interrupt the attack")
+	check(sprite.animation == &"stagger" and enemy._attack_seconds == 0.0, "Stun does not interrupt the attack")
 	var second: CharacterBody2D = ENEMY.instantiate()
 	room.add_child(second)
 	second.set_physics_process(false)
-	check(second.sprite.material != sprite.material, "Enemies share mutable sprite materials")
+	check(second.sprite.material != sprite.material, "Enemies share mutable frame masks")
 	second.queue_free()
 	var camera: Camera2D = player.get_node("Camera2D")
 	camera.limit_left = 0
@@ -93,7 +86,7 @@ func _run() -> void:
 	enemy.stun_seconds = 0.0
 	enemy.facing = Vector2.RIGHT
 	enemy._play_visual("idle")
-	await capture("zombie_in_room")
+	await capture("blood_hound_in_room")
 	room.hide()
 	var sheet := CanvasLayer.new()
 	add_child(sheet)
@@ -103,25 +96,23 @@ func _run() -> void:
 	sheet.add_child(background)
 	var row := 0
 	for action in ["idle", "walk", "sniff", "run", "attack", "stagger"]:
-		enemy.facing = Vector2.DOWN
-		enemy._play_visual(action)
-		var action_animation: StringName = sprite.animation
-		for frame in sprite.sprite_frames.get_frame_count(action_animation):
+		for frame in sprite.sprite_frames.get_frame_count(action):
 			var pose := AnimatedSprite2D.new()
 			pose.sprite_frames = sprite.sprite_frames
 			pose.material = sprite.material.duplicate()
-			pose.animation = action_animation
+			pose.animation = action
 			pose.frame = frame
 			pose.offset = sprite.offset
 			pose.scale = Vector2.ONE * 0.50
 			pose.position = Vector2(frame * 158 + 90, row * 120 + 106)
+			pose.material.set_shader_parameter("clip_id", float(enemy.HOUND_CLIPS.data[action][frame]))
 			sheet.add_child(pose)
 			var label := Label.new()
 			label.text = action + " " + str(frame + 1)
 			label.position = Vector2(frame * 158 + 12, row * 120 + 5)
 			sheet.add_child(label)
 		row += 1
-	await capture("zombie_all_frames")
+	await capture("blood_hound_all_frames")
 	sheet.queue_free()
 	room.queue_free()
 	await get_tree().process_frame

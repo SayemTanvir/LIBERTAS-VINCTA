@@ -106,6 +106,8 @@ func _physics_process(delta: float) -> void:
 		use_sigil()
 	if Input.is_action_just_pressed("stun"):
 		use_stun()
+	if Input.is_action_just_pressed("quick_turn"):
+		facing = -facing
 	is_crouching = Input.is_action_pressed("crouch")
 	is_sprinting = Input.is_action_pressed("sprint") and not is_crouching
 	var axis := Input.get_vector("move_left", "move_right", "move_up", "move_down")
@@ -121,7 +123,7 @@ func _physics_process(delta: float) -> void:
 	velocity = velocity.move_toward(desired, acceleration * delta)
 	move_and_slide()
 	_register_touch_evasion()
-	if axis.length_squared() > 0.01:
+	if axis.length_squared() > 0.01 and not Input.is_action_just_pressed("quick_turn"):
 		facing = axis.normalized()
 	_update_animation(axis, speed)
 	noise_clock -= delta
@@ -141,9 +143,9 @@ func _physics_process(delta: float) -> void:
 func _update_flashlight_charge(delta: float) -> void:
 	if not flashlight_enabled:
 		return
-	var drain := 3.0 if is_sprinting else 1.0
-	FreedomLedger.set_flashlight_seconds(FreedomLedger.flashlight_seconds - delta * drain)
-	if FreedomLedger.flashlight_seconds <= 0.0:
+	var drain := (1.0 / 2.0) if is_sprinting else (1.0 / 6.0)
+	FreedomLedger.set_flashlight_charge(FreedomLedger.flashlight_charge - delta * drain)
+	if FreedomLedger.flashlight_charge <= 0.0:
 		set_flashlight(false, false)
 
 func _update_breath(delta: float) -> void:
@@ -172,8 +174,8 @@ func _find_interactable() -> void:
 					target_interactable = candidate
 
 func set_flashlight(enabled: bool, present_action: bool = true) -> void:
-	var changed := flashlight_enabled != (enabled and FreedomLedger.flashlight_seconds > 0.0)
-	flashlight_enabled = enabled and FreedomLedger.flashlight_seconds > 0.0
+	var changed := flashlight_enabled != (enabled and FreedomLedger.flashlight_charge > 0.0)
+	flashlight_enabled = enabled and FreedomLedger.flashlight_charge > 0.0
 	$FlashlightFloor.visible = flashlight_enabled
 	EventBus.flashlight_changed.emit(flashlight_enabled)
 	if present_action and changed:
@@ -183,19 +185,32 @@ func set_flashlight(enabled: bool, present_action: bool = true) -> void:
 	_update_flashlight_presentation()
 
 func use_gadget() -> bool:
-	if FreedomLedger.flags.get("flashlight", false) and FreedomLedger.flashlight_seconds < 50.0 and FreedomLedger.recharge_from_batteries(45.0) > 0.0:
+	if FreedomLedger.flags.get("flashlight", false) and FreedomLedger.flashlight_charge < 56.0 and FreedomLedger.recharge_from_batteries(50.0) > 0.0:
 		play_action("interact", 0.55, true)
 		EventBus.ability_used.emit("battery")
 		return true
 	var gadget := "bottle" if int(FreedomLedger.inventory.get("bottle", 0)) > 0 else "clock"
 	if not FreedomLedger.consume_item(gadget):
-		_ability_feedback("No usable gadget. Find bottles or clocks; batteries work below 50 seconds of charge.")
+		_ability_feedback("No usable gadget. Find bottles or clocks; batteries work below 56% charge.")
 		return false
 	play_action("interact", 0.55, true)
-	var point := global_position + facing * (260.0 if gadget == "bottle" else 180.0)
-	EventBus.noise_created.emit(point, 576.0 if gadget == "bottle" else 384.0, "GLASS" if gadget == "bottle" else "GENERIC")
-	if gadget == "bottle":
+	if gadget == "clock":
+		var clock_scene = load("res://scenes/interactables/clock_distraction.tscn")
+		if clock_scene != null:
+			var clock_inst = clock_scene.instantiate()
+			clock_inst.global_position = global_position
+			get_parent().add_child(clock_inst)
+		EventBus.noise_created.emit(global_position, 576.0, "CLOCK")
+		EventBus.audio_requested.emit("clock_tick")
+	else:
+		# Bottle broken on the location where Q is pressed (same drop-in-place logic as the clock)
+		var bottle_scene = load("res://scenes/interactables/bottle_projectile.tscn")
+		if bottle_scene != null:
+			var bottle_inst = bottle_scene.instantiate()
+			bottle_inst.global_position = global_position
+			get_parent().add_child(bottle_inst)
 		EventBus.audio_requested.emit("glass_break")
+
 	if GameManager.zone == "echoes" and FreedomLedger.current_part == 2 and FreedomLedger.part2_seed.get("full_gadgets", false):
 		FreedomLedger.mechanic_uses += 1
 	EventBus.ability_used.emit(gadget)

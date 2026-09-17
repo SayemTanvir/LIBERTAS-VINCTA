@@ -41,14 +41,14 @@ func _run() -> void:
 	GameManager.state = GameManager.State.PLAYING
 	FreedomLedger.reset()
 	FreedomLedger.flags["flashlight"] = true
-	FreedomLedger.set_flashlight_seconds(90.0)
+	FreedomLedger.set_flashlight_charge(100.0)
 	player.flashlight_enabled = true
 	player.is_sprinting = false
-	player._update_flashlight_charge(2.0)
-	_check(is_equal_approx(FreedomLedger.flashlight_seconds, 88.0), "Flashlight normal drain is not one second per second")
+	player._update_flashlight_charge(6.0)
+	_check(is_equal_approx(FreedomLedger.flashlight_charge, 99.0), "Flashlight normal drain is not one percent per six seconds")
 	player.is_sprinting = true
 	player._update_flashlight_charge(2.0)
-	_check(is_equal_approx(FreedomLedger.flashlight_seconds, 82.0), "Sprint flashlight drain is not triple")
+	_check(is_equal_approx(FreedomLedger.flashlight_charge, 98.0), "Sprint flashlight drain is not one percent per two seconds")
 	_check(is_equal_approx(player.walk_speed, 141.0) and is_equal_approx(player.sprint_speed, 256.0) and is_equal_approx(player.crouch_speed, 70.0), "Player movement tunables changed")
 	_check(is_equal_approx(player.breath_capacity, 6.0) and is_equal_approx(player.breath_cooldown_seconds, 15.0), "Breath timing tunables changed")
 	var radii: Array[float] = []
@@ -65,8 +65,8 @@ func _run() -> void:
 	var expected_states := ["WANDER_BLIND", "PATROL_AUDIO", "INVESTIGATE", "HUNT_AUDIO", "PATROL_SIGHT", "CHASE", "INVESTIGATE_LAST_SEEN", "PREDICT_HUNT", "AMBUSH"]
 	_check(enemy.State.keys() == expected_states, "Enemy state table does not match the specification")
 	_check(enemy.state == enemy.State.WANDER_BLIND, "Stage 0 did not begin blind wandering")
-	_check(is_equal_approx(enemy.blind_speed, 115.0) and is_equal_approx(enemy.patrol_speed, 142.0), "Enemy patrol speeds changed")
-	_check(is_equal_approx(enemy.audio_hunt_speed, 216.0) and is_equal_approx(enemy.sight_chase_speed, 282.0) and is_equal_approx(enemy.true_form_speed, 238.0), "Enemy hunt speeds changed")
+	_check(is_equal_approx(enemy.blind_speed, 113.85) and is_equal_approx(enemy.patrol_speed, 140.58), "Enemy patrol speeds changed")
+	_check(is_equal_approx(enemy.audio_hunt_speed, 213.84) and is_equal_approx(enemy.sight_chase_speed, 279.18) and is_equal_approx(enemy.true_form_speed, 235.62), "Enemy hunt speeds changed")
 	_check(is_equal_approx(enemy.audio_hunt_seconds, 10.0) and is_equal_approx(enemy.path_refresh_seconds, 0.28), "Enemy pursuit timing changed")
 	_check(is_equal_approx(enemy.ambush_chance, 0.55) and is_equal_approx(enemy.ambush_interval, 2.5) and is_equal_approx(enemy.ambush_seconds, 10.0), "Enemy ambush pressure changed")
 	_check(enemy.sight_chase_speed > player.sprint_speed, "Stage 2 can still be escaped by sprinting in a straight line")

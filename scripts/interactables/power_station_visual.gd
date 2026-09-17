@@ -52,7 +52,7 @@ static func _cutout(picture: Image) -> Texture2D:
 func _process(_delta: float) -> void:
 	if not is_instance_valid(station):
 		return
-	var full := FreedomLedger.flashlight_seconds >= FreedomLedger.MAX_FLASHLIGHT_SECONDS and (FreedomLedger.current_part == 1 or FreedomLedger.hp >= FreedomLedger.max_hp)
+	var full := FreedomLedger.flashlight_charge >= FreedomLedger.MAX_CHARGE and (FreedomLedger.current_part == 1 or FreedomLedger.hp >= FreedomLedger.max_hp)
 	var next := 2 if full else (1 if station.busy else 0)
 	if next == state:
 		return

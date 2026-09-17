@@ -49,7 +49,8 @@ func _ready() -> void:
 			var y := 505.0 if i % 2 == 0 else 450.0
 			_furniture("Furniture" + str(i), Vector2(x, y), Vector2(150, 56))
 	for spec in layout.props:
-		var prop: Node2D = load("res://scenes/interactables/" + spec[0] + ".tscn").instantiate()
+		var scene_name: String = "letter_pickup" if spec[0] == "hidden_letter" else spec[0]
+		var prop: Node2D = load("res://scenes/interactables/" + scene_name + ".tscn").instantiate()
 		prop.name = spec[1].to_pascal_case()
 		prop.interaction_id = spec[1]
 		prop.position = Vector2(spec[2], spec[3])
@@ -60,6 +61,12 @@ func _ready() -> void:
 					value = Vector2(float(value[0]), float(value[1]))
 				prop.set(key, value)
 		props.add_child(prop)
+		if prop.get("kind") == "vent":
+			var vent_label := preload("res://scripts/interactables/vent_label.gd").new()
+			var meta: Dictionary = spec[4] if spec.size() > 4 and spec[4] is Dictionary else {}
+			vent_label.destination_floor = str(meta.get("destination", ""))
+			vent_label.entrance_id = str(meta.get("entrance", ""))
+			prop.add_child(vent_label)
 		_marker(spec[1].to_pascal_case() + "Point", prop.position)
 	_marker("PlayerSpawn", Vector2(240, 490))
 	_marker("ReturnSpawn", Vector2(room_width - 330, 490))
