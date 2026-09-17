@@ -1,0 +1,200 @@
+LIBERTAS VINCTA — পার্ট ১ ও পার্ট ২ থেকে বের হওয়ার সম্পূর্ণ বাংলা গাইড
+
+সতর্কতা: এই ফাইলে সব রুট, ধাঁধা ও সমাপ্তির স্পয়লার আছে।
+
+মূল নিয়ম
+----------
+তিনটি Key নেওয়া বাধ্যতামূলক নয়। বরং কোন Key-এর পর কোথা থেকে বের হবেন,
+সেটিই পার্ট ১-এর ফল নির্ধারণ করে। Key-এর ক্রম স্থির:
+
+1. Hearing Key — GF-03 Music Room-এর পিয়ানোতে
+2. Sight Key — UF-02 Master Bedroom-এর ভ্যানিটিতে
+3. Memory Key — BS-05 Ritual Chamber-এ
+
+শুরুতে GF-00 Cold Foyer থেকে flashlight এবং tool pouch নিন। Tool pouch-এ
+৩টি lockpick থাকে। পিয়ানো ও ভ্যানিটি—প্রতিটিতে প্রথম সফল সমাধানে ১টি করে
+lockpick লাগে; cracked ritual seal-এ lockpick লাগে না। সব puzzle-এ E চাপার
+পর প্রতিটি animation শেষ হতে দিন।
+
+
+পার্ট ১: বের হওয়ার সব পথ
+===========================
+
+১) Untouched — ০টি Key নিয়ে নিরাপদে পালানো
+-------------------------------------------
+এটি আসল সফল সমাপ্তি এবং পার্ট ২ খুলবে। তবে পুরো পথে monster যেন আপনাকে
+detect না করে, সেটি জরুরি।
+
+ধাপ:
+1. Cold Foyer শেষ করে GF-01 Grand Foyer-এ যান।
+2. পিয়ানো খুলবেন না এবং কোনো Key নেবেন না।
+3. GF-01-এর Front Door-এ E চাপুন। প্রথমবার দরজা শুধু পরীক্ষা করা হবে।
+4. কোনো detection না ঘটিয়ে Front Door-এ দ্বিতীয়বার E চাপুন।
+5. দরজা খুলে গেলে Untouched ending হবে। Ending screen-এ Descend বেছে নিন।
+
+গুরুত্বপূর্ণ: প্রথমবার দরজা পরীক্ষা না করলে দ্বিতীয় interaction-এও escape হবে
+না। ধরা পড়লে এই ০-Key route আর কাজ করবে না।
+
+
+২) Vantree — শুধু Hearing Key নিয়ে Ritual Conduit দিয়ে বের হওয়া
+-----------------------------------------------------------------
+এটি canon route এবং পার্ট ২-এ Blood Magic দেয়। সফল হওয়ার জন্য ঠিক ১টি Key
+এবং পার্ট ১-এর অন্তত ৪টি letter দরকার। Hearing ছাড়া অন্য কোনো Key নেবেন না।
+
+ধাপ:
+1. GF-03 Music Room-এ পিয়ানোর পাশে E তিনবার চাপুন; Hearing Key নিন।
+2. Letter I নিন (GF-03)।
+3. GF-06 থেকে Letter II নিন।
+4. GF-09-এর Upper Stairs দিয়ে Upper Floor-এ উঠুন।
+5. UF-01 থেকে Letter III এবং UF-03 থেকে Letter IV নিন।
+6. UF-02-এর ভ্যানিটি খুলবেন না; Sight Key নেবেন না।
+7. UF-06 দিয়ে Ground Floor-এ ফিরে GF-10 Cellar Stairs দিয়ে Basement-এ যান।
+8. Basement route: BS-01 -> BS-04 -> BS-02 -> BS-03 -> BS-05 -> BS-06 -> BS-09।
+9. BS-05-এর seal ভাঙবেন না, Memory Key নেবেন না।
+10. BS-09 Ritual Conduit-এ E চাপুন। ১টি Key ও অন্তত ৪টি letter থাকলে
+    Vantree ending হবে। তারপর Descend বেছে নিন।
+
+ঐচ্ছিক: BS-03-এর Letter V, VI ও VII পড়লে গল্পের বাড়তি তথ্য পাবেন, কিন্তু
+escape-এর জন্য I–IV-ই যথেষ্ট।
+
+
+৩) Partial Mercy — Hearing ও Sight Key নিয়ে Flood Tunnel দিয়ে বের হওয়া
+------------------------------------------------------------------------
+এটিও সফল সমাপ্তি এবং পার্ট ২ খুলবে। এখানে ঠিক ২টি Key থাকতে হবে।
+
+ধাপ:
+1. GF-03-এর পিয়ানো solve করে Hearing Key নিন।
+2. GF-09 দিয়ে Upper Floor-এ যান।
+3. UF-02-এর ভ্যানিটির পাশে E তিনবার চাপুন এবং Sight Key নিন।
+4. UF-06 দিয়ে Ground Floor-এ ফিরুন এবং GF-10 Cellar Stairs দিয়ে Basement-এ যান।
+5. শুরুর দিকের BS-04 Flooded Cellar-এ Maintenance Exit / Flood Tunnel খুঁজুন।
+6. সেখানে E চাপুন। ঠিক ২টি Key থাকলে Partial Mercy ending হবে।
+7. Memory Key নিতে BS-05-এ যাবেন না; ৩টি Key হলে এই exit অকার্যকর হবে।
+8. Ending screen-এ Descend বেছে নিন।
+
+
+৪) Loop — ৩টি Key নিলে যে মিথ্যা escape হয়
+--------------------------------------------
+এটি সফলভাবে বের হওয়ার পথ নয় এবং পার্ট ২ খুলবে না। তবু সব সম্ভাব্য ফলাফলের
+জন্য এটি জানা দরকার।
+
+ধাপ:
+1. Hearing ও Sight Key নিন।
+2. BS-05 Ritual Chamber-এ cracked seal-এর কাছে E একবার চাপুন।
+3. Memory Key নিন।
+4. BS-01 হয়ে Ground Floor-এ ফিরে GF-01 Front Door-এ E চাপুন।
+5. বাইরে না গিয়ে Els আবার Foyer-এ জেগে উঠবে। Keys, letters ও সাধারণ inventory
+   reset হবে—এটাই Loop ending।
+
+
+পার্ট ১-এর দ্রুত সিদ্ধান্ত তালিকা
+---------------------------------
+০ Key + Front Door দুইবার + zero detection  = Untouched
+১ Key (শুধু Hearing) + ৪টি letter + BS-09    = Vantree
+২ Key (Hearing + Sight) + BS-04 Flood Tunnel = Partial Mercy
+৩ Key + GF-01 Front Door                     = Loop; পার্ট ২ নেই
+
+
+পার্ট ২: Nexus-এ পৌঁছানোর সব উপায়
+==================================
+
+যে কোনো সফল পার্ট ১ ending-এর পরে Descend দিলে পথটি হবে:
+CR-01 -> CR-02 -> CR-03 -> CR-04 -> CR-05 -> CR-06
+তারপর
+CE-01 -> CE-02 -> CE-03 -> CE-04 -> CE-05 -> LN-CENTER
+
+CE-05-এর Nexus Descent খোলার আগে নিজের branch-এর mechanic সফলভাবে মোট ৩ বার
+ব্যবহার করতে হবে। H চাপলে in-game field guide-এ আপনার বর্তমান branch-এর
+objective, cooldown ও cost দেখা যায়।
+
+
+A) Untouched branch থেকে Nexus খোলা
+------------------------------------
+এই branch-এ monster-এর শুরুতে কোনো active sense নেই এবং Els-এর health 100।
+
+1. Chamber of Echoes-এ যান।
+2. Flashlight charge ৫০ সেকেন্ড বা প্রায় ৫৬% এর বেশি রাখুন। Charge কম হলে Q
+   আগে battery ব্যবহার করবে, যা gate-এর count-এ ধরা হয় না।
+3. Q চেপে bottle বা clock decoy মোট ৩ বার সফলভাবে ব্যবহার করুন।
+4. তিনটি gadget resonance হলে CE-05-এর Nexus Descent খুলবে।
+5. দরজায় E চেপে LN-CENTER-এ যান।
+
+
+B) Vantree branch থেকে Nexus খোলা
+----------------------------------
+এই branch-এ monster Touch sense পায়; Els Blood Magic পায় এবং maximum health 80।
+
+পদ্ধতি ১ — Forge ও Blood Sigil:
+1. CE-02-এর Sigil Forge-এ E চাপুন। এটি ১ম use হিসেবে count হবে এবং 6.4 HP
+   (maximum health-এর 8%) কমবে।
+2. R চাপুন; Blood Sigil ১২ সেকেন্ডের জন্য circle-এর ভিতরে monster-এর senses
+   (Touch-সহ) suppress করে। এটি ২য় use; আবার 6.4 HP লাগে।
+3. ২০ সেকেন্ড cooldown শেষ হলে R আবার চাপুন। এটি ৩য় use।
+4. CE-05-এর Nexus Descent খুলবে।
+
+পদ্ধতি ২ — Touch evasion:
+1. CE-04-এর rubble-এর উপর থাকুন।
+2. Touch-mutated monster 520 pixels-এর মধ্যে থাকলে rubble-এর উপর movement করে
+   তার Touch এড়িয়ে যান।
+3. প্রতি counted evasion-এর মাঝে ২ সেকেন্ড cooldown আছে।
+4. মোট ৩টি successful Touch evasion Nexus gate খুলে দেয়।
+
+নোট: Blood Sigil contact damage বন্ধ করে না। Health কম হলে cyan power station-এ
+E ধরে charge/heal করুন। T-এর Stun Rite monster কাছে থাকলে ৬ সেকেন্ড stun দেয়,
+কিন্তু তিন-use gate-এর count-এ ধরা হয় না।
+
+
+C) Partial Mercy branch থেকে Nexus খোলা
+----------------------------------------
+এই branch-এ monster-এর Hearing ও Sight থাকে; Els-এর health 100 এবং Partial
+Sigil আছে।
+
+1. CE-01-এ ঢুকে ability unlock করুন।
+2. R চাপুন—প্রতি Partial Sigil 4 HP খরচ করে এবং ১টি use হিসেবে count হয়।
+3. ২০ সেকেন্ড cooldown শেষ হলে R আবার চাপুন।
+4. আবার cooldown শেষে তৃতীয়বার R চাপুন।
+5. তিন use শেষ হলে CE-05-এর Nexus Descent দিয়ে LN-CENTER-এ যান।
+
+সতর্কতা: Partial Sigil শুধু Hearing বন্ধ করে; Sight বন্ধ করে না। তাই crouch,
+shadow, corner ও bottle/clock decoy ব্যবহার করুন।
+
+
+পার্ট ২ থেকে চূড়ান্তভাবে বের হওয়ার ৩টি পথ
+==========================================
+
+LN-CENTER (Convergence)-এ ফিরে যাওয়ার দরজা নেই। তিনটি anchor একই arena-তে:
+
+LN-A = Destroy
+LN-B = Seal Els
+LN-C = Bind New Vessel
+
+যে ending চান, সেই anchor-এ একবারই সফল ritual শেষ করুন। তিনটিই করার দরকার নেই।
+
+সব anchor-এর সাধারণ ধাপ:
+1. Golden Ward Bell-এর কাছে গিয়ে E চাপুন। Monster 32 সেকেন্ডের জন্য bound হবে
+   এবং detection clear হবে।
+2. প্রয়োজন হলে bottle/clock decoy, Blood Sigil বা Stun Rite ব্যবহার করে নির্বাচিত
+   anchor-এ যান। Arena-তে দুইটি hiding screen এবং একটি power station আছে।
+3. নির্বাচিত anchor-এ E ধরে টানা 20 সেকেন্ড channel করুন।
+4. নড়া, E ছেড়ে দেওয়া, detection বা damage হলে progress শূন্যে ফিরে যাবে।
+5. চেষ্টা ব্যর্থ হলে ward শেষ হওয়ার পর bell আবার বাজিয়ে পুনরায় চেষ্টা করুন।
+6. Pause করলে ward ও ritual timer থেমে থাকে।
+
+Anchor ও ending:
+- LN-A: Destroy — Severance ending। Deprived One-এর সঙ্গে শেষ bond নষ্ট হয়।
+- LN-B: Seal Els — Custodian's Rest ending। Els নিজেই living ward হয়।
+- LN-C: Bind New Vessel — Vessel ending। prison একটি নতুন key-এর ভিতরে বাঁধা হয়।
+
+অতএব পার্ট ২-এর সম্পূর্ণ হওয়ার বৈধ ফল তিনটি: Severance, Custodian's Rest এবং
+Vessel। সবচেয়ে সরাসরি স্থায়ী মুক্তির সমাপ্তি চাইলে LN-A-এর Severance বেছে নিন।
+
+
+বেঁচে থাকার ছোট টিপস
+--------------------
+- Shift sprint দ্রুত কিন্তু বেশি শব্দ করে; Ctrl crouch ধীর কিন্তু নীরব।
+- B দিয়ে সর্বোচ্চ ৬ সেকেন্ড শ্বাস ধরে শব্দ কমানো যায়; cooldown ১৫ সেকেন্ড।
+- পানির মেঝে ও creaking floor খুব শব্দ করে—monster কাছাকাছি থাকলে crouch করুন।
+- flashlight sprint করলে তিনগুণ দ্রুত শেষ হয়। Cyan CHARGE marker-ওয়ালা power
+  station-এ E ধরে recharge করুন; পার্ট ২-এ সেখানেই health-ও ফেরে।
+- Hearing Key নেওয়ার পরে টানা শব্দ হলে দ্রুত hunt শুরু হয়। Sight Key নেওয়ার পরে
+  সোজা দৌড়ে পালানো কার্যকর নয়; আড়াল ও মোড় ব্যবহার করুন।

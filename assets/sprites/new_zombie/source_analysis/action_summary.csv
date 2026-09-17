@@ -1,0 +1,14 @@
+name,directions,columns,rows,frames_per_direction,total_frames
+Attack1,16,4,5,20,320
+Attack2,16,6,4,24,384
+Attack3,16,6,4,24,384
+Attack4,16,6,5,30,480
+Death1,16,6,4,24,384
+Death2,16,6,4,24,384
+Hit1,16,4,4,16,256
+Hit2,16,4,4,16,256
+Idle,16,4,5,20,320
+Lookup,16,6,5,30,480
+Roar,16,6,4,24,384
+Run,16,4,5,20,320
+Walk,16,4,5,20,320
