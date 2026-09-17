@@ -42,12 +42,24 @@ func _build_presentation() -> void:
 	presentation.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(presentation)
 	move_child(presentation, get_child_count() - 2)
+	var backdrop := TextureRect.new()
+	backdrop.texture = preload("res://assets/ui/menu/hollowmere_dark_menu.png")
+	backdrop.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	backdrop.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	backdrop.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	backdrop.modulate = Color(0.42, 0.42, 0.42, 0.72)
+	backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	presentation.add_child(backdrop)
+	var veil := ColorRect.new()
+	veil.color = Color(0.01, 0.014, 0.019, 0.58)
+	veil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	presentation.add_child(veil)
 	var brand := style.label(presentation, "LIBERTAS VINCTA", Rect2(140, 240, 1000, 66), 42, style.PAPER, true)
 	brand.add_theme_font_override("font", preload("res://scripts/ui/menu_typography.gd").TITLE)
 	brand.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	var chapter := style.label(presentation, "PART II  /  DEGREES OF FREEDOM" if FreedomLedger.current_part == 2 else "PART I  /  HOLLOWMERE ESTATE", Rect2(140, 328, 1000, 32), 12, style.BRASS)
 	chapter.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	style.rule(presentation, Rect2(440, 385, 400, 1))
 	indicator = Control.new()
 	indicator.position = Vector2(640, 428)
 	indicator.mouse_filter = Control.MOUSE_FILTER_IGNORE
