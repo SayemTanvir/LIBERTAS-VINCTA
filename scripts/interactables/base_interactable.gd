@@ -50,8 +50,8 @@ func _ready() -> void:
 
 func _on_seal_completed(seal_id: String) -> void:
 	if kind == "key" and CollectibleManager.is_next_key(sense) and (seal_id == required_flag or FreedomLedger.has_requirement(required_flag)):
+		refresh()
 		modulate.a = 0.0
-		visible = true
 		var tween := create_tween()
 		tween.tween_property(self, "modulate:a", 1.0, 1.5)
 		EventBus.audio_requested.emit("key_grab")
@@ -114,12 +114,19 @@ func refresh() -> void:
 		$Visual.show()
 	if interaction_id in ["nexus_ending_door", "nexus_trap"]:
 		visible = available()
+		if visible:
+			set_process(true)
+			for child in get_children():
+				if child is CanvasItem:
+					child.show()
 		return
 	var progression_visible := available()
 	if kind == "key":
 		progression_visible = CollectibleManager.is_key_revealed(sense)
 	elif kind == "letter":
 		progression_visible = interaction_id == "nexus_guide" or CollectibleManager.is_letter_revealed(interaction_id)
+		if interaction_id == "nexus_guide":
+			progression_visible = true
 	visible = progression_visible or kind in ["puzzle", "door", "locked_door", "hiding", "exit", "recharge", "vent", "anchor", "lore"]
 	if has_node("NameplateFragments"):
 		$NameplateFragments.set_collected(bool(FreedomLedger.flags.get("nameplate_assembled", false)))
@@ -538,7 +545,7 @@ func _travel(player: CharacterBody2D) -> void:
 		GameManager.travel.call_deferred(destination, entrance)
 
 func _exit(player: CharacterBody2D) -> void:
-	var candidate := ending_type
+	var candidate := str(FreedomLedger.flags.get("nexus_outcome", "")) if interaction_id == "nexus_ending_door" else ending_type
 	if ending_type == "front_door":
 		if FreedomLedger.current_stage == 0 and not FreedomLedger.flags.get("door_tested", false):
 			FreedomLedger.flags["door_tested"] = true

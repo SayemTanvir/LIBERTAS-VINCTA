@@ -31,6 +31,10 @@ func _process(delta: float) -> void:
 	super._process(delta)
 	if GameManager.state != GameManager.State.PLAYING:
 		return
+	if not outcome.is_empty():
+		alarm_active = false
+		alarm_seconds = 0.0
+		return
 	alarm_seconds = maxf(0.0, alarm_seconds - delta)
 	var enemy = get_tree().get_first_node_in_group("enemy")
 	if is_instance_valid(trap_prompt):
@@ -83,10 +87,14 @@ func complete_outcome(choice: String, point: Vector2) -> void:
 	if not outcome.is_empty() or choice not in ["destroy", "flee", "remain"]:
 		return
 	outcome = choice
+	alarm_active = false
+	alarm_seconds = 0.0
 	FreedomLedger.flags["nexus_outcome"] = choice
 	FreedomLedger.flags["nexus_door_x"] = point.x
 	for enemy in get_tree().get_nodes_in_group("enemy"):
 		enemy.stun(3600.0)
+		enemy.nexus_hunting = false
+		enemy.blood_trap_seconds = 0.0
 	_reveal_door()
 	EventBus.anchor_progress.emit("", 0.0, 20.0)
 	EventBus.audio_requested.emit("door_open")

@@ -21,13 +21,14 @@ func texture_for(key: String) -> Texture2D:
 		path = str(data.asset_root) + path
 	var source: Texture2D = load(path)
 	if spec.get("mask_background", false):
-		var r: Array = spec.region
+		var image := source.get_image()
+		var r: Array = spec.get("region", [0, 0, image.get_width(), image.get_height()])
 		textures[key] = preload("res://scripts/levels/furniture_cutout.gd").texture(source, Rect2i(r[0], r[1], r[2], r[3]), spec.get("mask_seeds", []))
 		return textures[key]
 	var atlas := AtlasTexture.new()
 	atlas.atlas = source
 	if spec.has("region"):
-		var r: Array = spec.region
+		var r: Array = spec.get("region")
 		atlas.region = Rect2(r[0], r[1], r[2], r[3])
 		if spec.get("trim", false):
 			var bounds := source.get_image().get_region(Rect2i(atlas.region)).get_used_rect()

@@ -210,6 +210,19 @@ func _physics_process(delta: float) -> void:
 	state_clock += delta
 	route_clock -= delta
 	ambush_clock -= delta
+	if is_distracted:
+		# A broken bottle or dropped clock has priority over every chase signal.
+		# Keep the Hound committed to the exact drop point until its five-second search ends.
+		target = distraction_target
+		detection_active = false
+		if state != State.INVESTIGATE:
+			change_state(State.INVESTIGATE)
+		_update_state(delta)
+		if GameManager.state == GameManager.State.PLAYING and _attack_seconds <= 0.0:
+			_move(delta)
+			_resolve_contact()
+			_observe_debug()
+		return
 	_update_vision(delta)
 	_detect_touch()
 	_update_state(delta)

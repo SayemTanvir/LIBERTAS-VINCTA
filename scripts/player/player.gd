@@ -71,14 +71,16 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 func _physics_process(delta: float) -> void:
+	var nexus_resolved := GameManager.zone == "nexus" and not str(FreedomLedger.flags.get("nexus_outcome", "")).is_empty()
 	hurt_cooldown = maxf(0.0, hurt_cooldown - delta)
 	animation_hold = maxf(0.0, animation_hold - delta)
 	breath_cooldown = maxf(0.0, breath_cooldown - delta)
-	sigil_cooldown = maxf(0.0, sigil_cooldown - delta)
-	stun_cooldown = maxf(0.0, stun_cooldown - delta)
-	blood_trap_cooldown = maxf(0.0, blood_trap_cooldown - delta)
-	touch_evasion_cooldown = maxf(0.0, touch_evasion_cooldown - delta)
-	ability_feedback_cooldown = maxf(0.0, ability_feedback_cooldown - delta)
+	if not nexus_resolved:
+		sigil_cooldown = maxf(0.0, sigil_cooldown - delta)
+		stun_cooldown = maxf(0.0, stun_cooldown - delta)
+		blood_trap_cooldown = maxf(0.0, blood_trap_cooldown - delta)
+		touch_evasion_cooldown = maxf(0.0, touch_evasion_cooldown - delta)
+		ability_feedback_cooldown = maxf(0.0, ability_feedback_cooldown - delta)
 	_update_flashlight_charge(delta)
 	_update_breath(delta)
 	target_interactable = null
