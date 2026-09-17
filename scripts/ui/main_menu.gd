@@ -157,7 +157,7 @@ func _setup_video_background() -> void:
 	video_background.stream = stream
 	video_background.autoplay = true
 	video_background.loop = true
-	video_background.volume_db = -80.0
+	video_background.volume_db = -16.0
 	video_background.expand = true
 	video_background.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	video_background.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)

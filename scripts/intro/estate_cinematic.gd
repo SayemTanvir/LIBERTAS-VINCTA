@@ -110,7 +110,7 @@ func _ready() -> void:
 	veil.color = Color.BLACK
 	veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stage.add_child(veil)
-	_make_audio(WIND, "Ambience", -16.0, true)
+	_make_audio(WIND, "Ambience", -10.0, true)
 	_make_audio(THUNDER, "SFX", -12.0)
 	_make_audio(STING, "Music", -19.0)
 	audio[0].play()
