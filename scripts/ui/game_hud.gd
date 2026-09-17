@@ -401,6 +401,9 @@ func close_modal() -> void:
 	GameManager.block_ui_input()
 	if modal_mode == "ending":
 		modal_mode = ""
+		if GameManager.ending == "flee":
+			GameManager.finish_flee_to_menu.call_deferred()
+			return
 		chapter_complete.process_mode = Node.PROCESS_MODE_INHERIT
 		chapter_complete.show()
 		chapter_complete.focus_default()

@@ -68,6 +68,8 @@ func available() -> bool:
 		return false
 	if interaction_id == "nexus_power":
 		return bool(FreedomLedger.flags.get("nexus_guide_read", false)) and not bool(FreedomLedger.flags.get(interaction_id, false))
+	if interaction_id == "nexus_guide":
+		return interaction_id not in FreedomLedger.letter_ids
 	if interaction_id == "scratched_nameplate":
 		# Older checkpoints only recorded the static inspection, not assembly.
 		return not FreedomLedger.flags.get("nameplate_assembled", false)

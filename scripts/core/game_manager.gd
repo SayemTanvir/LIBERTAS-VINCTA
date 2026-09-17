@@ -59,6 +59,21 @@ func go_home() -> void:
 	state = State.MENU
 	get_tree().change_scene_to_file("res://scenes/ui/front_end.tscn")
 
+func finish_flee_to_menu() -> void:
+	transition_epoch += 1
+	get_tree().paused = false
+	if FileAccess.file_exists(save_path):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
+	checkpoint.clear()
+	FreedomLedger.reset()
+	zone = "intro"
+	entry = "start"
+	ending = ""
+	arrival_pending = false
+	respawn_pending = false
+	state = State.MENU
+	get_tree().change_scene_to_file("res://scenes/ui/front_end.tscn")
+
 func save_checkpoint(position: Vector2) -> void:
 	checkpoint = {"zone": zone, "position": position, "ledger": FreedomLedger.snapshot()}
 	var serializable := checkpoint.duplicate(true)

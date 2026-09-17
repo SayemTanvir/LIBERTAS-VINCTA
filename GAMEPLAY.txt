@@ -1,0 +1,481 @@
+LIBERTAS VINCTA - COMPLETE GAMEPLAY GUIDE
+==========================================
+
+This is the complete spoiler guide for the current game.
+It covers controls, rooms, interactions, key and letter order, enemy rules,
+all Part I routes, Part II branches, Ley Nexus access, and every ending.
+
+
+1. BASIC CONTROLS
+-----------------
+W A S D / Arrow Keys : Move
+Shift                 : Sprint
+Ctrl                  : Crouch / move quietly
+B                     : Hold breath
+F                     : Toggle flashlight
+E                     : Interact, collect, read, hide, solve, or use a door
+Q                     : Use the selected gadget
+R                     : Blood Sigil / branch ability
+T                     : Stun Rite when unlocked
+Y                     : Blood Trap
+H                     : Open the Field Guide
+Tab                   : Open inventory and collected letters
+Esc                   : Pause or close a modal
+C                     : Quick turn
+
+
+2. GAME START - COLD FOYER
+--------------------------
+1. Pick up the flashlight.
+2. Pick up the Tool Pouch. It gives Els three lockpicks.
+3. Try the intro door once. The first attempt only records that it was tested.
+4. Return to the door after collecting the required items.
+5. Press E to unlock it and enter the Ground Floor.
+
+Power stations:
+- Hold the interaction while standing still to recharge the flashlight.
+- In Part II, stations also restore HP.
+- Moving or taking damage interrupts the session.
+- Batteries are required for flashlight charging.
+
+
+3. INTERACTION TYPES
+--------------------
+Pickups:
+- Flashlight: enables the flashlight.
+- Tool Pouch: gives three lockpicks.
+- Key: restores one sealed sense to the Hound.
+- Letter: provides story clues and unlocks progression.
+- Battery: restores flashlight charge.
+- Bottle: creates a distant noise distraction.
+- Clock: creates a larger noise distraction.
+- Knife, Guide Letter, and The Power: required for the Nexus Destroy route.
+
+Puzzles and seals:
+- Piano Seal: three steps and one lockpick.
+- Vanity Seal: three steps and one lockpick.
+- Cracked Ritual Seal: one step and no lockpick.
+- Damage or interruption can cancel an active puzzle.
+
+Hiding:
+- Els can hide under tables, in wardrobes, beds, toy chests, coat racks,
+  and the Nexus ward screens.
+- Reusing the same hiding place is dangerous after Memory is restored.
+- Press E to leave a hiding place.
+
+Doors and vents:
+- Approach the target and press E.
+- Locked doors explain their missing requirement instead of opening.
+- Vents connect several floors and provide alternate routes.
+
+Lore:
+- Assemble the nameplate fragments to reveal VANTREE.
+- Some lore events happen automatically and only once per run.
+- The Foyer Note warns that the keys concern three stolen senses.
+
+
+4. HOUND AND SENSORY RULES
+--------------------------
+Stage 0 - no keys:
+- The Hound wanders without Hearing, Sight, or Memory.
+- Contact is a non-lethal stagger on this branch.
+- Avoid detection to preserve the Untouched route.
+
+After the Hearing Key:
+- The Hound investigates noise.
+- Two audible pings close together can start an audio hunt.
+- Glass, running, and loud surfaces are dangerous.
+- Crouch and use carpet or quieter routes.
+
+After the Sight Key:
+- The Hound can detect exposure, line of sight, and flashlight use.
+- Turn off the flashlight and use real cover.
+- Do not cross exposed areas in front of the Hound.
+
+After the Memory Key:
+- The Hound remembers used hiding places.
+- It can predict routes and revisit previous hiding locations.
+- Change both your route and hiding place.
+
+Part II branch behavior:
+- Untouched: ordinary senses remain dormant; gadgets are the main defense.
+- Vantree: Touch mutation and Blood Magic are active; nearby floor vibration
+  can reveal Els.
+- Partial Mercy: Hearing and Sight remain active; Memory remains dormant.
+
+Damage or capture leads to checkpoint recovery. A successful attack in Part I
+causes capture; Part II attacks reduce HP.
+
+
+5. KEY AND LETTER ORDER
+----------------------
+The three keys must be taken in this order:
+
+1. Hearing Key - Ground Floor, Music Room, after the Piano Seal
+2. Sight Key   - Upper Floor, Master Bedroom, after the Vanity Seal
+3. Memory Key  - Basement, Ritual Chamber, after the Cracked Ritual Seal
+
+Visibility and collection rules:
+- The Hearing Key is visible from the beginning.
+- It cannot be collected until the Piano Seal is complete.
+- After collecting Hearing, Letter I becomes visible.
+- After reading Letter I, the Sight Key becomes visible.
+- After collecting Sight, Letter II becomes visible.
+- After reading Letter II, the Memory Key becomes visible.
+- Only the current progression key or letter is visible and collectible.
+- Collected keys and letters disappear from the world.
+
+The first two letters give the next key locations:
+- Letter I sends Els to the Upper Floor Master Bedroom and the Vanity Seal.
+- Letter II sends Els to the Basement Ritual Chamber and the Cracked Seal.
+
+
+6. PART I ROOMS AND IMPORTANT OBJECTS
+-------------------------------------
+Ground Floor:
+- GF-01 Grand Foyer: Front Door and Foyer Note
+- GF-02 Dining Hall: table hiding place
+- GF-03 Music Room: Piano Seal and Hearing Key
+- GF-04 Servant's Pantry: bottles and wardrobe
+- GF-05 Side Corridor: Vantree nameplate fragments
+- GF-06 Reading Nook: Letter II
+- GF-07 Coat Room: hiding place and lockpick
+- GF-08 Trophy Hall: vent route
+- GF-09 Upper Stairwell
+- GF-10 Cellar Stairs: Hearing-gated basement route
+
+Upper Floor:
+- UF-01 Portrait Gallery: Letter III
+- UF-02 Master Bedroom: Vanity Seal and Sight Key
+- UF-03 Nursery: toy chest hiding place and Letter IV
+- UF-04 Linen Hall: vent route
+- UF-05 Bathroom: bottle
+- UF-06 Stairwell Down
+- UF-07 Vent Junction A
+
+Basement:
+- BS-01 Cellar Stairs
+- BS-04 Flooded Cellar: Partial Mercy exit
+- BS-02 Wine Cellar: vent route
+- BS-03 Ossuary Nook: Letters V, VI, and VII
+- BS-05 Ritual Chamber: Cracked Ritual Seal and Memory Key
+- BS-06 Root Cellar: supplies and recharge
+- BS-09 Ritual Conduit: Vantree exit
+
+Part II areas:
+- CR-01 Entry Descent
+- CR-02 Flooded Nave
+- CR-03 Collapsed Cloister
+- CR-04 Altar Approach and automatic Vantree name reveal
+- CR-05 Crypt Row
+- CR-06 Echo Threshold
+- CE-01 Chamber of Echoes entry
+- CE-03 one-time Vantree voice event
+- CE-05 Nexus Descent and supply area
+
+
+7. PART I ENDINGS
+-----------------
+There are four Part I results. Three continue to Part II. Three keys create
+the Loop instead of a Part II seed.
+
+A. 0 KEYS - UNTOUCHED
+
+Requirements:
+- Do not collect any key.
+- Do not trigger a detection.
+
+Sequence:
+1. Test the Front Door in the Ground Floor Grand Foyer.
+2. Without taking a key or being detected, use the Front Door again.
+3. The Untouched ending triggers.
+4. Continue to begin Part II.
+
+Part II seed:
+- The Hound's ordinary senses remain dormant.
+- Els receives a full supply of batteries, bottles, and clocks.
+- Use Q, crouching, cover, and distractions to survive.
+
+B. 1 KEY - VANTREE
+
+Requirements:
+- Collect only the Hearing Key.
+- Read at least four estate letters.
+- Do not collect Sight or Memory.
+
+Sequence:
+1. Complete the three Piano Seal steps.
+2. Collect the Hearing Key.
+3. Read Letter I.
+4. Go upstairs and complete the Vanity Seal, but do not collect Sight.
+5. Read Letter II and collect enough additional estate letters.
+6. Go to the Basement after reaching four estate letters.
+7. Use the Ritual Conduit in BS-09.
+8. Continue from the Vantree ending into Part II.
+
+Part II seed:
+- Touch mutation is active.
+- Blood Magic is available.
+- Maximum HP is 80.
+- Nearby floor vibration can reveal Els.
+
+C. 2 KEYS - PARTIAL MERCY
+
+Requirements:
+- Collect Hearing and Sight.
+- Do not collect Memory.
+
+Sequence:
+1. Complete the Piano Seal and collect Hearing.
+2. Read Letter I.
+3. Complete the Vanity Seal and collect Sight.
+4. Go to the Flooded Cellar in BS-04.
+5. Use the Maintenance Exit.
+6. Continue from Partial Mercy into Part II.
+
+Part II seed:
+- Hearing and Sight remain active.
+- Memory remains dormant.
+- Partial Sigil is available.
+
+D. 3 KEYS - LOOP
+
+Sequence:
+1. Collect Hearing.
+2. Read Letter I.
+3. Collect Sight.
+4. Read Letter II.
+5. Collect Memory.
+6. Return to the Ground Floor Front Door.
+7. Trigger the Loop.
+
+Loop result:
+- Els restarts at the Ground Floor.
+- Keys, letters, ordinary inventory, and hiding history reset.
+- No Part II seed is created.
+- The second Loop unlocks a Memory Fragment.
+- The three-key route is not a final victory route.
+
+
+8. HOW TO REACH THE LEY NEXUS WITH EACH COMBINATION
+-----------------------------------------------------
+0-key route:
+1. Finish Untouched at the Ground Floor Front Door.
+2. Press Continue to start Part II in Roots.
+3. Travel through CR-01, CR-02, CR-03, CR-04, and CR-05.
+4. Cross CR-06 Echo Threshold into the Chamber of Echoes.
+5. Successfully use the current branch mechanic three times.
+6. Go to CE-05 and use the Nexus Descent.
+
+1-key route:
+1. Take only Hearing and read Letters I-IV.
+2. Use the BS-09 Ritual Conduit for the Vantree ending.
+3. Press Continue to start in Roots.
+4. Travel through the Roots to CR-06 and the Chamber of Echoes.
+5. Use Blood Magic or the current branch mechanic three times.
+6. Go to CE-05 and use the Nexus Descent.
+
+2-key route:
+1. Take Hearing, read Letter I, then take Sight.
+2. Use the BS-04 Flooded Cellar Maintenance Exit.
+3. Press Continue to start in Roots.
+4. Travel to the Chamber of Echoes.
+5. Use the Partial Mercy branch mechanic three times.
+6. Go to CE-05 and use the Nexus Descent.
+
+3-key route:
+1. Take Hearing, Sight, and Memory.
+2. Use the Ground Floor Front Door to trigger the Loop.
+3. This route does not reach the Nexus directly.
+4. After the reset, choose the 0-key, 1-key, or 2-key route to reach Part II.
+
+Common gate:
+- The Nexus Descent opens after three successful branch mechanic uses.
+- The Descent is in CE-05, after the Chamber of Echoes.
+- Entering through the Descent loads the wide Ley Nexus arena.
+
+
+9. LEY NEXUS: HOW TO FIND THE GUIDE LETTER
+--------------------------------------------
+The Guide Letter is inside the Ley Nexus. You cannot collect it before entering
+the Nexus through CE-05's Nexus Descent.
+
+Follow this exact path after entering the Nexus:
+
+1. Start exploring the wide arena.
+2. Find LN-A, the Destroy rune, in the western/left section.
+3. Move right from LN-A and collect the Knife.
+4. Continue right toward the middle of the arena.
+5. The Guide Letter is after the Knife and before LN-B, the Flee rune.
+6. Press E on the Guide Letter and read it completely.
+7. Reading the Guide Letter reveals The Power at the far side of the arena.
+8. Travel to The Power, collect it, and return to LN-A for Destroy.
+
+Landmark order from the Nexus entrance:
+
+LN-A Destroy rune -> Knife -> Guide Letter -> LN-B Flee rune -> LN-C Remain rune
+
+The Power is revealed only after the Guide Letter is read. If it is not visible,
+the letter has not been successfully read yet.
+
+
+10. LEY NEXUS ARENA AND HOUND
+-----------------------------
+The Nexus is a wide free-roam arena with three distant runes, two hiding screens,
+a cyan power/heal station, and the Destroy-route items.
+
+The Hound:
+- Starts by patrolling the entire arena.
+- Does not camp permanently near a rune.
+- Returns to roaming after losing the player.
+- Keeps its existing Hearing, Sight, Touch, and Memory systems.
+
+Rune alarm:
+- Pressing E at any rune for the first time starts the red alarm.
+- The alarm immediately gives the Hound the player's trail.
+- The Hound begins actively hunting for the rest of the sequence.
+- Hiding screens and rubble routes can break line of sight.
+
+Rune hold rules:
+- LN-B and LN-C require an uninterrupted 20-second hold of E.
+- Movement, damage, detection, or releasing E resets the hold.
+- Pausing freezes the timer.
+- LN-A starts the alarm but cannot finish Destroy without the item chain.
+
+
+11. NEXUS ENDINGS
+-----------------
+A. DESTROY - TRUE VICTORY
+
+Required sequence:
+1. Collect the Knife.
+2. Read the Guide Letter.
+3. Collect The Power after it becomes visible.
+4. Return to LN-A and press E once.
+5. Let the alarmed Hound approach.
+6. Get within approximately 192 pixels and press Y.
+7. Blood Trap costs exactly 40 HP and holds the Hound for 18 seconds.
+8. Move beside the trapped Hound.
+9. Press E on the trap prompt to set the trap and drop The Power.
+10. The Power is consumed and the Hound dies.
+11. An ending door appears.
+12. Press E at the ending door.
+
+Destroy requirements:
+- Knife in inventory
+- Guide Letter read
+- The Power in inventory
+- Hound currently bound by Blood Trap
+- Clear line of sight to the Hound
+
+B. FLEE
+
+1. Go to LN-B.
+2. Hold E for 20 seconds.
+3. Do not move, take damage, or become detected.
+4. Enter the door that appears.
+5. Els escapes and the Flee narration plays.
+
+Knife, Guide Letter, and The Power are not required for Flee.
+
+C. REMAIN / RESTART
+
+1. Go to LN-C.
+2. Hold E for 20 seconds.
+3. Avoid movement, damage, and detection.
+4. Enter the door that appears.
+5. The game returns to the Ground Floor through the Loop reset system.
+
+Remain is a restart outcome, not a final victory. Current keys, letters,
+inventory, and Nexus progress are cleared.
+
+
+12. Q GADGET PRIORITY
+---------------------
+Q checks items in this order:
+
+1. Battery - only when flashlight charge is below approximately 56 percent
+2. The Power - during the Nexus Destroy sequence
+3. Bottle
+4. Clock
+
+The Power has priority over bottles and clocks. It can only complete Destroy
+through the trapped-Hound interaction prompt.
+
+
+13. ABILITIES AND FAILED USES
+-----------------------------
+Blood Sigil:
+- Available on the Blood Magic or partial-magic branches.
+- Creates a temporary suppression circle.
+- Failed range or unavailable casts spend nothing.
+
+Stun Rite:
+- Available when the Blood Magic branch unlocks it.
+- Requires the correct branch and cooldown state.
+- Failed casts spend nothing.
+
+Blood Trap:
+- Available in the Nexus after reading the Guide Letter.
+- Key: Y.
+- Range: approximately 192 pixels.
+- Cost: 40 HP flat.
+- Duration: 18 seconds.
+- Failed range, line-of-sight, cooldown, or low-HP checks spend nothing.
+- Blood Trap cannot reduce the caster to zero HP.
+
+
+14. SURVIVAL RULES
+------------------
+- Sprinting creates more noise and drains the flashlight faster.
+- Crouching reduces noise but does not fully defeat Touch mutation.
+- Flashlight use is risky after Sight is restored.
+- Bottles and clocks should be thrown away from the route you intend to use.
+- Do not reuse the same hiding place after Memory is active.
+- Approach doors, puzzles, and stations before pressing E.
+- Damage can interrupt puzzles, charging, and anchor holds.
+- HP reaching zero causes death/capture and checkpoint recovery.
+- Save/Continue restores zone, position, keys, letters, HP, flashlight,
+  inventory, and progression state.
+
+
+15. QUICK ROUTE SUMMARY
+-----------------------
+0 keys:
+Untouched Front Door -> Part II -> Echoes x3 -> Nexus Descent
+
+1 key:
+Hearing -> Letters I-IV -> Ritual Conduit -> Part II -> Echoes x3 -> Nexus
+
+2 keys:
+Hearing -> Letter I -> Sight -> Flooded Cellar exit -> Part II -> Echoes x3 -> Nexus
+
+3 keys:
+Hearing -> Letter I -> Sight -> Letter II -> Memory -> Front Door -> Loop reset
+
+Destroy:
+Nexus Descent -> LN-A -> Knife -> Guide Letter -> The Power -> LN-A -> Y -> E -> Door
+
+Flee:
+Nexus Descent -> LN-B -> hold E for 20 seconds -> Door
+
+Remain:
+Nexus Descent -> LN-C -> hold E for 20 seconds -> Ground Floor reset
+
+
+16. ENDING TABLE
+----------------
+Part I:
+- Untouched: 0 keys, 0 detections, Front Door
+- Vantree: Hearing only, at least four estate letters, Ritual Conduit
+- Partial Mercy: Hearing and Sight, Flooded Cellar exit
+- Loop: all three keys, Front Door
+
+Part II / Ley Nexus:
+- Destroy: the Hound dies; final victory
+- Flee: Els escapes; narration ending
+- Remain: Ground Floor restart; Loop-style reset
+
+
+END OF GAMEPLAY GUIDE
+=====================
