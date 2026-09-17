@@ -1,6 +1,7 @@
 extends Control
 signal close_requested
 const Style := preload("res://scripts/ui/ui_style.gd")
+const ESTATE_LAYOUT := preload("res://data/estate_layout.json")
 var design: Control
 var title_label: Label
 var content: RichTextLabel
@@ -18,6 +19,7 @@ var document: Control
 var guide_button: Button
 var memory_button: Button
 var battery_list: RichTextLabel
+var past_letters: VBoxContainer
 
 func _ready() -> void:
 	theme = preload("res://themes/libertas_ui_theme.tres")
@@ -96,7 +98,7 @@ func _ready() -> void:
 
 func _build_inventory() -> void:
 	inventory_grid = Control.new()
-	inventory_grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	inventory_grid.mouse_filter = Control.MOUSE_FILTER_STOP
 	design.add_child(inventory_grid)
 	var art := preload("res://scripts/levels/estate_art.gd").new()
 	var names := ["Batteries", "Bottles", "Clocks", "Lockpicks"]
@@ -128,6 +130,16 @@ func _build_inventory() -> void:
 	inventory_grid.add_child(battery_list)
 	inventory_summary = Style.label(inventory_grid, "", Rect2(400, 458, 648, 65), 16, Style.MUTED)
 	inventory_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	Style.label(inventory_grid, "PAST LETTERS", Rect2(48, 112, 253, 26), 12, Style.BRASS)
+	var letter_scroll := ScrollContainer.new()
+	letter_scroll.position = Vector2(48, 145)
+	letter_scroll.size = Vector2(253, 378)
+	letter_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	inventory_grid.add_child(letter_scroll)
+	past_letters = VBoxContainer.new()
+	past_letters.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	past_letters.add_theme_constant_override("separation", 6)
+	letter_scroll.add_child(past_letters)
 	inventory_grid.hide()
 	memory_button = Button.new()
 	memory_button.text = "Read Memory Fragment A"
@@ -163,6 +175,8 @@ func open(title: String, text: String) -> void:
 	var inventory := title == "Inventory"
 	var guide := "Guide" in title
 	inventory_grid.visible = inventory
+	title_label.visible = not inventory
+	description.visible = not inventory
 	guide_button.visible = FreedomLedger.flags.get("nexus_guide_read", false)
 	memory_button.visible = bool(FreedomLedger.flags.get("vantree_memory_fragment_A", false))
 	scroll.visible = not inventory
@@ -170,12 +184,20 @@ func open(title: String, text: String) -> void:
 	description.text = "What you carry may buy you another moment." if inventory else ("Your current abilities, their costs, and the way forward." if guide else "Some words outlive the hands that wrote them.")
 	for item in item_counts:
 		item_counts[item].text = str(FreedomLedger.inventory.get(item, 0))
+	if inventory:
+		_build_past_letters()
 	var cells := FreedomLedger.battery_percentages()
 	var cell_lines: Array[String] = []
 	for i in cells.size():
 		cell_lines.append("Battery %d: %.1f%%" % [i + 1, cells[i]])
 	battery_list.text = "No batteries. Find a cell to recharge." if cells.is_empty() else "   ·   ".join(cell_lines)
-	inventory_summary.text = "Letters collected: %d | Knife: %d | The Power: %d\n%s" % [FreedomLedger.letter_ids.size(), FreedomLedger.inventory.get("knife", 0), FreedomLedger.inventory.get("power", 0), FreedomLedger.freedom_summary()]
+	var letters := "None"
+	if not FreedomLedger.letter_ids.is_empty():
+		var numbered_letters: Array[String] = []
+		for i in FreedomLedger.letter_ids.size():
+			numbered_letters.append("Letter %02d: %s" % [i + 1, FreedomLedger.letter_ids[i]])
+		letters = ", ".join(numbered_letters)
+	inventory_summary.text = "Letters collected: %d | %s\nKnife: %d | The Power: %d\n%s" % [FreedomLedger.letter_ids.size(), letters, FreedomLedger.inventory.get("knife", 0), FreedomLedger.inventory.get("power", 0), FreedomLedger.freedom_summary()]
 	show()
 	design.visible = inventory
 	document.visible = not inventory
@@ -188,6 +210,32 @@ func open(title: String, text: String) -> void:
 	design.modulate.a = 0.0
 	entrance = create_tween()
 	entrance.tween_property(design, "modulate:a", 1.0, 0.16)
+
+func _build_past_letters() -> void:
+	for child in past_letters.get_children():
+		child.queue_free()
+	for letter_id in FreedomLedger.letter_ids:
+		var metadata := _letter_metadata(letter_id)
+		if metadata.is_empty():
+			continue
+		var letter_button := Button.new()
+		letter_button.text = str(metadata.get("title", letter_id))
+		letter_button.custom_minimum_size = Vector2(245, 34)
+		letter_button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		letter_button.add_theme_font_size_override("font_size", 14)
+		for state in ["normal", "hover", "focus", "pressed"]:
+			letter_button.add_theme_stylebox_override(state, Style.panel(Style.INK, Style.BRASS if state != "normal" else Style.RULE))
+		past_letters.add_child(letter_button)
+		letter_button.pressed.connect(func():
+			var resolved := LetterTextResolver.resolve_text(letter_id, metadata)
+			open(str(metadata.get("title", letter_id)), resolved))
+
+func _letter_metadata(letter_id: String) -> Dictionary:
+	for floor_data in ESTATE_LAYOUT.data.values():
+		for prop in floor_data.get("props", []):
+			if prop is Array and prop.size() >= 5 and str(prop[1]) == letter_id and prop[4] is Dictionary:
+				return prop[4].duplicate(true)
+	return {}
 
 func _process(_delta: float) -> void:
 	if not visible:

@@ -39,5 +39,6 @@ func resume_game() -> void:
 func select(destination: String) -> void:
 	match destination:
 		"resume": resume_game()
+		"checkpoint": leave_to(GameManager.restart_checkpoint)
 		"home": leave_to(GameManager.go_home)
 		_: navigate(destination)

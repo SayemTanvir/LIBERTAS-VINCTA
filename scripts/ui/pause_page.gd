@@ -6,9 +6,10 @@ var atmosphere_clock := 0.0
 func _ready() -> void:
 	build_sheet("A moment of stillness", "The estate waits while you pause.", [
 		{"id": "resume", "label": "Resume  ›", "rect": Rect2(84, 289, 370, 54)},
-		{"id": "settings", "label": "Settings", "rect": Rect2(84, 360, 370, 54)},
-		{"id": "rules", "label": "How to play", "rect": Rect2(84, 431, 370, 54)},
-		{"id": "home", "label": "Main menu", "rect": Rect2(84, 502, 370, 54)}], "LIBERTAS VINCTA  /  PAUSED")
+		{"id": "checkpoint", "label": "Start from checkpoint", "rect": Rect2(84, 353, 370, 54)},
+		{"id": "settings", "label": "Settings", "rect": Rect2(84, 417, 370, 54)},
+		{"id": "rules", "label": "How to play", "rect": Rect2(84, 481, 370, 54)},
+		{"id": "home", "label": "Main menu", "rect": Rect2(84, 545, 370, 54)}], "LIBERTAS VINCTA  /  PAUSED")
 	artwork.texture = preload("res://assets/ui/menu/libertas_vincta_pause_background.png")
 	var atmosphere := ShaderMaterial.new()
 	atmosphere.shader = preload("res://shaders/horror_menu_backdrop.gdshader")

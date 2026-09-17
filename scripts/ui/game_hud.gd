@@ -29,6 +29,7 @@ var activity_meter: ProgressBar
 var survival_panel: Control
 var help_bar: PanelContainer
 var help_open := false
+var help_location: Label
 
 var subtitle_queue: Array[Dictionary] = []
 var subtitle_time: float = 0.0
@@ -70,7 +71,7 @@ func _ready() -> void:
 	room_name.offset_top = 22
 	room_name.offset_bottom = 46
 	room_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	room_name.add_theme_color_override("font_color", Color("c5b58f"))
+	room_name.add_theme_color_override("font_color", Color("69c77a"))
 	root.add_child(room_name)
 	prompt = make_label("[E]", 16)
 	prompt.add_theme_color_override("font_color", UIStyle.PAPER)
@@ -181,6 +182,9 @@ func _build_help_bar() -> void:
 	var heading := make_label("ESTATE DIRECTORY   /   H to close", 18)
 	heading.add_theme_color_override("font_color", UIStyle.BRASS)
 	rows.add_child(heading)
+	help_location = make_label("CURRENT LOCATION: --", 16)
+	help_location.add_theme_color_override("font_color", Color("69c77a"))
+	rows.add_child(help_location)
 	var scroll := ScrollContainer.new()
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -228,6 +232,7 @@ func _process(delta: float) -> void:
 		for section in room.layout.rooms:
 			if section.id == displayed_room_id:
 				room_name.text = str(section.name).to_upper()
+				help_location.text = "CURRENT LOCATION: %s / %s" % [_floor_name(room.zone_id), room_name.text]
 				if room_reveal != null and room_reveal.is_valid():
 					room_reveal.kill()
 				room_name.modulate.a = 0.0
@@ -284,6 +289,12 @@ func _process(delta: float) -> void:
 	if GameManager.state == GameManager.State.ENDING and not ending_shown:
 		ending_shown = true
 		show_ending()
+
+func _floor_name(zone_id: String) -> String:
+	return {
+		"ground": "GROUND FLOOR", "upper": "UPPER FLOOR", "basement": "BASEMENT",
+		"roots": "ROOTS", "echoes": "ECHOES", "nexus": "NEXUS", "intro": "FOYER"
+	}.get(zone_id, zone_id.to_upper())
 
 func _layout_for_viewport() -> void:
 	help_bar.position = Vector2(maxf(16.0, root.size.x - 596.0), 100.0)

@@ -144,23 +144,7 @@ func travel(destination: String, entrance: String = "start") -> void:
 	get_tree().change_scene_to_file("res://scenes/main/main.tscn")
 
 func restart_checkpoint() -> void:
-	transition_epoch += 1
-	get_tree().paused = false
-	checkpoint_error = ""
-	checkpoint.clear()
-	FreedomLedger.reset()
-	FreedomLedger.flags["intro_complete"] = true
-	FreedomLedger.flags["flashlight"] = true
-	FreedomLedger.flags["lockpick_tool"] = true
-	FreedomLedger.collect_item("lockpick", 3)
-	zone = "ground"
-	entry = "start"
-	arrival_pending = false
-	ending = ""
-	respawn_pending = false
-	return_state = State.PLAYING
-	state = State.PLAYING
-	get_tree().change_scene_to_file("res://scenes/main/main.tscn")
+	continue_game()
 
 func caught() -> void:
 	if state != State.PLAYING:

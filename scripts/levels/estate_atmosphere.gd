@@ -1,10 +1,10 @@
 extends Node2D
 ## Presentation lighting. Never changes noise, exposure, AI, or story flags.
 const AMBIENT := {
-	"intro": Color(0.48, 0.54, 0.65), "ground": Color(0.46, 0.51, 0.61),
-	"upper": Color(0.44, 0.48, 0.62), "basement": Color(0.38, 0.47, 0.52),
-	"roots": Color(0.37, 0.47, 0.50), "echoes": Color(0.40, 0.45, 0.53),
-	"nexus": Color(0.43, 0.46, 0.57)
+	"intro": Color(0.34, 0.39, 0.48), "ground": Color(0.32, 0.36, 0.43),
+	"upper": Color(0.30, 0.33, 0.44), "basement": Color(0.26, 0.32, 0.35),
+	"roots": Color(0.25, 0.32, 0.34), "echoes": Color(0.27, 0.31, 0.37),
+	"nexus": Color(0.29, 0.32, 0.40)
 }
 var ambient: CanvasModulate
 var sources: Array[Dictionary] = []
