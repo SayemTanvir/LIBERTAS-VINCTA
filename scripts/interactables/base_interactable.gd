@@ -566,6 +566,7 @@ func _depart(player: CharacterBody2D) -> bool:
 	var presentation: Node = get_node_or_null("Visual/DoorPresentation")
 	if presentation != null and presentation.has_method("depart"):
 		await presentation.depart(player)
+		return GameManager.state == GameManager.State.PLAYING and not player.death_started
 	else:
 		EventBus.audio_requested.emit("door_open")
 		await get_tree().create_timer(0.45, false).timeout

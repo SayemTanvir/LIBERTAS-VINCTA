@@ -253,9 +253,9 @@
         2100,
         500,
         {
-          "display_name": "Flee - Hold E for 20s",
+          "display_name": "Flee - Hold E for 10s",
           "ending_type": "flee",
-          "channel_seconds": 20.0
+          "channel_seconds": 10.0
         }
       ],
       [
@@ -264,9 +264,9 @@
         3600,
         500,
         {
-          "display_name": "Remain - Hold E for 20s",
+          "display_name": "Remain - Hold E for 10s",
           "ending_type": "remain",
-          "channel_seconds": 20.0
+          "channel_seconds": 10.0
         }
       ],
       [

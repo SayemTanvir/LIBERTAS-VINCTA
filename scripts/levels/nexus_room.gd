@@ -31,12 +31,14 @@ func _process(delta: float) -> void:
 	super._process(delta)
 	if GameManager.state != GameManager.State.PLAYING:
 		return
+	var enemy = get_tree().get_first_node_in_group("enemy")
+	if outcome.is_empty() and enemy != null and enemy.nexus_defeated:
+		complete_outcome("destroy", enemy.global_position)
 	if not outcome.is_empty():
 		alarm_active = false
 		alarm_seconds = 0.0
 		return
 	alarm_seconds = maxf(0.0, alarm_seconds - delta)
-	var enemy = get_tree().get_first_node_in_group("enemy")
 	if is_instance_valid(trap_prompt):
 		trap_prompt.visible = enemy != null and enemy.blood_trap_seconds > 0.0 and outcome.is_empty()
 		if trap_prompt.visible:
@@ -91,6 +93,7 @@ func complete_outcome(choice: String, point: Vector2) -> void:
 	alarm_seconds = 0.0
 	FreedomLedger.flags["nexus_outcome"] = choice
 	FreedomLedger.flags["nexus_door_x"] = point.x
+	FreedomLedger.flags["nexus_door_y"] = point.y
 	for enemy in get_tree().get_nodes_in_group("enemy"):
 		enemy.stun(3600.0)
 		enemy.nexus_hunting = false
@@ -103,8 +106,8 @@ func complete_outcome(choice: String, point: Vector2) -> void:
 func _reveal_door() -> void:
 	for prop in props.get_children():
 		if prop is BaseInteractable and prop.interaction_id == "nexus_ending_door":
-			var door_x := room_width - 80.0 if outcome == "destroy" else clampf(float(FreedomLedger.flags.get("nexus_door_x", 2100.0)) + 120.0, 120.0, room_width - 120.0)
-			var door_y := 350.0 if outcome == "destroy" else 430.0
+			var door_x := float(FreedomLedger.flags.get("nexus_door_x", 2100.0)) if outcome == "destroy" else clampf(float(FreedomLedger.flags.get("nexus_door_x", 2100.0)) + 120.0, 120.0, room_width - 120.0)
+			var door_y := float(FreedomLedger.flags.get("nexus_door_y", 430.0))
 			prop.position = Vector2(door_x, door_y)
 			prop.ending_type = outcome
 			prop.refresh()
