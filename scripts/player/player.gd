@@ -29,6 +29,7 @@ var animation_state: String = "idle"
 var animation_hold: float = 0.0
 var sigil_cooldown: float = 0.0
 var stun_cooldown: float = 0.0
+var blood_trap_cooldown := 0.0
 var touch_evasion_cooldown: float = 0.0
 var was_sprinting: bool = false
 var presentation_clock: float = 0.0
@@ -75,6 +76,7 @@ func _physics_process(delta: float) -> void:
 	breath_cooldown = maxf(0.0, breath_cooldown - delta)
 	sigil_cooldown = maxf(0.0, sigil_cooldown - delta)
 	stun_cooldown = maxf(0.0, stun_cooldown - delta)
+	blood_trap_cooldown = maxf(0.0, blood_trap_cooldown - delta)
 	touch_evasion_cooldown = maxf(0.0, touch_evasion_cooldown - delta)
 	ability_feedback_cooldown = maxf(0.0, ability_feedback_cooldown - delta)
 	_update_flashlight_charge(delta)
@@ -104,6 +106,8 @@ func _physics_process(delta: float) -> void:
 		use_gadget()
 	if Input.is_action_just_pressed("ability"):
 		use_sigil()
+	if Input.is_action_just_pressed("blood_trap"):
+		use_blood_trap()
 	if Input.is_action_just_pressed("stun"):
 		use_stun()
 	if Input.is_action_just_pressed("quick_turn"):
@@ -169,6 +173,10 @@ func _find_interactable() -> void:
 			var distance := global_position.distance_to(point)
 			if distance < nearest:
 				var ray := PhysicsRayQueryParameters2D.create(global_position, point, 1, [get_rid()])
+				if candidate.interaction_id == "nexus_trap":
+					var hound = get_tree().get_first_node_in_group("enemy")
+					if hound != null:
+						ray.exclude = [get_rid(), hound.get_rid()]
 				if get_world_2d().direct_space_state.intersect_ray(ray).is_empty():
 					nearest = distance
 					target_interactable = candidate
@@ -189,6 +197,13 @@ func use_gadget() -> bool:
 		play_action("interact", 0.55, true)
 		EventBus.ability_used.emit("battery")
 		return true
+	if int(FreedomLedger.inventory.get("power", 0)) > 0:
+		var room = get_tree().get_first_node_in_group("room")
+		if GameManager.zone == "nexus" and room != null and room.place_power(self):
+			EventBus.ability_used.emit("power")
+			return true
+		_ability_feedback("The Power needs the Knife and a bound Hound. Approach the Blood Trap.")
+		return false
 	var gadget := "bottle" if int(FreedomLedger.inventory.get("bottle", 0)) > 0 else "clock"
 	if not FreedomLedger.consume_item(gadget):
 		_ability_feedback("No usable gadget. Find bottles or clocks; batteries work below 56% charge.")
@@ -249,6 +264,35 @@ func use_sigil() -> bool:
 	play_action("interact", 0.65, true)
 	_spawn_sigil(192.0, 12.0, Color(0.46, 0.11, 0.13, 0.68), true)
 	EventBus.ability_used.emit("blood_sigil")
+	return true
+
+func use_blood_trap() -> bool:
+	if GameManager.state != GameManager.State.PLAYING or GameManager.zone != "nexus" or not FreedomLedger.flags.get("nexus_guide_read", false):
+		_ability_feedback("Find and read the Guide Letter in the Nexus first.")
+		return false
+	if blood_trap_cooldown > 0.0 or FreedomLedger.hp <= 40.0 or not str(FreedomLedger.flags.get("nexus_outcome", "")).is_empty():
+		_ability_feedback("Blood Trap needs more than 40 HP and a ready cooldown.")
+		return false
+	var enemy = get_tree().get_first_node_in_group("enemy")
+	if enemy == null or enemy.nexus_defeated or enemy.blood_trap_seconds > 0.0 or global_position.distance_to(enemy.global_position) > 192.0:
+		_ability_feedback("Bring the Hound within the Blood Trap's reach (192px).")
+		return false
+	var ray := PhysicsRayQueryParameters2D.create(global_position, enemy.global_position, 1, [get_rid(), enemy.get_rid()])
+	if not get_world_2d().direct_space_state.intersect_ray(ray).is_empty():
+		_ability_feedback("Stone blocks the trap. Find a clear line to the Hound.")
+		return false
+	get_tree().get_first_node_in_group("room").trigger_alarm()
+	FreedomLedger.damage(40.0)
+	blood_trap_cooldown = 60.0
+	enemy.bind_blood_trap()
+	var effect := SigilField.new()
+	effect.radius = 192.0
+	effect.lifetime = 18.0
+	effect.tint = Color(0.85, 0.06, 0.08, 0.85)
+	get_parent().add_child(effect)
+	effect.global_position = enemy.global_position
+	play_action("channel", 0.65, true)
+	EventBus.ability_used.emit("blood_trap")
 	return true
 
 func use_stun() -> bool:

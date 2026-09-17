@@ -131,7 +131,8 @@ func _run_untouched() -> bool:
 		return false
 	FreedomLedger.flags["automation_channel"] = true
 	await _use("LnB")
-	_check(GameManager.ending == "custodian_rest", "Custodian's Rest anchor failed")
+	await _use("NexusEndingDoor")
+	_check(GameManager.ending == "flee", "Flee ending door failed")
 	return true
 
 func _run_partial_mercy() -> bool:
@@ -172,7 +173,10 @@ func _run_partial_mercy() -> bool:
 		return false
 	FreedomLedger.flags["automation_channel"] = true
 	await _use("LnC")
-	_check(GameManager.ending == "vessel", "Vessel anchor failed")
+	await _use("NexusEndingDoor")
+	if not await _wait_zone("ground"):
+		return false
+	_check(FreedomLedger.current_part == 1 and FreedomLedger.loop_counter == 1, "Remain did not reset to Ground Floor")
 	return true
 
 func _run_loop_and_recovery() -> bool:

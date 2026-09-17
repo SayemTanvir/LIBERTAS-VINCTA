@@ -5,7 +5,7 @@ func _ready() -> void:
 		{"id": "back", "label": "‹  Back", "rect": Rect2(84, 620, 160, 46)}])
 	section("Movement & survival", 84, 256)
 	section("Tools & reading", 684, 256)
-	var rows := [["W A S D / Arrows", "Move"], ["Shift", "Sprint"], ["Ctrl", "Crouch"], ["E", "Interact / leave hiding"], ["F", "Toggle flashlight"], ["B", "Hold breath"], ["Q", "Use gadget / battery"], ["R", "Cast sigil, when unlocked"], ["T", "Stun rite, when unlocked"], ["Tab", "Inventory"], ["H", "Field guide"], ["Esc", "Pause / back"]]
+	var rows := [["W A S D / Arrows", "Move"], ["Shift", "Sprint"], ["Ctrl", "Crouch"], ["E", "Interact / leave hiding"], ["F", "Toggle flashlight"], ["B", "Hold breath"], ["Q", "Use gadget / battery"], ["R", "Cast sigil, when unlocked"], ["T / Y", "Stun rite / Nexus Blood Trap"], ["Tab", "Inventory"], ["H", "Field guide"], ["Esc", "Pause / back"]]
 	for i in rows.size():
 		var x := 84.0 if i < 6 else 684.0
 		var y := 296.0 + (i % 6) * 46.0

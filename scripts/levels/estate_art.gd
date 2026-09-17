@@ -121,14 +121,13 @@ func dress(room: Node2D) -> void:
 				_dress_passage(child, zone.passage_labels.get(child.interaction_id, "Passage"))
 			elif child.get_node("Visual/Sprite2D").texture == null:
 				_dress_generic_interactable(child, tint)
+			child.refresh()
 			if child.kind == "recharge":
 				_service_marker(child, "CHARGE + REST" if room.zone_id in ["roots", "echoes", "nexus"] else "CHARGE", Color("86d1d3"))
 				room._wall(child.name + "Footprint", Rect2(child.position - Vector2(29, 27), Vector2(58, 19)))
 			elif child.kind == "anchor":
-				var titles := {"LN-A": "SEVERANCE\nDestroy entity and bond", "LN-B": "CUSTODIAN'S REST\nEls takes the burden", "LN-C": "VESSEL\nTransfer the prison"}
+				var titles := {"LN-A": "DESTROY\nKnife, Power and Blood Trap", "LN-B": "FLEE\nHold E for 20 seconds", "LN-C": "REMAIN\nHold E to begin again"}
 				_service_marker(child, titles.get(child.interaction_id, "ANCHOR"), Color("dfc287"), -120.0)
-			elif child.interaction_id == "nexus_bell":
-				_service_marker(child, "WARD BELL\nBind the Hound for 32s", Color("eac775"), -105.0)
 	# Former charging tables remain ordinary furniture with no E target or marker.
 	for entry in zone.get("plain_tables", []):
 		var table := Node2D.new()
@@ -204,12 +203,14 @@ func _ceiling_string_lights(room: Node2D, bounds: Dictionary, spec: Dictionary, 
 func _dress_pickup(prop: BaseInteractable) -> void:
 	var visual: Node2D = prop.get_node("Visual")
 	var sprite: Sprite2D = visual.get_node("Sprite2D")
-	var item_assets := {"battery": "battery_pickup", "bottle": "bottle_pickup", "clock": "clock_pickup", "lockpick": "lockpick_pickup"}
+	var item_assets := {"battery": "battery_pickup", "bottle": "bottle_pickup", "clock": "clock_pickup", "lockpick": "lockpick_pickup", "knife": "lockpick_pickup", "power": "key"}
 	var asset: String = item_assets.get(prop.item_id, "tool_pouch") if prop.kind == "item" else {"key": "key", "letter": "letter", "flashlight": "flashlight_pickup", "tool": "tool_pouch"}[prop.kind]
 	var width: float = {"key": 22.0, "letter": 25.0, "flashlight": 26.0, "tool": 29.0}.get(prop.kind, 23.0)
 	if prop.kind == "item":
 		width = {"battery": 16.0, "bottle": 17.0, "clock": 23.0, "lockpick": 24.0}.get(prop.item_id, 23.0)
 	_set_sprite(sprite, asset, width, Vector2.ZERO, Color.WHITE)
+	if prop.item_id == "power":
+		sprite.self_modulate = Color(1.0, 0.2, 0.25)
 	# Loose objects belong to the floor plane, below every character and piece of furniture.
 	prop.z_index = -1
 	visual.scale = Vector2.ONE

@@ -19,7 +19,6 @@ var markers: Node2D
 var estate_art: RefCounted
 var current_room_id: String = ""
 var ambient_false_noise_clock: float = 14.0
-var ward_seconds := 0.0
 
 func _ready() -> void:
 	add_to_group("room")
@@ -157,7 +156,7 @@ func _build_surface_markings() -> void:
 	elif zone_id == "echoes":
 		_polygon($Backdrop, "ChoirDrop", Rect2(3300, 355, 1100, 150), Color(0.08, 0.14, 0.16, 0.45))
 	elif zone_id == "nexus":
-		_polygon($Backdrop, "NexusRing", Rect2(260, 365, 1280, 250), Color(0.12, 0.24, 0.25, 0.32))
+		_polygon($Backdrop, "NexusRing", Rect2(260, 365, room_width - 520, 250), Color(0.12, 0.24, 0.25, 0.32))
 	elif zone_id == "intro":
 		if not _uses_imported_art():
 			_polygon($Backdrop, "Moonlight", Rect2(180, 355, 390, 190), Color(0.5, 0.58, 0.68, 0.22))
@@ -238,6 +237,10 @@ func patrol_anchor() -> float:
 	return float(layout.enemy)
 
 func patrol_target(stage: int, index: int) -> Vector2:
+	if zone_id == "nexus":
+		var points: Array = layout.patrol_points
+		var point: Array = points[index % points.size()]
+		return clamp_point(Vector2(point[0], point[1]))
 	var candidates: Array = layout.rooms.duplicate()
 	if zone_id == "ground" and stage == 0:
 		candidates = candidates.slice(0, 5)
@@ -294,8 +297,6 @@ func _noise(point: Vector2, intensity: float, _surface: String) -> void:
 		noise_rings.append({"point": point, "radius": intensity if intensity > 10.0 else intensity * 740.0, "life": 0.6})
 
 func _process(delta: float) -> void:
-	if GameManager.state == GameManager.State.PLAYING:
-		ward_seconds = maxf(0.0, ward_seconds - delta)
 	_update_room_tracking()
 	_update_ambient_hazards(delta)
 	if debug_noise:
@@ -357,23 +358,6 @@ func _enter_room(id: String) -> void:
 
 func _mechanic_intro_line() -> String:
 	return preload("res://scripts/systems/field_guide.gd").tutorial()
-
-func ring_ward_bell() -> bool:
-	if zone_id != "nexus" or ward_seconds > 0.0:
-		return false
-	ward_seconds = 32.0
-	for enemy in get_tree().get_nodes_in_group("enemy"):
-		enemy.stun(ward_seconds)
-	var ward := preload("res://scripts/player/sigil_field.gd").new()
-	ward.position = Vector2(900, 500)
-	ward.scale = Vector2(1.0, 0.16)
-	ward.radius = 800.0
-	ward.lifetime = ward_seconds
-	ward.tint = Color(0.35, 0.85, 0.83, 0.85)
-	add_child(ward)
-	EventBus.audio_requested.emit("stinger")
-	EventBus.subtitle_requested.emit("ELS", "The bell binds it for 32 seconds. One anchor. One choice. Hold E for twenty.", 4.0)
-	return true
 
 func _story_once(beat: String, speaker: String, line: String, cue: String = "") -> void:
 	var flag := "story_" + beat

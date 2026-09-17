@@ -163,7 +163,7 @@ func caught() -> void:
 func finish(kind: String) -> void:
 	if state != State.PLAYING or not FreedomLedger.eligible(kind):
 		return
-	if kind == "loop":
+	if kind in ["loop", "remain"]:
 		_trigger_loop()
 		return
 	ending = kind

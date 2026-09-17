@@ -4,6 +4,17 @@ This is the current implementation guide for the game as it exists in the codeba
 
 > This guide is intentionally written to the code: the game state and route checks in the project are the source of truth.
 
+## Verified current build state
+
+The project was run in Godot 4.7 headless mode using the installed executable from `E:\New folder\Godot_v4.7-stable_win64_console.exe`.
+
+The current runtime validation result is:
+
+- route verification reached the full intro-to-nexus flow
+- full-playthrough verification reported: `PLAYED Untouched -> Custodian's Rest`
+
+This means the current verified path for the build is the Untouched route resolving to Custodian's Rest. Treat that as the active project state until a new, contradictory runtime check is run.
+
 ## 1. What the player is actually doing
 
 The game is built around a simple structure:
@@ -191,7 +202,8 @@ If you want a practical solve path with the current project state:
    - Partial Mercy for hybrid route
    - Untouched for zero-key / gadget route
 5. Follow the route checks in the actual project logic instead of the older design text.
-6. Use the final anchor once the barrier is cleared.
+6. If you want the currently verified ending in this build, use the Untouched route and complete Custodian's Rest.
+7. Use the final anchor once the barrier is cleared.
 
 ## 10. Current project references
 

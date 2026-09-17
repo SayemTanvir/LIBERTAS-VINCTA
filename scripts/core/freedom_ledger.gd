@@ -209,8 +209,8 @@ func eligible(candidate: String) -> bool:
 		"vantree": return current_part == 1 and entity_stage == 1 and estate_letters_found >= 4
 		"partial_mercy": return current_part == 1 and entity_stage == 2
 		"loop": return current_part == 1 and entity_stage == 3
-		"severance", "custodian_rest", "vessel":
-			return current_part == 2 and anchors_cleansed.size() >= 1
+		"destroy", "flee", "remain":
+			return current_part == 2 and flags.get("nexus_outcome", "") == candidate
 	return false
 
 func begin_part_two(part_one_ending: String) -> void:

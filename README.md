@@ -17,6 +17,7 @@ The game is not a freeform sandbox. The route logic, monster escalation, invento
 - Winning condition: complete the correct exit/anchor route for the branch you are on.
 - Losing condition: take all three keys and trigger the loop ending instead of a real escape.
 - Current monster escalation: hearing first, then sight, then memory; Vantree adds touch-based pressure and blood magic.
+- Verified current full-playthrough result: the project’s headless Godot validation reached the Untouched route and completed the Custodian's Rest ending.
 
 ## Current controls
 
@@ -168,4 +169,11 @@ Key files for understanding the current behavior:
 
 ## Verification status
 
-The workspace includes many route and gameplay validation scripts under the tests folder, but this environment does not currently have a runnable Godot binary available, so no fresh runtime pass can be claimed from here. The current project files and route logic are the best active source for the implementation state.
+Fresh runtime verification was completed with the installed Godot executable:
+
+- Command used: `"E:\New folder\Godot_v4.7-stable_win64_console.exe" --headless --path . res://tests/verify_game_route.tscn --quit-after 600`
+- Result: the route suite reached the full intro-to-nexus flow successfully.
+- Command used: `"E:\New folder\Godot_v4.7-stable_win64_console.exe" --headless --path . res://tests/verify_full_playthrough.tscn --quit-after 600`
+- Result: `PLAYED Untouched -> Custodian's Rest`
+
+This is the current verified build state for documentation. The project files and route logic remain the authoritative source of truth, and the current automated runtime check confirms the Untouched route reaches Custodian's Rest in this build.

@@ -39,12 +39,12 @@
       ["item_pickup", "ground_battery", 1280, 470, {"display_name": "Flashlight Battery", "item_id": "battery"}],
       ["puzzle_interactable", "piano_seal", 1780, 438, {"display_name": "Unlock Piano", "puzzle_steps": 3, "action_seconds": 1.1, "action_animation_override": "piano", "action_position_offset": [-78, -4]}],
       ["key_pickup", "hearing_key", 1960, 478, {"sense": "hearing", "required_flag": "piano_seal"}],
-      ["letter_pickup", "vantree_01", 1871, 455, {"title": "Letter I - Silence", "text": "Silence didn't make it gentle. It only made it patient.\n\nNext: between two books on the shelf, Reading Nook."}],
+      ["letter_pickup", "vantree_01", 1871, 455, {"title": "Letter I - Silence", "text": "Silence didn't make it gentle. It only made it patient.\n\nThe next key waits upstairs, in the Master Bedroom. First open the vanity seal."}],
       ["hiding_spot", "pantry_wardrobe", 2380, 430, {"display_name": "Hide in wardrobe", "hiding_priority": "medium"}],
       ["item_pickup", "pantry_bottles", 2710, 474, {"display_name": "Glass Bottles x2", "item_id": "bottle", "item_amount": 2}],
       ["item_pickup", "side_clock", 3070, 470, {"display_name": "Wind-Up Clock", "item_id": "clock"}],
       ["lore", "scratched_nameplate", 3420, 480, {"display_name": "Gather Nameplate Fragments", "title": "The Broken Nameplate", "text": "VANTREE\n\nThe three pieces fit along their broken edges. Together they restore the family name beneath the damaged portrait. No first name survives.\n\nEls recognizes her surname. The plate offers no answer to who sat for the portrait, or why the name was broken away."}],
-      ["letter_pickup", "vantree_02", 3967, 455, {"title": "Letter II - The Office", "text": "Custodian was the word I chose. Jailer was the true one.\n\nNext: behind a dusty portrait frame, upstairs."}],
+      ["letter_pickup", "vantree_02", 3967, 455, {"title": "Letter II - The Office", "text": "Custodian was the word I chose. Jailer was the true one.\n\nThe last key waits below, in the Ritual Chamber. Break the cracked seal first."}],
       ["recharge_station", "ground_recharge", 4170, 430, {"display_name": "Power station"}],
       ["hiding_spot", "coat_rack_hide", 4520, 430, {"display_name": "Hide among coats", "hiding_priority": "low"}],
       ["item_pickup", "coat_lockpick", 4870, 470, {"display_name": "Lockpick", "item_id": "lockpick"}],
@@ -196,21 +196,216 @@
     ]
   },
   "nexus": {
-    "width": 1800,
-    "names": ["Convergence"],
-    "rooms": [{"id": "LN-CENTER", "name": "Convergence", "start": 0, "end": 1800}],
+    "width": 4200,
+    "names": [
+      "Convergence"
+    ],
+    "rooms": [
+      {
+        "id": "LN-CENTER",
+        "name": "Convergence",
+        "start": 0,
+        "end": 4200
+      }
+    ],
     "surface": "STONE",
-    "light_regions": [[0, 1800]],
-    "enemy": 900,
+    "light_regions": [
+      [
+        450,
+        750
+      ],
+      [
+        1950,
+        2250
+      ],
+      [
+        3450,
+        3750
+      ]
+    ],
+    "enemy": 3000,
     "props": [
-      ["lore", "nexus_gate", 180, 430, {"display_name": "Sealed Threshold", "speaker": "", "text": "The way back has closed."}],
-      ["anchor", "LN-A", 520, 500, {"display_name": "Destroy - Hold E", "ending_type": "severance", "channel_seconds": 20.0}],
-      ["anchor", "LN-B", 900, 500, {"display_name": "Seal Els - Hold E", "ending_type": "custodian_rest", "channel_seconds": 20.0}],
-      ["anchor", "LN-C", 1280, 500, {"display_name": "Bind New Vessel - Hold E", "ending_type": "vessel", "channel_seconds": 20.0}],
-      ["lore", "nexus_bell", 900, 395, {"display_name": "Ring Ward Bell — 32s protection", "speaker": ""}],
-      ["hiding_spot", "nexus_hide_west", 345, 580, {"display_name": "Hide behind ward screen", "hiding_priority": "low"}],
-      ["hiding_spot", "nexus_hide_east", 1490, 580, {"display_name": "Hide behind ward screen", "hiding_priority": "low"}],
-      ["recharge_station", "ln_center_charge_1", 450, 405, {"display_name": "Power station - charge & recover"}]
+      [
+        "lore",
+        "nexus_gate",
+        180,
+        430,
+        {
+          "display_name": "Sealed Threshold",
+          "speaker": "",
+          "text": "The way back has closed."
+        }
+      ],
+      [
+        "anchor",
+        "LN-A",
+        600,
+        500,
+        {
+          "display_name": "Destroy - awaken rune",
+          "ending_type": "destroy",
+          "channel_seconds": 20.0
+        }
+      ],
+      [
+        "anchor",
+        "LN-B",
+        2100,
+        500,
+        {
+          "display_name": "Flee - Hold E for 20s",
+          "ending_type": "flee",
+          "channel_seconds": 20.0
+        }
+      ],
+      [
+        "anchor",
+        "LN-C",
+        3600,
+        500,
+        {
+          "display_name": "Remain - Hold E for 20s",
+          "ending_type": "remain",
+          "channel_seconds": 20.0
+        }
+      ],
+      [
+        "hiding_spot",
+        "nexus_hide_west",
+        1350,
+        580,
+        {
+          "display_name": "Hide behind ward screen",
+          "hiding_priority": "low"
+        }
+      ],
+      [
+        "hiding_spot",
+        "nexus_hide_east",
+        2850,
+        580,
+        {
+          "display_name": "Hide behind ward screen",
+          "hiding_priority": "low"
+        }
+      ],
+      [
+        "recharge_station",
+        "ln_center_charge_1",
+        2100,
+        405,
+        {
+          "display_name": "Power station - charge & recover"
+        }
+      ],
+      [
+        "item_pickup",
+        "nexus_knife",
+        900,
+        500,
+        {
+          "display_name": "Knife",
+          "item_id": "knife",
+          "action_animation_override": "bag_pickup"
+        }
+      ],
+      [
+        "letter_pickup",
+        "nexus_guide",
+        1650,
+        500,
+        {
+          "display_name": "Guide Letter",
+          "title": "The Last Keeper — Guide Letter",
+          "action_animation_override": "bag_pickup"
+        }
+      ],
+      [
+        "item_pickup",
+        "nexus_power",
+        3900,
+        500,
+        {
+          "display_name": "The Power",
+          "item_id": "power",
+          "required_flag": "nexus_guide_read",
+          "action_animation_override": "bag_pickup"
+        }
+      ],
+      [
+        "lore",
+        "nexus_trap",
+        0,
+        500,
+        {
+          "display_name": "Set trap + drop The Power"
+        }
+      ],
+      [
+        "base_interactable",
+        "nexus_ending_door",
+        2220,
+        430,
+        {
+          "display_name": "Cross the final threshold",
+          "ending_type": "destroy",
+          "kind": "exit"
+        }
+      ]
+    ],
+    "surface_regions": [
+      [
+        900,
+        1800,
+        "RUBBLE"
+      ],
+      [
+        2400,
+        3300,
+        "RUBBLE"
+      ]
+    ],
+    "patrol_points": [
+      [
+        300,
+        490
+      ],
+      [
+        600,
+        540
+      ],
+      [
+        1350,
+        575
+      ],
+      [
+        2100,
+        540
+      ],
+      [
+        2850,
+        575
+      ],
+      [
+        3600,
+        540
+      ],
+      [
+        3900,
+        490
+      ],
+      [
+        2850,
+        410
+      ],
+      [
+        2100,
+        590
+      ],
+      [
+        1350,
+        410
+      ]
     ]
   }
 }

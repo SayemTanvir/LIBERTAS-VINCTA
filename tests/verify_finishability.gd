@@ -153,57 +153,64 @@ func _run() -> void:
 	await capture("nexus_descent_hide")
 	player.leave_hiding()
 	await get_tree().create_timer(0.25, false).timeout
-	# The finale runs with normal movement, held E, real 20s channels and live AI.
+	# The finale keeps real AI, steering and held-E channels active.
 	Engine.time_scale = 3.0
-	for route in [["vantree", "LnA", "severance"], ["partial_mercy", "LnC", "vessel"], ["untouched", "LnB", "custodian_rest"]]:
-		await setup(route[0], "nexus")
-		check(enemy.is_physics_processing(), "Finale Hound remains active for " + route[0])
-		var bell: BaseInteractable = main.room.props.get_node("NexusBell")
-		if not await walk_to(bell.position + Vector2(0, 28)):
-			break
-		player._find_interactable()
-		check(player.target_interactable == bell, "Ward Bell is reachable through normal movement")
-		if route[0] == "vantree":
-			await capture("ward_bell")
-		await bell.interact(player)
-		check(main.room.ward_seconds > 31.0 and enemy.stun_seconds > 31.0 and not enemy.detection_active, "Bell binds the live Hound and clears detection")
-		var anchor: BaseInteractable = main.room.props.get_node(route[1])
-		if not await walk_to(anchor.position + Vector2(0, 26)):
-			break
-		player._find_interactable()
-		check(player.target_interactable == anchor, "Chosen anchor is reachable and selectable")
-		Input.action_press("interact")
-		await get_tree().create_timer(1.0, false).timeout
-		check(anchor.busy and not player.control_enabled, "Holding E starts the actual ending ritual")
-		if route[0] == "untouched":
-			GameManager.pause_game()
-			var ward_left: float = main.room.ward_seconds
-			var meter: float = main.get_node("UI").activity_meter.value
-			await get_tree().create_timer(0.3, true).timeout
-			check(is_equal_approx(ward_left, main.room.ward_seconds) and is_equal_approx(meter, main.get_node("UI").activity_meter.value), "Pause freezes both ward and ritual progress")
-			GameManager.resume()
-			Input.action_release("interact")
-			await frames(6)
-			check(not anchor.busy and player.control_enabled and FreedomLedger.anchors_cleansed.is_empty(), "Releasing E cancels the ritual without committing an ending")
-			await get_tree().create_timer(main.room.ward_seconds + 0.1, false).timeout
-			check(main.room.ward_seconds <= 0.0, "Ward expires naturally")
-			if not await walk_to(bell.position + Vector2(0, 28)):
-				break
-			await bell.interact(player)
-			check(main.room.ward_seconds > 31.0, "A failed attempt can re-ring the bell")
-			if not await walk_to(anchor.position + Vector2(0, 26)):
-				break
-			Input.action_press("interact")
-			await get_tree().create_timer(1.0, false).timeout
-		await capture("convergence_" + route[0])
-		var deadline := Time.get_ticks_msec() + 12000
-		while GameManager.state == GameManager.State.PLAYING and Time.get_ticks_msec() < deadline:
-			await frames(1)
-		Input.action_release("interact")
-		check(GameManager.state == GameManager.State.ENDING and GameManager.ending == route[2], "Live-AI finale completes " + route[2])
-		check(FreedomLedger.anchors_cleansed.size() == 1, "Finale commits exactly one choice")
-		await capture("ending_" + route[2])
-		print("LIVE FINALE COMPLETED: " + route[0] + " -> " + route[2])
+	await setup("untouched", "nexus")
+	player.set_physics_process(false)
+	player.position = Vector2(100, 500)
+	var min_x := enemy.position.x
+	var max_x := enemy.position.x
+	for i in 500:
+		await get_tree().create_timer(0.12, false).timeout
+		min_x = minf(min_x, enemy.position.x)
+		max_x = maxf(max_x, enemy.position.x)
+	check(min_x < 700.0 and max_x > 3500.0, "Live patrol covers both ends of wide arena")
+	check(enemy.is_physics_processing(), "Arena Hound uses its live AI")
+	var guide: BaseInteractable = main.room.props.get_node("NexusGuide")
+	player.position = guide.position + Vector2(0, 30)
+	await guide.interact(player)
+	main.get_node("UI").close_modal()
+	player.position = Vector2(3600, 550)
+	enemy.position = Vector2(3500, 550)
+	await get_tree().physics_frame
+	check(player.use_blood_trap(), "Live Hound can be trapped")
+	var bound_at := enemy.position
+	await get_tree().create_timer(1.0, false).timeout
+	check(enemy.position.distance_to(bound_at) < 1.0 and enemy.blood_trap_seconds > 16.0, "Bound Hound cannot move or attack")
+	await capture("blood_trap")
+	# Freeze time with pause, then let the real 18-second trap expire.
+	GameManager.pause_game()
+	var held: float = enemy.blood_trap_seconds
+	await get_tree().create_timer(0.3, true).timeout
+	check(enemy.blood_trap_seconds == held, "Pause freezes live trap timer")
+	GameManager.resume()
+	player.position = Vector2(2100, 530)
+	await get_tree().create_timer(18.0, false).timeout
+	check(enemy.blood_trap_seconds == 0.0 and enemy.nexus_hunting, "Trap expires and permanent hunt resumes")
+	check(enemy.position.distance_to(bound_at) > 1.0, "Hound moves again after release")
+	# A distant decoy trail buys a full hold while AI stays active.
+	enemy.position = Vector2(4100, 550)
+	enemy.target = Vector2(4100, 550)
+	enemy.change_state(enemy.State.INVESTIGATE_LAST_SEEN)
+	var rune: BaseInteractable = main.room.props.get_node("LnB")
+	player.position = rune.position + Vector2(0, 30)
+	player.blood_trap_cooldown = 0.0
+	FreedomLedger.heal(FreedomLedger.max_hp)
+	# Cast at the far side, then cover the arena through normal movement.
+	player.position = Vector2(3960, 550)
+	await get_tree().physics_frame
+	check(player.use_blood_trap(), "Second prepared trap buys escape time")
+	player.animation_hold = 0.0
+	player.set_physics_process(true)
+	check(await walk_to(rune.position + Vector2(0, 30)), "Rune reached by normal sprint after binding")
+	Input.action_press("interact")
+	rune.interact(player)
+	var deadline := Time.get_ticks_msec() + 14000
+	while rune.busy and Time.get_ticks_msec() < deadline:
+		await frames(1)
+	Input.action_release("interact")
+	check(main.room.outcome == "flee", "Live Hound allows a prepared 20-second Flee hold")
+	await capture("nexus_flee_door")
 	Engine.time_scale = 1.0
 	release_movement()
 	get_tree().paused = false

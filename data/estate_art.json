@@ -383,27 +383,103 @@
       ]
     },
     "nexus": {
-      "plain_tables": [["ln_center_charge_2", 1360, 590]],
+      "plain_tables": [],
       "wall_tint": "#385354",
       "floor_tint": "#455f60",
       "prop_tint": "#b0bbb7",
-      "passage_labels": {},
+      "passage_labels": {
+        "nexus_ending_door": "Cross the final threshold"
+      },
       "surfaces": [
-        [0, 1800, "brick_wall", "dark_floor"]
+        [
+          0,
+          4200,
+          "brick_wall",
+          "dark_floor"
+        ]
       ],
       "furniture": {},
       "interactables": {
-        "nexus_gate": {"asset": "ritual_stone", "width": 90, "scale": 0.66},
-        "LN-A": {"asset": "nexus_anchor", "width": 125, "scale": 0.78},
-        "LN-B": {"asset": "nexus_anchor", "width": 125, "scale": 0.78},
-        "LN-C": {"asset": "nexus_anchor", "width": 125, "scale": 0.78},
-        "nexus_hide_west": {"asset": "screen", "width": 100, "footprint": [70, 24]},
-        "nexus_hide_east": {"asset": "screen", "width": 100, "footprint": [70, 24]}
+        "nexus_gate": {
+          "asset": "ritual_stone",
+          "width": 90,
+          "scale": 0.66
+        },
+        "LN-A": {
+          "asset": "nexus_anchor",
+          "width": 125,
+          "scale": 0.78
+        },
+        "LN-B": {
+          "asset": "nexus_anchor",
+          "width": 125,
+          "scale": 0.78
+        },
+        "LN-C": {
+          "asset": "nexus_anchor",
+          "width": 125,
+          "scale": 0.78
+        },
+        "nexus_hide_west": {
+          "asset": "screen",
+          "width": 100,
+          "footprint": [
+            70,
+            24
+          ]
+        },
+        "nexus_hide_east": {
+          "asset": "screen",
+          "width": 100,
+          "footprint": [
+            70,
+            24
+          ]
+        }
       },
       "decorations": [
-        ["ritual_stone", 900, 340, 230],
-        ["cat_rubble", 250, 405, 120],
-        ["cat_rubble", 1550, 405, 120]
+        [
+          "ritual_stone",
+          600,
+          340,
+          180
+        ],
+        [
+          "ritual_stone",
+          2100,
+          340,
+          230
+        ],
+        [
+          "ritual_stone",
+          3600,
+          340,
+          180
+        ],
+        [
+          "cat_rubble",
+          1050,
+          405,
+          120
+        ],
+        [
+          "cat_rubble",
+          1550,
+          405,
+          120
+        ],
+        [
+          "cat_rubble",
+          2550,
+          405,
+          120
+        ],
+        [
+          "cat_rubble",
+          3100,
+          405,
+          120
+        ]
       ]
     }
   }

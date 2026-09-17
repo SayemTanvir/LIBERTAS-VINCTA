@@ -15,6 +15,7 @@ var item_counts: Dictionary = {}
 var inventory_summary: Label
 var entrance: Tween
 var document: Control
+var guide_button: Button
 var memory_button: Button
 var battery_list: RichTextLabel
 
@@ -84,6 +85,7 @@ func _ready() -> void:
 	scroll_hint = Style.label(design, "", Rect2(400, 562, 648, 44), 14, Style.MUTED)
 	scroll_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_build_inventory()
+	_add_guide_button()
 	document = preload("res://scripts/ui/scroll_document.gd").new()
 	add_child(document)
 	document.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -140,6 +142,14 @@ func _build_inventory() -> void:
 		var fragment := preload("res://scripts/systems/memory_fragment.gd")
 		open(fragment.TITLE, fragment.TEXT))
 
+func _add_guide_button() -> void:
+	guide_button = Button.new()
+	guide_button.text = "Read Guide Letter"
+	guide_button.position = Vector2(724, 564)
+	guide_button.size = Vector2(310, 35)
+	inventory_grid.add_child(guide_button)
+	guide_button.pressed.connect(func(): open("The Last Keeper ? Guide Letter", preload("res://scripts/systems/nexus_guide.gd").GUIDE))
+
 func _layout() -> void:
 	var factor := minf((size.x - 32.0) / 1120.0, (size.y - 32.0) / 640.0)
 	design.scale = Vector2.ONE * maxf(factor, 0.1)
@@ -153,6 +163,7 @@ func open(title: String, text: String) -> void:
 	var inventory := title == "Inventory"
 	var guide := "Guide" in title
 	inventory_grid.visible = inventory
+	guide_button.visible = FreedomLedger.flags.get("nexus_guide_read", false)
 	memory_button.visible = bool(FreedomLedger.flags.get("vantree_memory_fragment_A", false))
 	scroll.visible = not inventory
 	category.text = "ELS VANTREE  /  INVENTORY" if inventory else ("ELS VANTREE  /  FIELD GUIDE" if guide else "HOLLOWMERE  /  DOCUMENTS")
@@ -164,7 +175,7 @@ func open(title: String, text: String) -> void:
 	for i in cells.size():
 		cell_lines.append("Battery %d: %.1f%%" % [i + 1, cells[i]])
 	battery_list.text = "No batteries. Find a cell to recharge." if cells.is_empty() else "   ·   ".join(cell_lines)
-	inventory_summary.text = "Letters collected: %d\n%s" % [FreedomLedger.letter_ids.size(), FreedomLedger.freedom_summary()]
+	inventory_summary.text = "Letters collected: %d | Knife: %d | The Power: %d\n%s" % [FreedomLedger.letter_ids.size(), FreedomLedger.inventory.get("knife", 0), FreedomLedger.inventory.get("power", 0), FreedomLedger.freedom_summary()]
 	show()
 	design.visible = inventory
 	document.visible = not inventory

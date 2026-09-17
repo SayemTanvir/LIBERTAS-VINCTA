@@ -4,6 +4,7 @@ const ZOMBIE_DIRECTIONS := ["0", "045", "090", "135", "180", "225", "270", "315"
 const ZombieFootOffsets := preload("res://scripts/enemy/zombie_foot_offsets.gd")
 
 enum State {
+	NEXUS_ROAM,
 	WANDER_BLIND,
 	PATROL_AUDIO,
 	INVESTIGATE,
@@ -37,6 +38,9 @@ const SPEED_MULTIPLIER := 0.99
 @export var remembered_hide_damage: float = 45.0
 @export var debug_detection: bool = false
 
+var nexus_hunting := false
+var blood_trap_seconds := 0.0
+var nexus_defeated := false
 var state: State = State.WANDER_BLIND
 var player: Node2D
 var room: Node2D
@@ -104,6 +108,9 @@ func change_state(next: State) -> void:
 		distraction_arrived = false
 		distraction_stay_timer = 0.0
 	state = next
+	if state == State.NEXUS_ROAM:
+		detection_active = false
+		_choose_patrol_target()
 	state_clock = 0.0
 	path_clock = 0.0
 	match state:
@@ -133,6 +140,8 @@ func change_state(next: State) -> void:
 		_voice_cooldown = 2.8
 
 func _patrol_state() -> State:
+	if is_instance_valid(room) and room.zone_id == "nexus":
+		return State.NEXUS_ROAM
 	if _stage() == 0:
 		return State.WANDER_BLIND
 	if _stage() == 1:
@@ -166,6 +175,8 @@ func _restored(sense: String) -> void:
 		change_state(_patrol_state())
 
 func _physics_process(delta: float) -> void:
+	if nexus_defeated:
+		return
 	if not is_instance_valid(player):
 		player = get_tree().get_first_node_in_group("player")
 	if not is_instance_valid(room):
@@ -173,6 +184,7 @@ func _physics_process(delta: float) -> void:
 	if not is_instance_valid(player) or not is_instance_valid(room) or GameManager.state != GameManager.State.PLAYING:
 		velocity = Vector2.ZERO
 		return
+	blood_trap_seconds = maxf(0.0, blood_trap_seconds - delta)
 	hearing_time += delta
 	if room.has_method("threat_active_at") and not room.threat_active_at(player.global_position):
 		_strike_pending = false
@@ -199,6 +211,17 @@ func _physics_process(delta: float) -> void:
 	_update_vision(delta)
 	_detect_touch()
 	_update_state(delta)
+	# The alarm maintains a trail, but only the existing senses confirm detection.
+	# Hiding and distractions buy time; a lost trail returns to arena patrol.
+	if nexus_hunting and not is_distracted and player.hidden_spot == null:
+		if state == State.NEXUS_ROAM:
+			target = player.global_position
+			last_seen = target
+			change_state(State.HUNT_AUDIO)
+		elif state == State.HUNT_AUDIO and not detection_active and global_position.distance_to(target) < 36.0:
+			# Search the last alarm trail for the existing four-second window.
+			# Real Hearing/Sight/Touch cues can interrupt this search immediately.
+			change_state(State.INVESTIGATE_LAST_SEEN)
 	if GameManager.state != GameManager.State.PLAYING or _attack_seconds > 0.0:
 		return
 	_move(delta)
@@ -248,11 +271,11 @@ func _update_state(delta: float) -> void:
 				_choose_patrol_target()
 				state_limit = randf_range(8.0, 15.0)
 				state_clock = 0.0
-		State.PATROL_AUDIO, State.PATROL_SIGHT:
+		State.NEXUS_ROAM, State.PATROL_AUDIO, State.PATROL_SIGHT:
 			if global_position.distance_to(target) < 30.0 or state_clock > 9.0:
 				_choose_patrol_target()
 				state_clock = 0.0
-			if _stage() >= 3 and ambush_clock <= 0.0:
+			if state != State.NEXUS_ROAM and _stage() >= 3 and ambush_clock <= 0.0:
 				ambush_clock = ambush_interval
 				if randf() <= ambush_chance:
 					_predict_exit()
@@ -399,6 +422,10 @@ func _clear_motion_to(point: Vector2) -> bool:
 	return result.size() == 2 and result[0] >= 0.999
 
 func _move_speed() -> float:
+	if nexus_hunting and state in [State.HUNT_AUDIO, State.CHASE]:
+		return true_form_speed if FreedomLedger.part2_seed.get("touch_mutation", false) else audio_hunt_speed
+	if state == State.NEXUS_ROAM:
+		return patrol_speed
 	if FreedomLedger.current_part == 2 and FreedomLedger.part2_seed.get("touch_mutation", false) and state == State.HUNT_AUDIO:
 		return true_form_speed
 	if is_distracted and not distraction_arrived:
@@ -621,6 +648,29 @@ func _predict_exit() -> bool:
 func _check_remembered_hide() -> void:
 	if player.hidden_spot != null and global_position.distance_to(player.hidden_spot.global_position) < 45.0 and clear_sight(player.hidden_spot.global_position):
 		_queue_strike(remembered_hide_damage, 68.0, player.hidden_spot.interaction_id)
+
+func begin_nexus_hunt() -> void:
+	nexus_hunting = true
+	is_distracted = false
+	distraction_arrived = false
+	distraction_stay_timer = 0.0
+	if is_instance_valid(player):
+		target = player.global_position
+		last_seen = target
+	change_state(State.HUNT_AUDIO)
+
+func bind_blood_trap() -> void:
+	stun(18.0)
+	blood_trap_seconds = 18.0
+
+func defeat_in_nexus() -> void:
+	stun(3600.0)
+	nexus_defeated = true
+	blood_trap_seconds = 0.0
+	collision_layer = 0
+	collision_mask = 0
+	var fade := create_tween()
+	fade.tween_property(self, "modulate:a", 0.0, 1.0)
 
 func stun(seconds: float) -> void:
 	stun_seconds = maxf(stun_seconds, seconds)

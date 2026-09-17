@@ -152,10 +152,22 @@ func _run() -> void:
 	await _use("NexusDescent")
 	if not await _wait_zone("nexus"):
 		return
-	FreedomLedger.flags["automation_channel"] = true
+	await _use("NexusKnife")
+	await _use("NexusGuide")
+	await _use("NexusPower")
 	await _use("LnA")
-	_check(GameManager.state == GameManager.State.ENDING and GameManager.ending == "severance", "Severance ending did not complete")
-	_check("LN-A" in FreedomLedger.anchors_cleansed, "Nexus anchor did not persist")
+	FreedomLedger.heal(FreedomLedger.max_hp)
+	var hound = get_tree().get_first_node_in_group("enemy")
+	player.position = Vector2(900, 550)
+	hound.position = Vector2(1000, 550)
+	await get_tree().physics_frame
+	_check(player.use_blood_trap(), "Nexus Blood Trap failed")
+	player.position = hound.position + Vector2(-40, 0)
+	await get_tree().physics_frame
+	_check(main.room.place_power(player), "Power placement failed")
+	await _use("NexusEndingDoor")
+	_check(GameManager.state == GameManager.State.ENDING and GameManager.ending == "destroy", "Destroy ending did not complete")
+
 	FreedomLedger.reset()
 	FreedomLedger.restore_sense("hearing")
 	FreedomLedger.restore_sense("sight")

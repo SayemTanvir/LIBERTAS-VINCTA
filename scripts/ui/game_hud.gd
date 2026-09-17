@@ -32,6 +32,7 @@ var subtitle_queue: Array[Dictionary] = []
 var subtitle_time: float = 0.0
 var modal_mode: String = ""
 var ending_shown: bool = false
+var nexus_narrating := false
 var threat_state: String = "CALM"
 var threat_clock: float = 0.0
 var displayed_room_id: String = ""
@@ -170,7 +171,7 @@ func _process(delta: float) -> void:
 	if not get_tree().paused:
 		threat_clock += delta
 	_layout_for_viewport()
-	var message_visible := not subtitle.text.is_empty() and (SessionSettings.subtitles_enabled or acknowledged_message) and not reader.visible and not pause_menu.visible and not game_over.visible and not chapter_complete.visible
+	var message_visible := not subtitle.text.is_empty() and (SessionSettings.subtitles_enabled or acknowledged_message or nexus_narrating) and not reader.visible and not pause_menu.visible and not game_over.visible and not chapter_complete.visible
 	bubble.visible = active_message == bubble and message_visible
 	narration.visible = active_message == narration and message_visible
 	var playing_hud := GameManager.zone != "intro" and GameManager.state != GameManager.State.ENDING and not reader.visible and not pause_menu.visible and not game_over.visible
@@ -205,6 +206,10 @@ func _process(delta: float) -> void:
 	if player != null:
 		strain = clampf((player.breath_seconds - 4.0) / 2.0, 0.0, 1.0) if player.holding_breath else 0.0
 	var threat_edge := 0.0
+	if room != null and room.zone_id == "nexus" and room.alarm_seconds > 0.0:
+		pulse.color = Color(0.9, 0.015, 0.02, minf(1.0, room.alarm_seconds) * (0.12 + 0.18 * (0.5 + 0.5 * sin(room.alarm_seconds * 9.0))))
+	elif not get_tree().paused:
+		pulse.color.a = move_toward(pulse.color.a, 0.0, delta)
 	if threat_state == "SEARCHING":
 		threat_edge = 0.045 + (sin(threat_clock * 3.2) + 1.0) * 0.018
 	elif threat_state == "CHASE":
@@ -425,6 +430,23 @@ func _result_action(id: String) -> void:
 				GameManager.new_game.call_deferred()
 
 func show_ending() -> void:
+	if GameManager.ending in ["destroy", "flee"]:
+		nexus_narrating = true
+		subtitle_queue.clear()
+		fade.color.a = 0.55
+		var copy := preload("res://scripts/ui/nexus_narration.gd")
+		var text: String = copy.FLEE if GameManager.ending == "flee" else copy.DESTROY
+		_present_message("", text)
+		subtitle_time = _reading_seconds()
+		# Existing cinematic strip paginates the complete copy; E/Enter advances.
+		while not subtitle.text.is_empty():
+			await get_tree().process_frame
+		nexus_narrating = false
+		get_tree().paused = true
+		fade.color.a = 0.88
+		modal_mode = "ending"
+		reader.open("FLEE" if GameManager.ending == "flee" else "DESTROY", text)
+		return
 	if GameManager.ending in ["severance", "custodian_rest", "vessel"]:
 		get_tree().paused = true
 		var sequence := preload("res://scripts/ui/ending_sequence.gd").new()
