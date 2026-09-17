@@ -203,7 +203,7 @@ func _ceiling_string_lights(room: Node2D, bounds: Dictionary, spec: Dictionary, 
 func _dress_pickup(prop: BaseInteractable) -> void:
 	var visual: Node2D = prop.get_node("Visual")
 	var sprite: Sprite2D = visual.get_node("Sprite2D")
-	var item_assets := {"battery": "battery_pickup", "bottle": "bottle_pickup", "clock": "clock_pickup", "lockpick": "lockpick_pickup", "knife": "lockpick_pickup", "power": "key"}
+	var item_assets := {"battery": "battery_pickup", "bottle": "bottle_pickup", "clock": "clock_pickup", "lockpick": "lockpick_pickup", "knife": "lockpick_pickup", "power": "power_stone"}
 	var asset: String = item_assets.get(prop.item_id, "tool_pouch") if prop.kind == "item" else {"key": "key", "letter": "letter", "flashlight": "flashlight_pickup", "tool": "tool_pouch"}[prop.kind]
 	var width: float = {"key": 22.0, "letter": 25.0, "flashlight": 26.0, "tool": 29.0}.get(prop.kind, 23.0)
 	if prop.kind == "item":

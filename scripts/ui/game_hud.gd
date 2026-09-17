@@ -299,7 +299,7 @@ func enqueue_subtitle(speaker: String, text: String, duration: float) -> void:
 func _present_message(speaker: String, text: String) -> void:
 	bubble.dismiss()
 	narration.dismiss()
-	var is_narrator := speaker.strip_edges().to_upper() in ["", "NARRATOR", "STORYTELLER", "STORY TELLER"]
+	var is_narrator := speaker.strip_edges().to_upper() != "ELS"
 	active_message = narration if is_narrator else bubble
 	if not is_narrator:
 		var group := "enemy" if speaker == "THE DEPRIVED" else "player"

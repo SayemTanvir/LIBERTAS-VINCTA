@@ -119,7 +119,7 @@ func refresh() -> void:
 	if kind == "key":
 		progression_visible = CollectibleManager.is_key_revealed(sense)
 	elif kind == "letter":
-		progression_visible = CollectibleManager.is_letter_revealed(interaction_id)
+		progression_visible = interaction_id == "nexus_guide" or CollectibleManager.is_letter_revealed(interaction_id)
 	visible = progression_visible or kind in ["puzzle", "door", "locked_door", "hiding", "exit", "recharge", "vent", "anchor", "lore"]
 	if has_node("NameplateFragments"):
 		$NameplateFragments.set_collected(bool(FreedomLedger.flags.get("nameplate_assembled", false)))

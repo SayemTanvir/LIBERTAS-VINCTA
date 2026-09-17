@@ -11,6 +11,7 @@ func _ready() -> void:
 	for prop in props.get_children():
 		if prop is BaseInteractable and prop.interaction_id == "nexus_guide":
 			prop.text = GUIDE
+			prop.refresh()
 		if prop is BaseInteractable and prop.interaction_id == "nexus_trap":
 			trap_prompt = prop
 			trap_prompt.get_node("Visual").hide()
@@ -94,7 +95,9 @@ func complete_outcome(choice: String, point: Vector2) -> void:
 func _reveal_door() -> void:
 	for prop in props.get_children():
 		if prop is BaseInteractable and prop.interaction_id == "nexus_ending_door":
-			prop.position = Vector2(clampf(float(FreedomLedger.flags.get("nexus_door_x", 2100.0)) + 120.0, 120.0, room_width - 120.0), 430.0)
+			var door_x := room_width - 80.0 if outcome == "destroy" else clampf(float(FreedomLedger.flags.get("nexus_door_x", 2100.0)) + 120.0, 120.0, room_width - 120.0)
+			var door_y := 350.0 if outcome == "destroy" else 430.0
+			prop.position = Vector2(door_x, door_y)
 			prop.ending_type = outcome
 			prop.refresh()
 			prop.modulate.a = 0.0

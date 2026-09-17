@@ -89,6 +89,7 @@
   "textures": {
     "key": {"file": "res://assets/environment/props/estate_essentials/estate_essentials.png", "region": [90, 80, 354, 350], "trim": true},
     "letter": {"file": "res://assets/environment/props/estate_essentials/estate_essentials.png", "region": [575, 110, 395, 300], "trim": true},
+    "power_stone": {"file": "res://assets/environment/props/LN/power-stone.png", "trim": true, "mask_background": true, "mask_seeds": [[0, 0]]},
     "flashlight_pickup": {"file": "res://assets/environment/props/estate_essentials/estate_essentials.png", "region": [1094, 116, 365, 295], "trim": true},
     "tool_pouch": {"file": "res://assets/environment/props/estate_essentials/estate_essentials.png", "region": [103, 578, 331, 330], "trim": true},
     "estate_door": {"file": "res://assets/environment/props/estate_essentials/estate_essentials.png", "region": [617, 480, 299, 490], "trim": true},

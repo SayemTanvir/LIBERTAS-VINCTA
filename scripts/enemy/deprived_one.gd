@@ -152,6 +152,8 @@ func _stage() -> int:
 	return int(FreedomLedger.part2_seed.get("monster_stage", FreedomLedger.current_stage)) if FreedomLedger.current_part == 2 else FreedomLedger.current_stage
 
 func _has_sense(sense: String) -> bool:
+	if nexus_hunting and is_instance_valid(room) and room.zone_id == "nexus":
+		return true
 	var active: bool = sense in FreedomLedger.part2_seed.get("senses", []) if FreedomLedger.current_part == 2 else sense in FreedomLedger.keys_collected
 	return active and not _sense_blocked(sense)
 
@@ -251,7 +253,10 @@ func _update_vision(delta: float) -> void:
 		sight_confirm = 0.0
 
 func _detect_touch() -> void:
-	if FreedomLedger.current_part != 2 or not FreedomLedger.part2_seed.get("touch_mutation", false) or _sense_blocked("touch"):
+	var touch_active: bool = nexus_hunting and is_instance_valid(room) and room.zone_id == "nexus"
+	if (FreedomLedger.current_part != 2 or not FreedomLedger.part2_seed.get("touch_mutation", false)) and not touch_active:
+		return
+	if _sense_blocked("touch"):
 		return
 	var transmission: float = room.vibration_transmission_at(player.global_position)
 	if global_position.distance_to(player.global_position) <= transmission:
@@ -449,7 +454,7 @@ func _resolve_contact() -> void:
 		return
 	if not clear_sight(player.global_position):
 		return
-	if _stage() == 0 and not FreedomLedger.part2_seed.get("touch_mutation", false):
+	if _stage() == 0 and not FreedomLedger.part2_seed.get("touch_mutation", false) and not nexus_hunting:
 		# Final Untouched rule (Path A): all senses stay dormant throughout Part II.
 		# Blind contact is intentionally a nonlethal stagger, including the Nexus.
 		# Only the separately seeded Vantree Touch branch bypasses this rule.
