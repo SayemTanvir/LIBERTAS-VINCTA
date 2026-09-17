@@ -482,12 +482,16 @@ func show_ending() -> void:
 	fade.color.a = 0.88
 	var titles := {
 		"untouched": "UNTOUCHED", "partial_mercy": "PARTIAL MERCY", "vantree": "VANTREE",
+		"destroy": "THE BRAVE WAY", "flee": "THE COWARD'S WAY", "remain": "THE LONG WAY OUT",
 		"severance": "SEVERANCE", "custodian_rest": "CUSTODIAN'S REST", "vessel": "VESSEL"
 	}
 	var texts := {
 		"untouched": "The front door opens before the house learns her shape.\nEvery stolen sense remains sealed.",
 		"partial_mercy": "Cold water gives way to older stone.\nTwo seals broken. One left dormant.",
 		"vantree": "The conduit recognizes her name.\nBlood and stone carry it downward.",
+		"destroy": "You chose the brave way and ended the curse for your bloodline.",
+		"flee": "You cowardly left the curse open for your next generations.",
+		"remain": "You chose the long way out.",
 		"severance": "The captive and the bond are destroyed.",
 		"custodian_rest": "Els Vantree becomes the living ward.",
 		"vessel": "The prison waits in another key."
