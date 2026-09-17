@@ -8,3 +8,7 @@ exports/
 # Python helper cache
 __pycache__/
 *.pyc
+
+
+test_runner.gd
+test_runner.gd.uid
