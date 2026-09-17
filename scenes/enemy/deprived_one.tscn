@@ -1,17 +1,14 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=5 format=3]
 [ext_resource type="Script" path="res://scripts/enemy/deprived_one.gd" id="1"]
-[ext_resource type="SpriteFrames" path="res://scenes/enemy/blood_hound_frames.tres" id="2"]
-[ext_resource type="Shader" path="res://shaders/blood_hound_clip.gdshader" id="3"]
-[ext_resource type="Texture2D" path="res://assets/sprites/blood_hound/frame_masks.svg" id="4"]
-[sub_resource type="ShaderMaterial" id="clip_material"]
+[ext_resource type="SpriteFrames" path="res://scenes/enemy/new_zombie_frames.tres" id="2"]
+[ext_resource type="Shader" path="res://shaders/zombie_chroma_guard.gdshader" id="3"]
+[sub_resource type="ShaderMaterial" id="zombie_material"]
 resource_local_to_scene = true
 shader = ExtResource("3")
-shader_parameter/frame_masks = ExtResource("4")
-shader_parameter/clip_id = 1.0
 [sub_resource type="RectangleShape2D" id="feet"]
 size = Vector2(24, 14)
 [node name="DeprivedOne" type="CharacterBody2D"]
-collision_layer = 4
+collision_layer = 1
 collision_mask = 1
 motion_mode = 1
 script = ExtResource("1")
@@ -27,14 +24,13 @@ visible = false
 color = Color(0.36, 0.16, 0.18, 1)
 polygon = PackedVector2Array(-18, 0, -23, -59, -9, -85, 9, -85, 23, -59, 18, 0)
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Visual"]
-material = SubResource("clip_material")
-texture_filter = 2
-scale = Vector2(0.7, 0.7)
+material = SubResource("zombie_material")
+texture_filter = 1
+scale = Vector2(0.63, 0.63)
 offset = Vector2(0, -92)
 sprite_frames = ExtResource("2")
-animation = &"idle"
-autoplay = "idle"
-flip_h = true
+animation = &"idle_180"
+autoplay = "idle_180"
 [node name="DebugState" type="Label" parent="."]
 visible = false
 offset_left = -80.0
