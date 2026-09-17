@@ -1,6 +1,20 @@
 extends RefCounted
 ## Player-facing explanations shared by the HUD, tutorial and field guide.
 
+static func room_groups() -> Array[Dictionary]:
+	var layout: Dictionary = preload("res://data/estate_layout.json").data
+	var floors := {"ground": "Ground Floor", "upper": "Upper Floor", "basement": "Basement", "roots": "Cathedral Roots", "echoes": "Chamber of Echoes", "nexus": "Ley-Nexus"}
+	var groups: Array[Dictionary] = []
+	for floor_id in floors:
+		var names: PackedStringArray = []
+		var rooms: Array = layout[floor_id].rooms.duplicate()
+		if floor_id == "ground":
+			rooms = layout.intro.rooms + rooms
+		for room in rooms:
+			names.append("%s  %s" % [room.id, room.name])
+		groups.append({"floor": floors[floor_id], "rooms": "  •  ".join(names)})
+	return groups
+
 static func branch_name() -> String:
 	if FreedomLedger.part2_seed.get("full_gadgets", false):
 		return "Clockwork & glass"

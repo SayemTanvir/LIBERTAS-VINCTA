@@ -33,6 +33,19 @@ CELL_SIZE = 256
 FOOT_BASELINE = 220
 BASE_OFFSET_Y = -92
 
+# The supplied /death sheet has four views, each with eight unevenly spaced poses.
+# Atlas margins keep their feet on a shared baseline without changing the artwork.
+DEATH_REGIONS = (
+    ((45, 34, 180, 293), (201, 56, 344, 292), (362, 94, 508, 292), (552, 118, 693, 293),
+     (713, 155, 868, 307), (865, 193, 1039, 301), (1051, 217, 1225, 304), (1222, 233, 1433, 300)),
+    ((37, 315, 153, 563), (197, 331, 332, 567), (341, 359, 504, 567), (526, 382, 687, 568),
+     (692, 439, 881, 562), (872, 466, 1049, 574), (1049, 505, 1253, 576), (1230, 500, 1432, 568)),
+    ((37, 581, 187, 823), (206, 597, 346, 824), (368, 617, 530, 824), (553, 636, 709, 825),
+     (736, 671, 898, 830), (906, 712, 1091, 834), (1090, 751, 1275, 834), (1244, 745, 1428, 826)),
+    ((57, 837, 180, 1071), (216, 849, 365, 1065), (393, 865, 553, 1068), (583, 883, 712, 1065),
+     (731, 924, 891, 1063), (903, 959, 1083, 1061), (1077, 990, 1241, 1062), (1229, 992, 1434, 1056)),
+)
+
 
 def key_magenta_to_alpha(image: Image.Image) -> Image.Image:
     """Turn the generated magenta backing and its edge bleed into transparency."""
@@ -85,6 +98,28 @@ def build_resource() -> None:
                 f'"name": &"{name}_{direction}",\n'
                 f'"speed": {fps}' + '\n}'
             )
+    death_texture_id = str(len(textures) + 1)
+    textures["assets/sprites/new_zombie/sheets/death/death.png"] = death_texture_id
+    death_frames = []
+    for row, poses in enumerate(DEATH_REGIONS):
+        frames = []
+        for frame, (left, top, right, bottom) in enumerate(poses):
+            width, height = right - left, bottom - top
+            region_id = f"death_{row}_{frame}"
+            regions.append(
+                f'[sub_resource type="AtlasTexture" id="{region_id}"]\n'
+                f'atlas = ExtResource("{death_texture_id}")\n'
+                f'region = Rect2({left}, {top}, {width}, {height})\n'
+                f'margin = Rect2({(320 - width) / 2}, {320 - height}, {320 - width}, {320 - height})\n'
+                'filter_clip = true'
+            )
+            frames.append('{"duration": 1.0, "texture": SubResource("' + region_id + '")}')
+        death_frames.append(frames)
+    for direction, row in zip(DIRECTIONS, (2, 1, 1, 0, 0, 3, 3, 2)):
+        animations.append(
+            '{"frames": [' + ',\n'.join(death_frames[row]) + '],\n'
+            f'"loop": false,\n"name": &"death_{direction}",\n"speed": 8.0\n' + '}'
+        )
     text = f'[gd_resource type="SpriteFrames" load_steps={len(textures) + len(regions) + 1} format=3]\n\n'
     text += '\n'.join(
         f'[ext_resource type="Texture2D" path="res://{path}" id="{resource_id}"]'

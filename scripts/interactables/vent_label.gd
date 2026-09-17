@@ -5,20 +5,25 @@ extends Node2D
 var destination_floor: String = ""
 var entrance_id: String = ""
 var _label: Label
-var _player: CharacterBody2D
-const VISIBLE_RANGE := 200.0  # Same as interaction prompt range
 
 func _ready() -> void:
 	_label = Label.new()
 	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_label.position = Vector2(-80, -58)
+	_label.position = Vector2(-100, -58)
+	_label.size = Vector2(200, 22)
 	_label.z_index = 50
-	_label.add_theme_font_size_override("font_size", 15)
-	_label.add_theme_color_override("font_color", Color("f7f3d6"))
-	_label.modulate = Color(1.0, 0.96, 0.82, 1.0)
-	_label.visible = false
+	_label.add_theme_font_size_override("font_size", 14)
+	_label.add_theme_color_override("font_color", Color("d8d5b9"))
+	_label.add_theme_color_override("font_shadow_color", Color("171d19"))
+	_label.add_theme_constant_override("shadow_offset_y", 1)
 	add_child(_label)
 	_resolve_destination_name()
+	_position_label.call_deferred()
+
+func _position_label() -> void:
+	var sprite := get_parent().get_node_or_null("Visual/Sprite2D") as Sprite2D
+	if sprite != null and sprite.texture != null:
+		_label.position.y = sprite.position.y + (sprite.get_rect().position.y + sprite.offset.y) * sprite.scale.y - 25.0
 
 func _resolve_destination_name() -> void:
 	## Look up which room contains the entrance vent on the destination floor.
@@ -46,14 +51,5 @@ func _resolve_destination_name() -> void:
 	# Find which room contains that x position
 	for room in rooms:
 		if room is Dictionary and float(room.get("start", 0)) <= entrance_x and entrance_x < float(room.get("end", 0)):
-			_label.text = "To: " + str(room.get("name", "Unknown"))
+			_label.text = "Vent to " + str(room.get("name", "Unknown"))
 			return
-
-func _process(_delta: float) -> void:
-	if _player == null:
-		_player = get_tree().get_first_node_in_group("player") as CharacterBody2D
-	if _player == null or not is_instance_valid(_player):
-		_label.visible = false
-		return
-	var dist := global_position.distance_to(_player.global_position)
-	_label.visible = dist <= VISIBLE_RANGE and _label.text != ""

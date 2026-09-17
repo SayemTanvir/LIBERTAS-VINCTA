@@ -27,6 +27,8 @@ var objective_label: Label
 var ability_label: Label
 var activity_meter: ProgressBar
 var survival_panel: Control
+var help_bar: PanelContainer
+var help_open := false
 
 var subtitle_queue: Array[Dictionary] = []
 var subtitle_time: float = 0.0
@@ -117,6 +119,7 @@ func _ready() -> void:
 	fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	fade.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root.add_child(fade)
+	_build_help_bar()
 	reader = preload("res://scenes/ui/letter_reader.tscn").instantiate()
 	root.add_child(reader)
 	reader.close_requested.connect(close_modal)
@@ -167,6 +170,41 @@ func make_label(text: String, size: int = 18) -> Label:
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return label
 
+func _build_help_bar() -> void:
+	help_bar = PanelContainer.new()
+	help_bar.name = "HelpBar"
+	help_bar.add_theme_stylebox_override("panel", UIStyle.panel(Color(0.025, 0.035, 0.046, 0.97), UIStyle.RULE, 20))
+	root.add_child(help_bar)
+	var rows := VBoxContainer.new()
+	rows.add_theme_constant_override("separation", 12)
+	help_bar.add_child(rows)
+	var heading := make_label("ESTATE DIRECTORY   /   H to close", 18)
+	heading.add_theme_color_override("font_color", UIStyle.BRASS)
+	rows.add_child(heading)
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	rows.add_child(scroll)
+	var groups := VBoxContainer.new()
+	groups.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	groups.add_theme_constant_override("separation", 12)
+	scroll.add_child(groups)
+	for group in FieldGuide.room_groups():
+		var floor_label := make_label(group.floor, 17)
+		floor_label.add_theme_color_override("font_color", UIStyle.BRASS)
+		groups.add_child(floor_label)
+		var rooms := make_label(group.rooms, 16)
+		rooms.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		groups.add_child(rooms)
+	var guide := Button.new()
+	guide.text = "Open Els' Field Guide"
+	guide.add_theme_font_size_override("font_size", 16)
+	for state in ["normal", "hover", "pressed", "focus"]:
+		guide.add_theme_stylebox_override(state, UIStyle.panel(UIStyle.INK, UIStyle.BRASS if state != "normal" else UIStyle.RULE, 12))
+	guide.pressed.connect(func(): show_letter("Els' Field Guide", FieldGuide.guide_text()))
+	rows.add_child(guide)
+	help_bar.hide()
+
 func _process(delta: float) -> void:
 	if not get_tree().paused:
 		threat_clock += delta
@@ -180,6 +218,7 @@ func _process(delta: float) -> void:
 	survival_panel.visible = playing_hud
 	survival_panel.update_values(delta)
 	room_name.visible = playing_hud
+	help_bar.visible = help_open and playing_hud
 	vitals.text = "Charge %02d  |  HP %03d  |  Batteries %d  ·  Bottles %d  ·  Clocks %d" % [
 		ceili(FreedomLedger.flashlight_charge), ceili(FreedomLedger.hp),
 		int(FreedomLedger.inventory.get("battery", 0)), int(FreedomLedger.inventory.get("bottle", 0)), int(FreedomLedger.inventory.get("clock", 0))]
@@ -247,6 +286,8 @@ func _process(delta: float) -> void:
 		show_ending()
 
 func _layout_for_viewport() -> void:
+	help_bar.position = Vector2(maxf(16.0, root.size.x - 596.0), 100.0)
+	help_bar.size = Vector2(minf(580.0, root.size.x - 32.0), minf(440.0, root.size.y - 180.0))
 	# canvas_items scales logical pixels down in small windows. Preserve readable
 	# physical HUD text rather than making the enlarged panel tiny again at 800px.
 	var pixel_scale := maxf(get_viewport().get_stretch_transform().get_scale().x, 0.01)
@@ -340,7 +381,7 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and (event.physical_keycode == KEY_H or event.keycode == KEY_H) and GameManager.state == GameManager.State.PLAYING:
 		get_viewport().set_input_as_handled()
 		GameManager.block_ui_input()
-		show_letter("Els' Field Guide", FieldGuide.guide_text())
+		help_open = not help_open
 		return
 	if event.is_action_pressed("inventory") and GameManager.state == GameManager.State.PLAYING:
 		get_viewport().set_input_as_handled()
@@ -401,7 +442,7 @@ func close_modal() -> void:
 	GameManager.block_ui_input()
 	if modal_mode == "ending":
 		modal_mode = ""
-		if GameManager.ending == "flee":
+		if GameManager.ending in ["destroy", "flee"]:
 			GameManager.finish_flee_to_menu.call_deferred()
 			return
 		chapter_complete.process_mode = Node.PROCESS_MODE_INHERIT
@@ -434,21 +475,6 @@ func _result_action(id: String) -> void:
 
 func show_ending() -> void:
 	if GameManager.ending in ["destroy", "flee"]:
-		nexus_narrating = true
-		subtitle_queue.clear()
-		fade.color.a = 0.55
-		var copy := preload("res://scripts/ui/nexus_narration.gd")
-		var text: String = copy.FLEE if GameManager.ending == "flee" else copy.DESTROY
-		_present_message("", text)
-		subtitle_time = _reading_seconds()
-		# Existing cinematic strip paginates the complete copy; E/Enter advances.
-		while not subtitle.text.is_empty():
-			await get_tree().process_frame
-		nexus_narrating = false
-		get_tree().paused = true
-		fade.color.a = 0.88
-		modal_mode = "ending"
-		reader.open("FLEE" if GameManager.ending == "flee" else "DESTROY", text)
 		return
 	if GameManager.ending in ["severance", "custodian_rest", "vessel"]:
 		get_tree().paused = true

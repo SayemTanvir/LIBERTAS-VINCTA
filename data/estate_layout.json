@@ -309,6 +309,8 @@
           "action_animation_override": "bag_pickup"
         }
       ],
+      ["item_pickup", "nexus_bottle", 1150, 500, {"display_name": "Bottle", "item_id": "bottle"}],
+      ["item_pickup", "nexus_clock", 2550, 500, {"display_name": "Clock", "item_id": "clock"}],
       [
         "letter_pickup",
         "nexus_guide",

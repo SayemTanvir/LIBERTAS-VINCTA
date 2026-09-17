@@ -101,6 +101,8 @@ func _ready() -> void:
 	_observe_debug()
 
 func change_state(next: State) -> void:
+	if nexus_defeated:
+		return
 	if is_distracted and next != State.INVESTIGATE:
 		next = State.INVESTIGATE
 	if next != State.INVESTIGATE and is_distracted:
@@ -164,6 +166,8 @@ func _sense_blocked(sense: String) -> bool:
 	return false
 
 func _restored(sense: String) -> void:
+	if nexus_defeated:
+		return
 	if sense == "memory":
 		recent_hides.clear()
 		for id in FreedomLedger.hiding_usage:
@@ -459,7 +463,7 @@ func _move_speed() -> float:
 	return patrol_speed
 
 func _resolve_contact() -> void:
-	if GameManager.state != GameManager.State.PLAYING or player.death_started:
+	if nexus_defeated or GameManager.state != GameManager.State.PLAYING or player.death_started:
 		return
 	if global_position.distance_to(player.global_position) >= catch_distance or hit_cooldown > 0.0:
 		return
@@ -479,7 +483,7 @@ func _resolve_contact() -> void:
 	_queue_strike(contact_damage, catch_distance + 30.0, witnessed_hide)
 
 func _queue_strike(amount: float, reach: float, hide_id: String = "") -> void:
-	if _attack_seconds > 0.0 or hit_cooldown > 0.0 or stun_seconds > 0.0:
+	if nexus_defeated or _attack_seconds > 0.0 or hit_cooldown > 0.0 or stun_seconds > 0.0:
 		return
 	hit_cooldown = 1.1
 	_strike_damage = amount
@@ -501,7 +505,7 @@ func _update_attack(delta: float) -> void:
 		_commit_strike()
 
 func _commit_strike() -> void:
-	if not is_instance_valid(player) or player.death_started or GameManager.state != GameManager.State.PLAYING or stun_seconds > 0.0:
+	if nexus_defeated or not is_instance_valid(player) or player.death_started or GameManager.state != GameManager.State.PLAYING or stun_seconds > 0.0:
 		return
 	if global_position.distance_to(player.global_position) > _strike_reach or not clear_sight(player.global_position):
 		return
@@ -521,7 +525,7 @@ func _is_distraction_noise(point: Vector2, surface: String) -> bool:
 	return false
 
 func _hear(point: Vector2, intensity: float, surface: String) -> void:
-	if not is_instance_valid(player) or not is_instance_valid(room):
+	if nexus_defeated or not is_instance_valid(player) or not is_instance_valid(room):
 		return
 	if stun_seconds > 0.0 or _attack_seconds > 0.0 or GameManager.state != GameManager.State.PLAYING:
 		return
@@ -542,7 +546,7 @@ func _hear(point: Vector2, intensity: float, surface: String) -> void:
 		# While a distraction is active, ignore ordinary movement and noise.
 		target = distraction_target if distraction_target != Vector2.ZERO else target
 		return
-	if not _has_sense("hearing") and not (is_distraction and state == State.CHASE):
+	if not _has_sense("hearing") and not (is_distraction and (state == State.CHASE or room.zone_id == "nexus")):
 		return
 	if state == State.CHASE and not is_distraction:
 		return
@@ -606,7 +610,7 @@ func can_see_player() -> bool:
 	return clear_sight(player.global_position)
 
 func _hidden(id: String) -> void:
-	if not is_instance_valid(player) or not is_instance_valid(room):
+	if nexus_defeated or not is_instance_valid(player) or not is_instance_valid(room):
 		return
 	var observed := _has_sense("sight") and sight_confirm > 0.0 and clear_sight(player.global_position)
 	if observed:
@@ -668,6 +672,8 @@ func _check_remembered_hide() -> void:
 		_queue_strike(remembered_hide_damage, 68.0, player.hidden_spot.interaction_id)
 
 func begin_nexus_hunt() -> void:
+	if nexus_defeated:
+		return
 	nexus_hunting = true
 	is_distracted = false
 	distraction_arrived = false
@@ -678,19 +684,35 @@ func begin_nexus_hunt() -> void:
 	change_state(State.HUNT_AUDIO)
 
 func bind_blood_trap() -> void:
+	if nexus_defeated:
+		return
 	stun(18.0)
 	blood_trap_seconds = 18.0
 
 func defeat_in_nexus() -> void:
-	stun(3600.0)
+	if nexus_defeated:
+		return
 	nexus_defeated = true
+	nexus_hunting = false
+	detection_active = false
+	is_distracted = false
+	distraction_arrived = false
+	distraction_stay_timer = 0.0
+	_strike_pending = false
+	_attack_seconds = 0.0
+	_attack_elapsed = 0.0
+	velocity = Vector2.ZERO
+	path.clear()
 	blood_trap_seconds = 0.0
 	collision_layer = 0
 	collision_mask = 0
-	var fade := create_tween()
-	fade.tween_property(self, "modulate:a", 0.0, 1.0)
+	set_physics_process(false)
+	_play_visual("death")
+	EventBus.tension_changed.emit("CALM")
 
 func stun(seconds: float) -> void:
+	if nexus_defeated:
+		return
 	stun_seconds = maxf(stun_seconds, seconds)
 	detection_active = false
 	sight_confirm = 0.0
@@ -706,6 +728,8 @@ func stun(seconds: float) -> void:
 	_play_visual("stagger")
 
 func _play_visual(animation: String) -> void:
+	if nexus_defeated and animation != "death":
+		return
 	_apply_base_appearance()
 	sprite.rotation = 0.0
 	var base := "sniff" if animation == "idle" and state in [State.INVESTIGATE, State.INVESTIGATE_LAST_SEEN, State.AMBUSH] else animation
@@ -739,13 +763,17 @@ func _on_visual_frame_changed() -> void:
 func _apply_base_appearance() -> void:
 	var true_form: bool = _stage() >= 3 or (FreedomLedger.current_part == 2 and bool(FreedomLedger.part2_seed.get("touch_mutation", false)))
 	sprite.scale = Vector2.ONE * (0.79 if true_form else 0.70)
+	if nexus_defeated:
+		sprite.scale *= 0.8
 	$Visual/Shadow.scale = Vector2.ONE * (1.13 if true_form else 1.0)
 	sprite.modulate = Color(0.88, 0.76, 0.76) if true_form else Color.WHITE
 
 func _sync_zombie_footing() -> void:
-	sprite.offset = Vector2(0.0, ZombieFootOffsets.offset_y(sprite.animation, sprite.frame))
+	sprite.offset = Vector2(0.0, -160.0 if nexus_defeated else ZombieFootOffsets.offset_y(sprite.animation, sprite.frame))
 
 func _attack() -> void:
+	if nexus_defeated:
+		return
 	velocity = Vector2.ZERO
 	if _attack_seconds > 0.0:
 		return

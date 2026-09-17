@@ -4,8 +4,8 @@ var outcome_label: Label
 
 func _ready() -> void:
 	var primary := "continue" if chapter else "retry"
-	build_sheet("Chapter complete" if chapter else "The estate claims you", "Every freedom has a price." if chapter else "Your last checkpoint is waiting.", [
-		{"id": primary, "label": "Continue  ›" if chapter else "Retry checkpoint  ›", "rect": Rect2(84, 451, 370, 56)},
+	build_sheet("Chapter complete" if chapter else "The estate claims you", "Every freedom has a price." if chapter else "Return to the beginning of the Ground Floor.", [
+		{"id": primary, "label": "Continue  ›" if chapter else "Restart  ›", "rect": Rect2(84, 451, 370, 56)},
 		{"id": "home", "label": "Main menu", "rect": Rect2(84, 523, 370, 52)}], "LIBERTAS VINCTA  /  " + ("A FATE WRITTEN" if chapter else "A LIFE INTERRUPTED"))
 	outcome_label = Style.label(design, "", Rect2(84, 290, 850, 52), 30, Style.BRASS)
 	Style.label(design, "", Rect2(84, 355, 1000, 52), 17, Style.MUTED).name = "OutcomeDetail"
@@ -20,5 +20,5 @@ func focus_default() -> void:
 		design.get_node("OutcomeDetail").text = "The story is complete. Another choice waits at the beginning." if final_ending else "Beyond Hollowmere, the consequences of your choices remain."
 	else:
 		outcome_label.text = "Caught in Hollowmere"
-		design.get_node("OutcomeDetail").text = "Retry restores your health, belongings and progress from the last checkpoint."
+		design.get_node("OutcomeDetail").text = "Restart begins a fresh run on the Ground Floor."
 	super.focus_default()

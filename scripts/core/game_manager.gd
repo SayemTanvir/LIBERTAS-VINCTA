@@ -146,15 +146,19 @@ func travel(destination: String, entrance: String = "start") -> void:
 func restart_checkpoint() -> void:
 	transition_epoch += 1
 	get_tree().paused = false
-	if checkpoint.is_empty():
-		new_game()
-		return
-	FreedomLedger.restore_snapshot(checkpoint.ledger)
-	zone = checkpoint.zone
-	entry = "checkpoint"
+	checkpoint_error = ""
+	checkpoint.clear()
+	FreedomLedger.reset()
+	FreedomLedger.flags["intro_complete"] = true
+	FreedomLedger.flags["flashlight"] = true
+	FreedomLedger.flags["lockpick_tool"] = true
+	FreedomLedger.collect_item("lockpick", 3)
+	zone = "ground"
+	entry = "start"
 	arrival_pending = false
 	ending = ""
-	respawn_pending = true
+	respawn_pending = false
+	return_state = State.PLAYING
 	state = State.PLAYING
 	get_tree().change_scene_to_file("res://scenes/main/main.tscn")
 
@@ -184,6 +188,8 @@ func finish(kind: String) -> void:
 	ending = kind
 	FreedomLedger.ending_type = kind
 	state = State.ENDING
+	if kind in ["destroy", "flee"]:
+		finish_flee_to_menu.call_deferred()
 
 func continue_to_part_two() -> void:
 	if ending not in ["untouched", "vantree", "partial_mercy"]:

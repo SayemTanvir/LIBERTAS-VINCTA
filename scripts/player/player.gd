@@ -204,8 +204,9 @@ func use_gadget() -> bool:
 		if GameManager.zone == "nexus" and room != null and room.place_power(self):
 			EventBus.ability_used.emit("power")
 			return true
-		_ability_feedback("The Power needs the Knife and a bound Hound. Approach the Blood Trap.")
-		return false
+		if int(FreedomLedger.inventory.get("bottle", 0)) + int(FreedomLedger.inventory.get("clock", 0)) == 0:
+			_ability_feedback("The Power needs the Knife and a bound Hound. Approach the Blood Trap.")
+			return false
 	var gadget := "bottle" if int(FreedomLedger.inventory.get("bottle", 0)) > 0 else "clock"
 	if not FreedomLedger.consume_item(gadget):
 		_ability_feedback("No usable gadget. Find bottles or clocks; batteries work below 56% charge.")
