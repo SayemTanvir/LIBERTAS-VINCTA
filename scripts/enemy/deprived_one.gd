@@ -25,7 +25,7 @@ enum State {
 @export var shadow_vision_range: float = 260.0
 @export var field_of_view: float = 140.0
 @export var flashlight_range_multiplier: float = 1.5
-@export var catch_distance: float = 32.0
+@export var catch_distance: float = 44.0
 @export var audio_hunt_seconds: float = 10.0
 @export var path_refresh_seconds: float = 0.28
 @export_range(0.0, 1.0) var ambush_chance: float = 0.55
@@ -405,9 +405,10 @@ func _update_attack(delta: float) -> void:
 	velocity = Vector2.ZERO
 	_attack_seconds = maxf(0.0, _attack_seconds - delta)
 	_attack_elapsed += delta
-	# The forward snap lands a little before the middle of the zombie's 20-frame swipe.
+	# Commit early in the swipe so entering the close radius cannot be escaped by
+	# moving on the last frame before impact.
 	var frame_count := sprite.sprite_frames.get_frame_count(sprite.animation)
-	var impact_frame := maxi(1, roundi(frame_count * 0.42))
+	var impact_frame := maxi(1, roundi(frame_count * 0.25))
 	var contact_time := float(impact_frame) / maxf(1.0, sprite.sprite_frames.get_animation_speed(sprite.animation))
 	if _strike_pending and _attack_elapsed >= contact_time:
 		_strike_pending = false
@@ -419,10 +420,6 @@ func _commit_strike() -> void:
 	if global_position.distance_to(player.global_position) > _strike_reach or not clear_sight(player.global_position):
 		return
 	if player.hidden_spot != null and player.hidden_spot.interaction_id != _strike_hide:
-		return
-	# The attack has committed its direction. Running past it can evade the jaws.
-	var offset: Vector2 = player.global_position - global_position
-	if offset.length() > 8.0 and facing.dot(offset.normalized()) < 0.15:
 		return
 	if FreedomLedger.current_part == 2:
 		player.take_hit(_strike_damage)

@@ -169,7 +169,7 @@ func _monster_checks() -> void:
 	enemy._resolve_contact()
 	player.position.x = enemy.position.x - 20.0
 	enemy._update_attack(contact_time + 0.1)
-	check(FreedomLedger.hp == hp, "Running past committed jaws evades strike")
+	check(FreedomLedger.hp == hp - enemy.contact_damage, "Close contact cannot bypass the committed strike")
 	_reset_attack()
 	enemy._resolve_contact()
 	enemy.stun(1.0)
