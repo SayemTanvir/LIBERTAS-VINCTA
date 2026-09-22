@@ -14,9 +14,12 @@ A tense branching 2D survival-horror exploration game built in Godot 4.7. Every 
   <a href="https://github.com/<your-username>/<your-repo>/releases">
     <img src="https://img.shields.io/badge/Windows-Playable%20Build-2ea043?style=for-the-badge&logo=windows&logoColor=white" alt="Download Windows build" />
   </a>
+  <a href="https://apps.microsoft.com/detail/9NPNK7VM8KDV?hl=en-us&gl=BD&ocid=pdpshare">
+    <img src="https://img.shields.io/badge/Microsoft%20Store-Available-0078D7?style=for-the-badge&logo=microsoft&logoColor=white" alt="Microsoft Store" />
+  </a>
 </div>
 
-The latest playable Windows executable is available from the GitHub Releases page. Download the build, launch the executable, and enter the estate immediately.
+The latest playable Windows executable is available on the [Microsoft Store](https://apps.microsoft.com/detail/9NPNK7VM8KDV?hl=en-us&gl=BD&ocid=pdpshare) and the GitHub Releases page. Download or install the build, launch the executable, and enter the estate immediately.
 
 ## The Estate Awakens
 
@@ -416,6 +419,3 @@ Run the focused or full suites with the installed Godot 4.7 executable:
 godot --headless --path . res://tests/verify_game_route.tscn --quit-after 600
 godot --headless --path . res://tests/verify_full_playthrough.tscn --quit-after 600
 godot --headless --path . res://tests/verify_nexus_finale.tscn --quit-after 600
-```
-
-The live project files and automated tests are the source of truth when older documentation conflicts with the current implementation.
